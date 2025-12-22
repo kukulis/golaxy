@@ -1,0 +1,4 @@
+class Race {
+    id = '';
+    name = '';
+}

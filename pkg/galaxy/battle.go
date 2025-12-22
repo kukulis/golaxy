@@ -1,4 +1,4 @@
-package ship
+package galaxy
 
 type Battle struct {
 	ID    string  `json:"id"`

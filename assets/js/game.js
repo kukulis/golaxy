@@ -61,7 +61,7 @@ class Game {
         group.style.cursor = 'pointer';
 
         this.svg.appendChild(group);
-        this.ships.push({ x, y, data: shipData, element: group });
+        this.ships.push({ data: shipData, element: group });
     }
 
     handleShipClick(shipData) {

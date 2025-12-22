@@ -1,4 +1,4 @@
-package ship
+package galaxy
 
 type Shot struct {
 	Source      string `json:"source"`

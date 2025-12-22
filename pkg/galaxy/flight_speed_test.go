@@ -1,10 +1,10 @@
-package ship
+package galaxy
 
 import "testing"
 
 func TestFlightSpeed0(t *testing.T) {
 
-	flight := Fleet{ships: []*Ship{}}
+	flight := Fleet{Ships: []*Ship{}}
 
 	rez := flight.Speed2()
 
@@ -15,7 +15,7 @@ func TestFlightSpeed0(t *testing.T) {
 
 func TestFlightSpeed1(t *testing.T) {
 
-	flight := Fleet{ships: []*Ship{
+	flight := Fleet{Ships: []*Ship{
 		{Tech: ShipTech{CargoCapacity: 0, Speed: 10}},
 	}}
 

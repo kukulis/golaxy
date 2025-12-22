@@ -1,0 +1,4 @@
+class Fleet {
+    ships = [];
+    owner = '';
+}

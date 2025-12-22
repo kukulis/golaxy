@@ -1,4 +1,4 @@
-package ship
+package galaxy
 
 type ShipTech struct {
 	Attack        float64 `json:"attack"`
