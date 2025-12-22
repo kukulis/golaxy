@@ -1,7 +1,7 @@
 package ship
 
 import (
-	"galaktika.eu/util"
+	"glaktika.eu/galaktika/pkg/util"
 	"math"
 )
 
