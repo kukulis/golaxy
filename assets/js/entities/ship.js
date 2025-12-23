@@ -111,4 +111,25 @@ class Ship {
         const info = `Ship: ${this.name}\nID: ${this.id}\nSpeed: ${this.tech.speed}\nAttack: ${this.tech.attack}\nDefense: ${this.tech.defense}\nDestroyed: ${this.destroyed}`;
         alert(info);
     }
+
+    /**
+     * Updates ship properties from DTO data
+     * @param {Object} data - Ship data from API
+     */
+    updateFromDTO(data) {
+        this.id = data.id;
+        this.tech = {
+            attack: data.tech.attack,
+            guns: data.tech.guns,
+            defense: data.tech.defense,
+            speed: data.tech.speed,
+            cargo_capacity: data.tech.cargo_capacity,
+            mass: data.tech.mass
+        };
+        this.destroyed = data.destroyed;
+        this.name = data.name;
+        this.owner = data.owner;
+
+        return this;
+    }
 }

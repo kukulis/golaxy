@@ -104,4 +104,16 @@ class Shot {
 
         return group;
     }
+
+    /**
+     * Updates shot properties from DTO data
+     * @param {Object} data - Shot data from API
+     */
+    updateFromDTO(data) {
+        this.source = data.source;
+        this.destination = data.destination;
+        this.result = data.result;
+
+        return this;
+    }
 }

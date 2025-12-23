@@ -163,6 +163,10 @@ class Game {
         this.shotElements.push( shot.buildSvg())
         this.svg.appendChild(shot.svgElement);
 
+        if ( shot.result ) {
+            this.destroyedShipsIds.add(shot.destinationShip.id)
+        }
+
         return true;
     }
 
