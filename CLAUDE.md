@@ -59,6 +59,28 @@ Provides generic functional programming utilities:
 
 These are used throughout the codebase for cleaner functional-style operations.
 
+### Frontend Entity Classes Architecture
+
+The JavaScript entity classes in `assets/js/entities/` combine both data storage and presentation logic:
+
+- **Battle** - Manages battle state, shots, and fleets; includes ship lookup methods
+- **Fleet** - Contains ships array and owner; maintains ship lookup map for efficient access
+- **Ship** - Ship data with tech specs; includes SVG rendering (`creteShipSvg`) and click handling
+- **Shot** - Shot data (source, destination, result); includes SVG building (`buildSvg`) for visualization
+
+**Key Architecture Decision**: These are NOT pure DTOs. Each entity class serves as a view-model that combines:
+1. **Backend data** - Properties received from API (id, name, tech, destroyed, etc.)
+2. **Rendering properties** - Display-specific fields (battleX, battleY, svgElement)
+3. **Presentation methods** - SVG generation, event handling, and drawing logic
+
+**Why This Works**: Since these classes are specifically designed for game rendering, combining data with SVG generation logic keeps related functionality together. This is appropriate for a game UI where entities are responsible for both their state and visual representation.
+
+**Data Update Pattern**: Each entity class includes an `updateFromDTO(data)` method that:
+- Updates properties from backend data
+- Returns `this` for method chaining
+- Creates nested entity instances (e.g., Fleet creates Ships, Battle creates Fleets and Shots)
+- Maintains relationships (e.g., Battle.fixShotsReferences links shots to ship instances)
+
 ## Development Commands
 
 ### Running the Server
