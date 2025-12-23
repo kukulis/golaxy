@@ -2,42 +2,34 @@ package game
 
 import (
 	"glaktika.eu/galaktika/pkg/galaxy"
-	"glaktika.eu/galaktika/pkg/gamemath"
 	"glaktika.eu/galaktika/pkg/util"
-	"math"
 )
 
 type BattleHandler struct {
-	destructionFunction *gamemath.ConfigurableFunction
-	idGenerator         util.IdGenerator
-	randomGenerator     gamemath.RandomGenerator
+	decisionProducer galaxy.DecisionProducer
+	idGenerator      util.IdGenerator
 }
 
 func NewBattleHandler(
 	idGenerator util.IdGenerator,
-	randomGenerator gamemath.RandomGenerator,
+	decisionProducer galaxy.DecisionProducer,
 ) *BattleHandler {
-	f, err := gamemath.NewConfigurableFunction([]float64{0.25, 1, 4}, []float64{1, 0.5, 0})
-	if err != nil {
-		panic(err)
-	}
 	return &BattleHandler{
-		destructionFunction: f,
-		idGenerator:         idGenerator,
-		randomGenerator:     randomGenerator,
+		decisionProducer: decisionProducer,
+		idGenerator:      idGenerator,
 	}
 }
 
-func (bh *BattleHandler) EvaluateShotResult(defence float64, attack float64, rGenerator gamemath.RandomGenerator) bool {
-	probability := bh.destructionFunction.CalculateRatio(defence, attack)
-	random := rGenerator.NextRandom()
-
-	return probability > random
-}
-
-func EvaluateTargetIndex(targetsCount int, randomGenerator gamemath.RandomGenerator) int {
-	return int(math.Floor(randomGenerator.NextRandom() * float64(targetsCount)))
-}
+//func (bh *BattleHandler) EvaluateShotResult(defence float64, attack float64, rGenerator gamemath.RandomGenerator) bool {
+//	probability := bh.destructionFunction.CalculateRatio(defence, attack)
+//	random := rGenerator.NextRandom()
+//
+//	return probability > random
+//}
+//
+//func EvaluateTargetIndex(targetsCount int, randomGenerator gamemath.RandomGenerator) int {
+//	return int(math.Floor(randomGenerator.NextRandom() * float64(targetsCount)))
+//}
 
 func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Fleet) *galaxy.Battle {
 
