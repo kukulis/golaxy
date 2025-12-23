@@ -2,6 +2,7 @@ package galaxy
 
 import (
 	"glaktika.eu/galaktika/pkg/gamemath"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
 // Side represents which side of the battle
@@ -76,31 +77,36 @@ func NewRuntimeDecisionProducer(rng gamemath.RandomGenerator) *RuntimeDecisionPr
 
 // ProduceNextTurn produces a turn decision based on current fleet state and randomness
 func (r *RuntimeDecisionProducer) ProduceNextTurn(postSideA, postSideB *Fleet) *TurnDecision {
-	// Get alive ships from both sides
-	aliveA := r.getAliveShips(postSideA.Ships)
-	aliveB := r.getAliveShips(postSideB.Ships)
+	// Create index pools for both sides
+	poolA := r.createAliveShipsPool(postSideA.Ships)
+	poolB := r.createAliveShipsPool(postSideB.Ships)
 
 	// Battle ends if either side has no alive ships
-	if len(aliveA) == 0 || len(aliveB) == 0 {
+	if poolA.Count() == 0 || poolB.Count() == 0 {
 		return nil
 	}
 
 	// Select which side fires (50/50)
 	side := r.selectSide()
 
-	// Determine active and enemy fleets
-	var activeShips, enemyShips []*Ship
+	// Determine active and enemy fleets and pools
+	var activeFleet, enemyFleet *Fleet
+	var activePool, enemyPool *util.IndexPool
 	if side == SideA {
-		activeShips = aliveA
-		enemyShips = aliveB
+		activeFleet = postSideA
+		enemyFleet = postSideB
+		activePool = poolA
+		enemyPool = poolB
 	} else {
-		activeShips = aliveB
-		enemyShips = aliveA
+		activeFleet = postSideB
+		enemyFleet = postSideA
+		activePool = poolB
+		enemyPool = poolA
 	}
 
 	// Select shooter from active side (evenly distributed)
-	shooterIdx := evaluateTargetIndex(len(activeShips), r.randomGenerator)
-	shooter := activeShips[shooterIdx]
+	shooterIdx := activePool.GetRandom(r.randomGenerator.NextRandom())
+	shooter := activeFleet.Ships[shooterIdx]
 
 	// Generate shots (one per gun)
 	numGuns := int(shooter.Tech.Guns)
@@ -108,8 +114,8 @@ func (r *RuntimeDecisionProducer) ProduceNextTurn(postSideA, postSideB *Fleet) *
 
 	for i := 0; i < numGuns; i++ {
 		// Select target (evenly distributed)
-		targetIdx := evaluateTargetIndex(len(enemyShips), r.randomGenerator)
-		target := enemyShips[targetIdx]
+		targetIdx := enemyPool.GetRandom(r.randomGenerator.NextRandom())
+		target := enemyFleet.Ships[targetIdx]
 
 		// Calculate if target is destroyed based on attack/defense ratio
 		probability := r.destructionFunction.CalculateRatio(
@@ -139,19 +145,13 @@ func (r *RuntimeDecisionProducer) selectSide() Side {
 	return SideB
 }
 
-// getAliveShips filters ships that are not destroyed
-func (r *RuntimeDecisionProducer) getAliveShips(ships []*Ship) []*Ship {
-	alive := make([]*Ship, 0, len(ships))
-	for _, ship := range ships {
-		if !ship.Destroyed {
-			alive = append(alive, ship)
+// createAliveShipsPool creates an IndexPool with only alive ships
+func (r *RuntimeDecisionProducer) createAliveShipsPool(ships []*Ship) *util.IndexPool {
+	pool := util.NewIndexPool(len(ships))
+	for i, ship := range ships {
+		if ship.Destroyed {
+			pool.Remove(i)
 		}
 	}
-	return alive
-}
-
-// evaluateTargetIndex selects an index from available targets
-func evaluateTargetIndex(targetsCount int, randomGenerator gamemath.RandomGenerator) int {
-	random := randomGenerator.NextRandom()
-	return int(random * float64(targetsCount))
+	return pool
 }
