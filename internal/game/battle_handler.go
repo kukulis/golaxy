@@ -47,8 +47,30 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 		SideB: fleetB,
 	}
 
+	// Create PostSideA with copies of all ships from SideA
+	battle.PostSideA = &galaxy.Fleet{
+		Ships: copyShips(fleetA.Ships),
+		Owner: fleetA.Owner,
+	}
+
+	// Create PostSideB with copies of all ships from SideB
+	battle.PostSideB = &galaxy.Fleet{
+		Ships: copyShips(fleetB.Ships),
+		Owner: fleetB.Owner,
+	}
+
 	// TODO generate shots
 	// TODO use IndexPool
 
 	return &battle
+}
+
+// copyShips creates a deep copy of a ship slice
+func copyShips(ships []*galaxy.Ship) []*galaxy.Ship {
+	copies := make([]*galaxy.Ship, len(ships))
+	for i, ship := range ships {
+		shipCopy := *ship
+		copies[i] = &shipCopy
+	}
+	return copies
 }
