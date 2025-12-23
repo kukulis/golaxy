@@ -1,21 +1,30 @@
 package game
 
 import (
+	"glaktika.eu/galaktika/pkg/galaxy"
 	"glaktika.eu/galaktika/pkg/gamemath"
+	"glaktika.eu/galaktika/pkg/util"
 	"math"
 )
 
 type BattleHandler struct {
 	destructionFunction *gamemath.ConfigurableFunction
+	idGenerator         util.IdGenerator
+	randomGenerator     gamemath.RandomGenerator
 }
 
-func NewBattleHandler() *BattleHandler {
+func NewBattleHandler(
+	idGenerator util.IdGenerator,
+	randomGenerator gamemath.RandomGenerator,
+) *BattleHandler {
 	f, err := gamemath.NewConfigurableFunction([]float64{0.25, 1, 4}, []float64{1, 0.5, 0})
 	if err != nil {
 		panic(err)
 	}
 	return &BattleHandler{
 		destructionFunction: f,
+		idGenerator:         idGenerator,
+		randomGenerator:     randomGenerator,
 	}
 }
 
@@ -28,4 +37,18 @@ func (bh *BattleHandler) EvaluateShotResult(defence float64, attack float64, rGe
 
 func EvaluateTargetIndex(targetsCount int, randomGenerator gamemath.RandomGenerator) int {
 	return int(math.Floor(randomGenerator.NextRandom() * float64(targetsCount)))
+}
+
+func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Fleet) *galaxy.Battle {
+
+	battle := galaxy.Battle{
+		ID:    bh.idGenerator.NextId(),
+		SideA: fleetA,
+		SideB: fleetB,
+	}
+
+	// TODO generate shots
+	// TODO use IndexPool
+
+	return &battle
 }

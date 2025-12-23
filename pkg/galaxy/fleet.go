@@ -6,6 +6,7 @@ import (
 )
 
 type Fleet struct {
+	ID    string  `json:"id"`
 	Ships []*Ship `json:"ships"`
 	Owner string  `json:"owner"` // owner race id
 }
