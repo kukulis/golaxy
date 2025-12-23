@@ -272,6 +272,11 @@ func TestExecuteBattle(t *testing.T) {
 			if !battle.PostSideB.EqualShips(tt.expectedBattle.PostSideB, logger) {
 				t.Errorf("Battle.PostSideB does not match expected PostSideB")
 			}
+
+			// Assertion: Battle.Shots must match expected Shots
+			if !battle.CompareShots(tt.expectedBattle, logger) {
+				t.Errorf("Battle.Shots does not match expected Shots")
+			}
 		})
 	}
 }

@@ -133,3 +133,20 @@ go mod verify
 - Test files follow Go naming: `*_test.go`
 - Tests use standard `testing` package
 - Test function naming: `Test<Feature><Variation>` (e.g., `TestFlightSpeed0`, `TestFlightSpeed1`)
+
+### Test-Driven Development (TDD)
+
+**Project Decision**: Follow TDD principles where possible - write tests first before implementation.
+
+**Workflow**:
+1. Write the test first (which will fail)
+2. Implement the minimum code to make the test pass
+3. Refactor if needed while keeping tests green
+
+**Benefits**:
+- Tests drive the API design
+- Ensures all code has test coverage
+- Catches bugs early in development
+- Makes refactoring safer
+
+**Note**: While TDD is preferred, it may not be practical for all scenarios (e.g., exploratory prototyping, UI work). Use judgment, but default to test-first when feasible.
