@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galaktika - Fleet Game</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-</head>
+    <script src="/assets/js/entities/ship.js"></script>
+    <script src="/assets/js/entities/fleet.js"></script>
+    <script src="/assets/js/entities/battle.js"></script>
+    <script src="/assets/js/entities/race.js"></script>
+    <script src="/assets/js/entities/shot.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/game.js"></script></head>
 <body>
     <div id="game-container">
         <h1>Galaktika</h1>
@@ -18,12 +24,17 @@
             <button id="auto-button">Auto</button>
         </div>
     </div>
-    <script src="/assets/js/entities/ship.js"></script>
-    <script src="/assets/js/entities/fleet.js"></script>
-    <script src="/assets/js/entities/battle.js"></script>
-    <script src="/assets/js/entities/race.js"></script>
-    <script src="/assets/js/entities/shot.js"></script>
-    <script src="/assets/js/api.js"></script>
-    <script src="/assets/js/game.js"></script>
+<script type="application/javascript">
+    // Initialize game when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        let svg = document.getElementById('galaxy');
+        let apiClient = new ApiClient();
+
+        const game = new Game(apiClient, svg);
+
+        game.init();
+    });
+</script>
+
 </body>
 </html>

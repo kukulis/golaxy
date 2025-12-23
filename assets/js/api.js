@@ -1,4 +1,9 @@
 class ApiClient {
+
+    /**
+     * @param id
+     * @returns {Promise<Battle>}
+     */
     async getBattle(id) {
         const response = await fetch('/api/battle');
 

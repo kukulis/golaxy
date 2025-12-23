@@ -3,16 +3,63 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 class Game {
-    constructor() {
-        this.svg = document.getElementById('galaxy');
-        this.ships = [];
-        this.apiClient = new ApiClient();
-        this.battle = null;
-        this.currentShotIndex = 0;
-        this.shipsToRemove = new Set();
-        this.shotElements = [];
-        this.isAutoPlaying = false;
-        this.init();
+
+    /**
+     * @type {HTMLElement}
+     */
+    svg = null;
+
+
+    /**
+     * @type {ApiClient}
+     */
+    apiClient = null;
+
+    /**
+     *
+     * @type {Battle}
+     */
+    battle = null;
+
+    /**
+     *
+     * @type {boolean}
+     */
+    isAutoPlaying = false
+
+    /**
+     * @type {number}
+     */
+    currentShotIndex = 0;
+
+    /**
+     * Array of SVG elements (lines, circles) representing shot visualizations
+     * @type {SVGElement[]}
+     */
+    shotElements = [];
+
+    /**
+     * Set of ship IDs that will be removed on the next shot
+     * @type {Set<string|number>}
+     */
+    destroyedShipsIds = new Set();
+
+    /**
+     *
+     * TODO remove this property.
+     * Array of ship objects containing ship data and their SVG group elements
+     * @type {Ship[]}>}
+     */
+    ships = [];
+
+
+    /**
+     * @param apiClient {ApiClient}
+     * @param svg {HTMLElement}
+     */
+    constructor(apiClient, svg) {
+        this.svg = svg;
+        this.apiClient = apiClient;
     }
 
     init() {
@@ -30,7 +77,7 @@ class Game {
         this.svg.innerHTML = '';
         this.ships = [];
         this.currentShotIndex = 0;
-        this.shipsToRemove.clear();
+        this.destroyedShipsIds.clear();
         this.shotElements = [];
         this.isAutoPlaying = false;
 
@@ -87,66 +134,31 @@ class Game {
     }
 
     drawShip(x, y, ship, color, side) {
-        // Create ship group
-        const group = document.createElementNS(SVG_NS, 'g');
-        group.setAttribute('class', 'ship');
+        this.svg.appendChild(ship.creteShipSvg(color, side));
 
-        // Draw ship as a triangle
-        const triangle = document.createElementNS(SVG_NS, 'polygon');
-
-        // Create triangle points based on side
-        let points;
-        if (side === 'a') {
-            // Right-pointing triangle for side A
-            points = `${x-10},${y-10} ${x+15},${y} ${x-10},${y+10}`;
-        } else {
-            // Left-pointing triangle for side B
-            points = `${x+10},${y-10} ${x-15},${y} ${x+10},${y+10}`;
-        }
-
-        triangle.setAttribute('points', points);
-        triangle.setAttribute('fill', ship.destroyed ? 'gray' : color);
-        triangle.setAttribute('stroke', 'white');
-        triangle.setAttribute('stroke-width', 2);
-
-        // Add ship label
-        const text = document.createElementNS(SVG_NS, 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', y - 20);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('fill', 'white');
-        text.setAttribute('font-size', '12');
-        text.textContent = ship.name;
-
-        group.appendChild(triangle);
-        group.appendChild(text);
-
-        // Add click handler
-        group.addEventListener('click', () => this.handleShipClick(ship));
-
-        // Add hover effect
-        group.style.cursor = 'pointer';
-
-        this.svg.appendChild(group);
-        this.ships.push({ data: ship, element: group });
+        // TODO remove this
+        this.ships.push(ship);
     }
 
-    handleShipClick(ship) {
-        console.log('Ship clicked:', ship);
-        const info = `Ship: ${ship.name}\nID: ${ship.id}\nSpeed: ${ship.tech.speed}\nAttack: ${ship.tech.attack}\nDefense: ${ship.tech.defense}\nDestroyed: ${ship.destroyed}`;
-        alert(info);
-    }
-
-    processShot() {
+    clearAllShotsFromDrawing() {
         // Clear previous shot visualization
         this.shotElements.forEach(element => element.remove());
         this.shotElements = [];
+    }
 
+    clearDestroyedShipsFromDrawing() {
         // Remove ships marked for removal from previous hit
-        this.shipsToRemove.forEach(shipId => {
+        this.destroyedShipsIds.forEach(shipId => {
             this.removeShip(shipId);
         });
-        this.shipsToRemove.clear();
+        this.destroyedShipsIds.clear();
+    }
+
+
+
+    processShot() {
+        this.clearAllShotsFromDrawing();
+        this.clearDestroyedShipsFromDrawing();
 
         // Check if there are more shots
         if (this.currentShotIndex >= this.battle.shots.length) {
@@ -177,7 +189,7 @@ class Game {
             // Hit - draw cross
             this.drawCross(destShip.battleX, destShip.battleY);
             // Mark ship for removal on next shot
-            this.shipsToRemove.add(shot.destination);
+            this.destroyedShipsIds.add(shot.destination);
         } else {
             // Miss - draw circle
             this.drawCircle(destShip.battleX, destShip.battleY);
@@ -221,6 +233,7 @@ class Game {
         }
     }
 
+    // TODO move this method to the Fleet class
     findShip(shipId) {
         // Search in side A
         if (this.battle.side_a && this.battle.side_a.ships) {
@@ -238,10 +251,10 @@ class Game {
     }
 
     removeShip(shipId) {
-        const shipEntry = this.ships.find(s => s.data.id === shipId);
-        if (shipEntry && shipEntry.element) {
-            shipEntry.element.remove();
-            this.ships = this.ships.filter(s => s.data.id !== shipId);
+        const foundShip = this.ships.find(s => s.id === shipId);
+        if (foundShip && foundShip.svgElement) {
+            foundShip.svgElement.remove();
+            this.ships = this.ships.filter(s => s.id !== shipId);
         }
     }
 
@@ -294,7 +307,4 @@ class Game {
     }
 }
 
-// Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const game = new Game();
-});
+
