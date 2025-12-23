@@ -44,14 +44,6 @@ class Game {
      */
     destroyedShipsIds = new Set();
 
-    /**
-     *
-     * TODO remove this property.
-     * Array of ship objects containing ship data and their SVG group elements
-     * @type {Ship[]}>}
-     */
-    ships = [];
-
 
     /**
      * @param apiClient {ApiClient}
@@ -75,7 +67,6 @@ class Game {
     async newGame() {
         // Clear existing game
         this.svg.innerHTML = '';
-        this.ships = [];
         this.currentShotIndex = 0;
         this.destroyedShipsIds.clear();
         this.shotElements = [];
@@ -135,9 +126,6 @@ class Game {
 
     drawShip(x, y, ship, color, side) {
         this.svg.appendChild(ship.creteShipSvg(color, side));
-
-        // TODO remove this
-        this.ships.push(ship);
     }
 
     clearAllShotsFromDrawing() {
@@ -149,7 +137,7 @@ class Game {
     clearDestroyedShipsFromDrawing() {
         // Remove ships marked for removal from previous hit
         this.destroyedShipsIds.forEach(shipId => {
-            this.removeShip(shipId);
+            this.removeShipFromDrawing(shipId);
         });
         this.destroyedShipsIds.clear();
     }
@@ -172,28 +160,8 @@ class Game {
         const shot = this.battle.shots[this.currentShotIndex];
         this.currentShotIndex++;
 
-        // Find source and destination ships
-        const sourceShip = this.findShip(shot.source);
-        const destShip = this.findShip(shot.destination);
-
-        if (!sourceShip || !destShip) {
-            console.error('Could not find ships for shot:', shot);
-            return false;
-        }
-
-        // Draw the shot line
-        this.drawLine(sourceShip.battleX, sourceShip.battleY, destShip.battleX, destShip.battleY);
-
-        // Draw miss or hit indicator
-        if (shot.result) {
-            // Hit - draw cross
-            this.drawCross(destShip.battleX, destShip.battleY);
-            // Mark ship for removal on next shot
-            this.destroyedShipsIds.add(shot.destination);
-        } else {
-            // Miss - draw circle
-            this.drawCircle(destShip.battleX, destShip.battleY);
-        }
+        this.shotElements.push( shot.buildSvg())
+        this.svg.appendChild(shot.svgElement);
 
         return true;
     }
@@ -233,78 +201,13 @@ class Game {
         }
     }
 
-    // TODO move this method to the Fleet class
-    findShip(shipId) {
-        // Search in side A
-        if (this.battle.side_a && this.battle.side_a.ships) {
-            const ship = this.battle.side_a.ships.find(s => s.id === shipId);
-            if (ship) return ship;
-        }
-
-        // Search in side B
-        if (this.battle.side_b && this.battle.side_b.ships) {
-            const ship = this.battle.side_b.ships.find(s => s.id === shipId);
-            if (ship) return ship;
-        }
-
-        return null;
-    }
-
-    removeShip(shipId) {
-        const foundShip = this.ships.find(s => s.id === shipId);
+    removeShipFromDrawing(shipId) {
+        const foundShip = this.battle.findShip(shipId)
         if (foundShip && foundShip.svgElement) {
             foundShip.svgElement.remove();
-            this.ships = this.ships.filter(s => s.id !== shipId);
         }
     }
 
-    drawLine(x1, y1, x2, y2) {
-        const line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('x1', x1);
-        line.setAttribute('y1', y1);
-        line.setAttribute('x2', x2);
-        line.setAttribute('y2', y2);
-        line.setAttribute('stroke', 'yellow');
-        line.setAttribute('stroke-width', 2);
-        this.svg.appendChild(line);
-        this.shotElements.push(line);
-    }
-
-    drawCircle(x, y) {
-        const circle = document.createElementNS(SVG_NS, 'circle');
-        circle.setAttribute('cx', x);
-        circle.setAttribute('cy', y);
-        circle.setAttribute('r', 20);
-        circle.setAttribute('fill', 'none');
-        circle.setAttribute('stroke', 'white');
-        circle.setAttribute('stroke-width', 2);
-        this.svg.appendChild(circle);
-        this.shotElements.push(circle);
-    }
-
-    drawCross(x, y) {
-        // Draw X with two lines
-        const line1 = document.createElementNS(SVG_NS, 'line');
-        line1.setAttribute('x1', x - 15);
-        line1.setAttribute('y1', y - 15);
-        line1.setAttribute('x2', x + 15);
-        line1.setAttribute('y2', y + 15);
-        line1.setAttribute('stroke', 'red');
-        line1.setAttribute('stroke-width', 3);
-
-        const line2 = document.createElementNS(SVG_NS, 'line');
-        line2.setAttribute('x1', x + 15);
-        line2.setAttribute('y1', y - 15);
-        line2.setAttribute('x2', x - 15);
-        line2.setAttribute('y2', y + 15);
-        line2.setAttribute('stroke', 'red');
-        line2.setAttribute('stroke-width', 3);
-
-        this.svg.appendChild(line1);
-        this.svg.appendChild(line2);
-        this.shotElements.push(line1);
-        this.shotElements.push(line2);
-    }
 }
 
 

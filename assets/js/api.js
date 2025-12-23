@@ -22,6 +22,7 @@ class ApiClient {
         battle.side_a = this.convertToFleet(data.side_a);
         battle.side_b = this.convertToFleet(data.side_b);
         battle.shots = data.shots.map(shot => this.convertToShot(shot));
+        battle.fixShotsReferences()
 
         return battle;
     }
@@ -31,6 +32,7 @@ class ApiClient {
 
         const fleet = new Fleet();
         fleet.ships = data.ships.map(ship => this.convertToShip(ship));
+        fleet.fillShipsMap(fleet.ships)
         fleet.owner = data.owner;
 
         return fleet;

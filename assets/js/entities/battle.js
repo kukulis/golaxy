@@ -22,4 +22,20 @@ class Battle {
      * @type {Shot[]}
      */
     shots = [];
+
+    findShip(shipId) {
+        let ship = this.side_a.findShip(shipId)
+        if ( ship != null ) {
+            return ship;
+        }
+
+        return this.side_b.findShip(shipId)
+    }
+
+    fixShotsReferences () {
+        for ( let shot of  this.shots) {
+            shot.sourceShip = this.findShip(shot.source)
+            shot.destinationShip = this.findShip(shot.destination)
+        }
+    }
 }
