@@ -6,5 +6,5 @@ type ShipTech struct {
 	Defense       float64 `json:"defense"`
 	Speed         float64 `json:"speed"`
 	CargoCapacity float64 `json:"cargo_capacity"`
-	Mass          int     `json:"mass"`
+	Mass          float64 `json:"mass"`
 }
