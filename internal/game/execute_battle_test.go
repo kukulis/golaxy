@@ -2,7 +2,6 @@ package game
 
 import (
 	"glaktika.eu/galaktika/pkg/galaxy"
-	"glaktika.eu/galaktika/pkg/gamemath"
 	"glaktika.eu/galaktika/pkg/util"
 	"testing"
 )
@@ -18,12 +17,12 @@ func (tl *testLogger) Printf(format string, v ...interface{}) {
 
 func TestExecuteBattle(t *testing.T) {
 	tests := []struct {
-		name            string
-		fleetA          *galaxy.Fleet
-		fleetB          *galaxy.Fleet
-		idGenerator     util.IdGenerator
-		randomGenerator gamemath.RandomGenerator
-		expectedBattle  *galaxy.Battle
+		name             string
+		fleetA           *galaxy.Fleet
+		fleetB           *galaxy.Fleet
+		idGenerator      util.IdGenerator
+		decisionProducer DecisionProducerInterface
+		expectedBattle   *galaxy.Battle
 	}{
 		{
 			name: "Battle between two single-ship fleets",
@@ -63,8 +62,8 @@ func TestExecuteBattle(t *testing.T) {
 				},
 				Owner: "race-b",
 			},
-			idGenerator:     util.NewSequenceGenerator([]string{"battle-1"}),
-			randomGenerator: gamemath.NewPredefinedRandomGenerator([]float64{0.5}),
+			idGenerator:      util.NewSequenceGenerator([]string{"battle-1"}),
+			decisionProducer: NewPredefinedDecisionProducer([]ShotDecision{}),
 			expectedBattle: &galaxy.Battle{
 				ID:    "battle-1",
 				Shots: nil,
@@ -172,8 +171,8 @@ func TestExecuteBattle(t *testing.T) {
 				},
 				Owner: "race-b",
 			},
-			idGenerator:     util.NewSequenceGenerator([]string{"battle-2"}),
-			randomGenerator: gamemath.NewPredefinedRandomGenerator([]float64{0.5}),
+			idGenerator:      util.NewSequenceGenerator([]string{"battle-2"}),
+			decisionProducer: NewPredefinedDecisionProducer([]ShotDecision{}),
 			expectedBattle: &galaxy.Battle{
 				ID:    "battle-2",
 				Shots: nil,
@@ -250,7 +249,7 @@ func TestExecuteBattle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			logger := &testLogger{t: t}
-			battleHandler := NewBattleHandler(tt.idGenerator, tt.randomGenerator)
+			battleHandler := NewBattleHandler(tt.idGenerator, tt.decisionProducer)
 			battle := battleHandler.ExecuteBattle(tt.fleetA, tt.fleetB)
 
 			// Assertion: Battle.SideA must be the same fleet as FleetA

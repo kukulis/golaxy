@@ -52,7 +52,7 @@ func (r *RuntimeDecisionProducer) ProduceNextShot() *ShotDecision {
 	}
 
 	targetIndex := int(math.Floor(r.randomGenerator.NextRandom() * float64(r.battleState.GetAliveShipCount(r.currentSide.Flip()))))
-	r.target = r.battleState.GetShipAt(r.currentSide, targetIndex)
+	r.target = r.battleState.GetShipAt(r.currentSide.Flip(), targetIndex)
 
 	destroyed := r.randomGenerator.NextRandom() < r.destructionFunction.CalculateRatio(r.target.Tech.Defense, r.shooter.Tech.Attack)
 
