@@ -46,7 +46,14 @@ func (r *RuntimeDecisionProducer) ProduceNextShot() *ShotDecision {
 			r.currentSide = 0
 		}
 
-		shooterIndex := int(math.Floor(r.randomGenerator.NextRandom() * float64(r.battleState.GetAliveGunnedShipCount(r.currentSide))))
+		// Check if there are any gunned ships available
+		gunnedCount := r.battleState.GetAliveGunnedShipCount(r.currentSide)
+		if gunnedCount == 0 {
+			// No gunned ships available, battle cannot continue
+			return nil
+		}
+
+		shooterIndex := int(math.Floor(r.randomGenerator.NextRandom() * float64(gunnedCount)))
 		r.shooter = r.battleState.GetGunnedShipAt(r.currentSide, shooterIndex)
 		r.shotsMade = 0
 	}

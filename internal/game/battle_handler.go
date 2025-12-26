@@ -117,9 +117,14 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 	maxShots := 1000
 
 	for i := 0; i < maxShots; i++ {
+		if bh.IsBattleOver() {
+			break
+		}
 		shotDecision := bh.decisionProducer.ProduceNextShot()
 		if shotDecision == nil {
-			break
+			// Decision producer couldn't produce a shot (e.g., no gunned ships on selected side)
+			// Continue to next iteration to give it another chance
+			continue
 		}
 
 		shot := galaxy.Shot{
@@ -152,9 +157,6 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 
 		battle.Shots = append(battle.Shots, &shot)
 
-		if bh.IsBattleOver() {
-			break
-		}
 	}
 
 	battle.PostSideA = galaxy.NewFleet(bh.shipsA)
