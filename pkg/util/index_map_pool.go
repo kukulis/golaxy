@@ -1,5 +1,7 @@
 package util
 
+import "fmt"
+
 type IndexMapPool struct {
 	indexMap map[string]int
 	keys     []string
@@ -19,15 +21,24 @@ func NewIndexMapPool(keys []string) *IndexMapPool {
 }
 
 func (p *IndexMapPool) GetKey(i int) string {
+	if i < 0 || i >= len(p.keys) {
+		return ""
+	}
 	return p.keys[i]
 }
 
 func (p *IndexMapPool) GetIndex(key string) int {
-	return p.indexMap[key]
+	if idx, exists := p.indexMap[key]; exists {
+		return idx
+	}
+	return -1
 }
 
-func (p *IndexMapPool) RemoveKey(keyToRemove string) {
-	indexToRemove := p.indexMap[keyToRemove]
+func (p *IndexMapPool) RemoveKey(keyToRemove string) error {
+	indexToRemove, exists := p.indexMap[keyToRemove]
+	if !exists || indexToRemove < 0 || indexToRemove >= p.count {
+		return fmt.Errorf("key not found: %s", keyToRemove)
+	}
 
 	lastIndex := p.count - 1
 	lastKey := p.keys[lastIndex]
@@ -39,6 +50,8 @@ func (p *IndexMapPool) RemoveKey(keyToRemove string) {
 	p.indexMap[lastKey] = indexToRemove
 
 	p.count--
+
+	return nil
 }
 
 func (p *IndexMapPool) Count() int {
