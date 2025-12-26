@@ -3,8 +3,6 @@ package game
 import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 	"glaktika.eu/galaktika/pkg/util"
-	"maps"
-	"slices"
 )
 
 type ShipRef struct {
@@ -19,6 +17,8 @@ type BattleHandler struct {
 	// Battle state (implements BattleState interface)
 	shipsMapA   map[string]*galaxy.Ship
 	shipsMapB   map[string]*galaxy.Ship
+	shipsA      []*galaxy.Ship // Preserves original order
+	shipsB      []*galaxy.Ship // Preserves original order
 	poolA       *util.IndexMapPool
 	poolB       *util.IndexMapPool
 	gunnedPoolA *util.IndexMapPool
@@ -31,18 +31,21 @@ func (bh *BattleHandler) initializeBattleState(fleetA *galaxy.Fleet, fleetB *gal
 	gunnedShipsA := util.ArrayFilter(shipsA, func(ship *galaxy.Ship) bool { return ship.Tech.Guns > 0 })
 	gunnedShipsB := util.ArrayFilter(shipsB, func(ship *galaxy.Ship) bool { return ship.Tech.Guns > 0 })
 
+	bh.shipsA = shipsA
+	bh.shipsB = shipsB
+
 	bh.poolA = util.NewIndexMapPool(util.ArrayMap(shipsA, func(ship *galaxy.Ship) string { return ship.ID }))
 	bh.poolB = util.NewIndexMapPool(util.ArrayMap(shipsB, func(ship *galaxy.Ship) string { return ship.ID }))
 	bh.gunnedPoolA = util.NewIndexMapPool(util.ArrayMap(gunnedShipsA, func(ship *galaxy.Ship) string { return ship.ID }))
 	bh.gunnedPoolB = util.NewIndexMapPool(util.ArrayMap(gunnedShipsB, func(ship *galaxy.Ship) string { return ship.ID }))
 
 	bh.shipsMapA = make(map[string]*galaxy.Ship)
-	for _, ship := range fleetA.Ships {
+	for _, ship := range shipsA {
 		bh.shipsMapA[ship.ID] = ship
 	}
 
 	bh.shipsMapB = make(map[string]*galaxy.Ship)
-	for _, ship := range fleetA.Ships {
+	for _, ship := range shipsB {
 		bh.shipsMapB[ship.ID] = ship
 	}
 }
@@ -115,6 +118,9 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 
 	for i := 0; i < maxShots; i++ {
 		shotDecision := bh.decisionProducer.ProduceNextShot()
+		if shotDecision == nil {
+			break
+		}
 
 		shot := galaxy.Shot{
 			Source:      shotDecision.ShooterId,
@@ -125,12 +131,22 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 		if shotDecision.Destroyed {
 			if shotDecision.Side == 0 {
 				bh.shipsMapB[shotDecision.TargetId].Destroyed = true
-				bh.poolB.RemoveKey(shotDecision.TargetId)
-				bh.gunnedPoolB.RemoveKey(shotDecision.TargetId)
+				if err := bh.poolB.RemoveKey(shotDecision.TargetId); err != nil {
+					panic("BUG: failed to remove destroyed ship from pool: " + err.Error())
+				}
+				if err := bh.gunnedPoolB.RemoveKey(shotDecision.TargetId); err != nil {
+					// Ignore error - ship might not have guns
+					_ = err
+				}
 			} else {
 				bh.shipsMapA[shotDecision.TargetId].Destroyed = true
-				bh.poolA.RemoveKey(shotDecision.TargetId)
-				bh.gunnedPoolA.RemoveKey(shotDecision.TargetId)
+				if err := bh.poolA.RemoveKey(shotDecision.TargetId); err != nil {
+					panic("BUG: failed to remove destroyed ship from pool: " + err.Error())
+				}
+				if err := bh.gunnedPoolA.RemoveKey(shotDecision.TargetId); err != nil {
+					// Ignore error - ship might not have guns
+					_ = err
+				}
 			}
 		}
 
@@ -141,8 +157,8 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 		}
 	}
 
-	battle.PostSideA = galaxy.NewFleet(slices.Collect(maps.Values(bh.shipsMapA)))
-	battle.PostSideB = galaxy.NewFleet(slices.Collect(maps.Values(bh.shipsMapB)))
+	battle.PostSideA = galaxy.NewFleet(bh.shipsA)
+	battle.PostSideB = galaxy.NewFleet(bh.shipsB)
 
 	return &battle
 }
