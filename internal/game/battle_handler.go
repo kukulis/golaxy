@@ -114,7 +114,9 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 		SideB: fleetB,
 	}
 
-	maxShots := 1000
+	maxShots := 10000
+	stalemateThreshold := 100 // If 100 consecutive shots don't destroy anything, declare stalemate
+	consecutiveNonDestructiveShots := 0
 
 	for i := 0; i < maxShots; i++ {
 		if bh.IsBattleOver() {
@@ -134,6 +136,7 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 		}
 
 		if shotDecision.Destroyed {
+			consecutiveNonDestructiveShots = 0 // Reset counter on destruction
 			if shotDecision.Side == 0 {
 				bh.shipsMapB[shotDecision.TargetId].Destroyed = true
 				if err := bh.poolB.RemoveKey(shotDecision.TargetId); err != nil {
@@ -152,6 +155,13 @@ func (bh *BattleHandler) ExecuteBattle(fleetA *galaxy.Fleet, fleetB *galaxy.Flee
 					// Ignore error - ship might not have guns
 					_ = err
 				}
+			}
+		} else {
+			consecutiveNonDestructiveShots++
+			if consecutiveNonDestructiveShots >= stalemateThreshold {
+				// Stalemate detected - too many shots without any destruction
+				battle.Shots = append(battle.Shots, &shot)
+				break
 			}
 		}
 

@@ -228,15 +228,15 @@ func TestBattleHandlerWithRuntimeDecisionProducer(t *testing.T) {
 				0.0,  // Target index 0 (ship-a1)
 				0.99, // Destruction check: high value = no destruction (defense 4 / attack 1 = ratio 4 -> prob 0)
 			},
-			expectedShots: 1000, // Hits max shot limit - demonstrates impenetrable defense
+			expectedShots: 100, // Hits stalemate threshold - demonstrates impenetrable defense
 			expectedSideA: func(f *galaxy.Fleet) bool {
-				// Ship A should survive all 1000 attacks due to high defense
+				// Ship A should survive all 100 attacks due to high defense
 				return len(f.Ships) == 1 && !f.Ships[0].Destroyed
 			},
 			expectedSideB: func(f *galaxy.Fleet) bool {
 				return len(f.Ships) == 1 && !f.Ships[0].Destroyed
 			},
-			battleOverEarly: false, // Battle continues until max shots
+			battleOverEarly: false, // Battle continues until stalemate detected
 		},
 	}
 
@@ -345,9 +345,9 @@ func TestBattleHandlerWithRuntimeDecisionProducerStalemate(t *testing.T) {
 
 	battle := battleHandler.ExecuteBattle(fleetA, fleetB)
 
-	// Should hit max shots limit (1000)
-	if len(battle.Shots) != 1000 {
-		t.Errorf("Expected battle to hit max shots limit of 1000, got %d shots", len(battle.Shots))
+	// Should hit stalemate threshold (100 consecutive non-destructive shots)
+	if len(battle.Shots) != 100 {
+		t.Errorf("Expected battle to hit stalemate threshold of 100 shots, got %d shots", len(battle.Shots))
 	}
 
 	// Both ships should still be alive
@@ -358,5 +358,5 @@ func TestBattleHandlerWithRuntimeDecisionProducerStalemate(t *testing.T) {
 		t.Error("Ship B should not be destroyed in stalemate")
 	}
 
-	t.Logf("Stalemate battle ended with %d shots, both ships alive", len(battle.Shots))
+	t.Logf("Stalemate battle ended with %d shots, both ships alive (stalemate detected)", len(battle.Shots))
 }
