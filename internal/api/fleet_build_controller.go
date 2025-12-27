@@ -69,3 +69,59 @@ func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 	controller.fleetBuildRepository.Delete(id)
 	c.JSON(http.StatusOK, gin.H{"message": "FleetBuild deleted successfully"})
 }
+
+func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
+	id := c.Param("id")
+	existing := controller.fleetBuildRepository.Get(id)
+	if existing == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	assignedModels := controller.fleetBuildRepository.FindAssignedShipModels(id)
+	c.JSON(http.StatusOK, assignedModels)
+}
+
+func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
+	fleetBuildId := c.Param("id")
+	existing := controller.fleetBuildRepository.Get(fleetBuildId)
+	if existing == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	var assignment galaxy.FleetBuildToShipModel
+	if err := c.ShouldBindJSON(&assignment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	assignment.FleetBuildID = fleetBuildId
+
+	wasCreated := controller.fleetBuildRepository.AssignShipModel(&assignment)
+
+	if wasCreated {
+		c.JSON(http.StatusCreated, assignment)
+	} else {
+		c.JSON(http.StatusOK, assignment)
+	}
+}
+
+func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
+	fleetBuildId := c.Param("id")
+	shipModelId := c.Param("shipModelId")
+
+	existing := controller.fleetBuildRepository.Get(fleetBuildId)
+	if existing == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	success := controller.fleetBuildRepository.UnassignShipModel(fleetBuildId, shipModelId)
+	if !success {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel assignment not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ShipModel unassigned successfully"})
+}

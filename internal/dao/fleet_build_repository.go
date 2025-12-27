@@ -46,22 +46,28 @@ func (r *FleetBuildRepository) FindAssignedShipModels(fleetBuildId string) []*ga
 	return util.ArrayFilter(r.fleetBuildToShipModels, func(b2s *galaxy.FleetBuildToShipModel) bool { return b2s.FleetBuildID == fleetBuildId })
 }
 
+// AssignShipModel assigns a ship model to a fleet build (upsert operation).
+// Returns true if a new assignment was created, false if an existing assignment was updated.
 func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.FleetBuildToShipModel) bool {
 	for _, b2s := range r.fleetBuildToShipModels {
 		if b2s.ShipModelID == fleetBuild2ShipModel.ShipModelID && b2s.FleetBuildID == fleetBuild2ShipModel.FleetBuildID {
-			return false
+			// Update existing assignment
+			b2s.Amount = fleetBuild2ShipModel.Amount
+			b2s.ResultMass = fleetBuild2ShipModel.ResultMass
+			b2s.ShipModel = fleetBuild2ShipModel.ShipModel
+			return false // Updated existing
 		}
 	}
 
+	// Create new assignment
 	r.fleetBuildToShipModels = append(r.fleetBuildToShipModels, fleetBuild2ShipModel)
-
-	return true
+	return true // Created new
 }
 
 func (r *FleetBuildRepository) UnassignShipModel(fleetBuildId, shipModelId string) bool {
 	foundIndex := -1
 	for i, b2s := range r.fleetBuildToShipModels {
-		if b2s.ShipModelID == fleetBuildId && b2s.FleetBuildID == shipModelId {
+		if b2s.ShipModelID == shipModelId && b2s.FleetBuildID == fleetBuildId {
 			foundIndex = i
 			break
 		}
@@ -71,7 +77,7 @@ func (r *FleetBuildRepository) UnassignShipModel(fleetBuildId, shipModelId strin
 		return false
 	}
 
-	slices.Delete(r.fleetBuildToShipModels, foundIndex, foundIndex)
+	r.fleetBuildToShipModels = slices.Delete(r.fleetBuildToShipModels, foundIndex, foundIndex+1)
 
 	return true
 }
