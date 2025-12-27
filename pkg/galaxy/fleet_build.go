@@ -11,7 +11,8 @@ type FleetBuild struct {
 	EngineResources  float64 `json:"engine_resources"`
 	CargoResources   float64 `json:"cargo_resources"`
 
-	// not stored to DB
-	ModelContainer *FleetBuildToShipModel
-	UsedResources  float64
+	// not stored to DB directly
+
+	AssignedShipModels []*ShipModel
+	UsedResources      float64
 }

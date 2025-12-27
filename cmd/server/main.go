@@ -12,11 +12,11 @@ func main() {
 	router.Static("/assets", "./assets")
 	router.StaticFile("/", "./assets/index.html")
 
-	// Future: API endpoints will go here
+	// API endpoints
 	apiRoute := router.Group("/api")
 
-	di.CreateSingletons()
-	apiRoute.GET("/battle", func(c *gin.Context) { di.BattleControllerInstance.GetBattle(c) })
+	di.CreateSingletons("dev")
+	di.RegisterRoutes(apiRoute)
 
 	router.Run(":8080")
 }
