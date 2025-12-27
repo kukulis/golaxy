@@ -46,6 +46,16 @@ func (r *FleetBuildRepository) FindAssignedShipModels(fleetBuildId string) []*ga
 	return util.ArrayFilter(r.fleetBuildToShipModels, func(b2s *galaxy.FleetBuildToShipModel) bool { return b2s.FleetBuildID == fleetBuildId })
 }
 
+func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId string) *galaxy.FleetBuildToShipModel {
+	for _, b2m := range r.fleetBuildToShipModels {
+		if b2m.FleetBuildID == fleetBuildId && b2m.ShipModelID == shipModelId {
+			return b2m
+		}
+	}
+
+	return nil
+}
+
 // AssignShipModel assigns a ship model to a fleet build (upsert operation).
 // Returns true if a new assignment was created, false if an existing assignment was updated.
 func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.FleetBuildToShipModel) bool {

@@ -9,10 +9,17 @@ import (
 
 type FleetBuildController struct {
 	fleetBuildRepository *dao.FleetBuildRepository
+	shipModelRepository  *dao.ShipModelRepository
 }
 
-func NewFleetBuildController(repository *dao.FleetBuildRepository) *FleetBuildController {
-	return &FleetBuildController{fleetBuildRepository: repository}
+func NewFleetBuildController(
+	fleetBuildRepository *dao.FleetBuildRepository,
+	shipModelRepository *dao.ShipModelRepository,
+) *FleetBuildController {
+	return &FleetBuildController{
+		fleetBuildRepository: fleetBuildRepository,
+		shipModelRepository:  shipModelRepository,
+	}
 }
 
 func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
@@ -124,4 +131,30 @@ func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "ShipModel unassigned successfully"})
+}
+
+// TODO
+func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
+	fleetBuildId := c.Param("id")
+	shipModelId := c.Param("shipModelId")
+
+	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	//build2shipModel := controller.fleetBuildRepository.FindAssignedShipModel(fleetBuildId, shipModelId)
+	//build2shipModel.ShipModel = controller.shipModelRepository.Get(build2shipModel.ShipModelID)
+
+	shipModel := controller.shipModelRepository.Get(shipModelId)
+
+	if shipModel == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel not found"})
+		return
+	}
+
+	shipTech := fleetBuild.CalculateShipTech(shipModel)
+
+	c.JSON(http.StatusOK, shipTech)
 }

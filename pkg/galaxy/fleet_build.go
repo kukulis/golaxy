@@ -16,3 +16,9 @@ type FleetBuild struct {
 	AssignedShipModels []*ShipModel
 	UsedResources      float64
 }
+
+func (fleetBuild *FleetBuild) CalculateShipTech(shipModel *ShipModel) ShipTech {
+	// TODO
+
+	return ShipTech{}
+}
