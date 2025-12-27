@@ -230,7 +230,7 @@ func TestDivisionEndpoints(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Request failed: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedStatus {
 				t.Errorf("Expected status %d, got: %d", tt.expectedStatus, resp.StatusCode)
@@ -265,7 +265,7 @@ func TestDivisionEndpoints_CreateMultiple(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to create division: %v", err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 
 		if resp.StatusCode != 201 {
 			t.Errorf("Expected status 201, got: %d", resp.StatusCode)
@@ -277,7 +277,7 @@ func TestDivisionEndpoints_CreateMultiple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get divisions: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, _ := io.ReadAll(resp.Body)
 	var result []galaxy.Division
