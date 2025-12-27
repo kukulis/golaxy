@@ -7,12 +7,14 @@ import (
 )
 
 type ShipModel struct {
-	ID            string
-	Name          string
-	Guns          int
-	OneGunMass    float64
-	DefenseMass   float64
-	EngineMass    float64
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Guns        int     `json:"guns"`
+	OneGunMass  float64 `json:"one_gun_mass"`
+	DefenseMass float64 `json:"defense_mass"`
+	EngineMass  float64 `json:"engine_mass"`
+	OwnerId     string  `json:"owner_id"`
+
 	validateError error
 }
 
