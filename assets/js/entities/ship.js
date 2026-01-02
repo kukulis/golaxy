@@ -64,23 +64,13 @@ class Ship {
         const group = document.createElementNS(SVG_NS, 'g');
         group.setAttribute('class', 'ship');
 
-        // Draw ship as a triangle
-        const triangle = document.createElementNS(SVG_NS, 'polygon');
+        // // Draw ship as a circle
+        const circle = document.createElementNS(SVG_NS, "circle");
+        circle.setAttribute("cx", x);  // center x
+        circle.setAttribute("cy", y);  // center y
+        circle.setAttribute("r", 20);    // radius
+        circle.setAttribute("fill", "blue");
 
-        // Create triangle points based on side
-        let points;
-        if (side === 'a') {
-            // Right-pointing triangle for side A
-            points = `${x - 10},${y - 10} ${x + 15},${y} ${x - 10},${y + 10}`;
-        } else {
-            // Left-pointing triangle for side B
-            points = `${x + 10},${y - 10} ${x - 15},${y} ${x + 10},${y + 10}`;
-        }
-
-        triangle.setAttribute('points', points);
-        triangle.setAttribute('fill', this.destroyed ? 'gray' : color);
-        triangle.setAttribute('stroke', 'white');
-        triangle.setAttribute('stroke-width', 2);
 
         // Add ship label
         // TODO remake using css class
@@ -92,7 +82,7 @@ class Ship {
         text.setAttribute('font-size', '12');
         text.textContent = this.name;
 
-        group.appendChild(triangle);
+        group.appendChild(circle);
         group.appendChild(text);
 
         // Add click handler
