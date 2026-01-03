@@ -66,10 +66,18 @@ class Ship {
 
         // // Draw ship as a circle
         const circle = document.createElementNS(SVG_NS, "circle");
+
+        const circleRadius = 20;
+
         circle.setAttribute("cx", x);  // center x
         circle.setAttribute("cy", y);  // center y
-        circle.setAttribute("r", 20);    // radius
-        circle.setAttribute("fill", "blue");
+        circle.setAttribute("r", circleRadius);    // radius
+        circle.setAttribute("fill", color);
+        circle.setAttribute('fill', this.destroyed ? 'gray' : color);
+        circle.setAttribute('stroke', 'white');
+        circle.setAttribute('stroke-width', 2);
+
+
 
 
         // Add ship label
@@ -83,6 +91,12 @@ class Ship {
         text.textContent = this.name;
 
         group.appendChild(circle);
+
+        if (this.tech.speed > 0)
+            {
+            group.appendChild(this.creteMotorSvg(color, side));
+        }
+
         group.appendChild(text);
 
         // Add click handler
@@ -121,5 +135,34 @@ class Ship {
         this.owner = data.owner;
 
         return this;
+    }
+
+    creteMotorSvg(color, side) {
+
+        let x = this.battleX;
+        let y = this.battleY;
+
+
+        // Draw motor as a triangle
+        const triangle = document.createElementNS(SVG_NS, 'polygon');
+
+        // Create triangle points based on side
+        let points;
+        if (side === 'a') {
+            // Right-pointing triangle for side A
+            x = x -20
+            points = `${x - 10},${y - 10} ${x + 15},${y} ${x - 10},${y + 10}`;
+        } else {
+            // Left-pointing triangle for side B
+            x = x+20
+            points = `${x + 10},${y - 10} ${x - 15},${y} ${x + 10},${y + 10}`;
+        }
+
+        triangle.setAttribute('points', points);
+        triangle.setAttribute('fill', this.destroyed ? 'gray' : color);
+        triangle.setAttribute('stroke', 'white');
+        triangle.setAttribute('stroke-width', 2);
+
+        return triangle;
     }
 }
