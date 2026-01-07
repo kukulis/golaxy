@@ -90,14 +90,17 @@ class Ship {
         text.setAttribute('font-size', '12');
         text.textContent = this.name;
 
-        group.appendChild(circle);
-
-        if (this.tech.speed > 0)
-            {
+        if (this.tech.speed > 0) {
             group.appendChild(this.creteMotorSvg(color, side));
         }
 
+        group.appendChild(circle);
+
+
+
         group.appendChild(text);
+
+
 
         // Add click handler
         group.addEventListener('click', () => this.handleShipClick());
@@ -150,11 +153,11 @@ class Ship {
         let points;
         if (side === 'a') {
             // Right-pointing triangle for side A
-            x = x -20
+            x = x - 20
             points = `${x - 10},${y - 10} ${x + 15},${y} ${x - 10},${y + 10}`;
         } else {
             // Left-pointing triangle for side B
-            x = x+20
+            x = x + 20
             points = `${x + 10},${y - 10} ${x - 15},${y} ${x + 10},${y + 10}`;
         }
 
