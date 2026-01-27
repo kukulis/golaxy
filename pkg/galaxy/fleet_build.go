@@ -21,7 +21,8 @@ type FleetBuild struct {
 }
 
 func (fleetBuild *FleetBuild) CalculateShipTech(shipModel *ShipModel) ShipTech {
-	// TODO
+	tech := NewTechnologies()
+	tech.Research(fleetBuild.AttackResources, fleetBuild.DefenseResources, fleetBuild.EngineResources, fleetBuild.CargoResources)
 
-	return ShipTech{}
+	return shipModel.CalculateShipTech(tech)
 }
