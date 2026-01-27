@@ -104,17 +104,21 @@ class ShipDraw {
         const s = this.scale;
         const scaledCircleRadius = drawMass * s;
         const scaledTrapezeHeight = drawSpeed * s;
-        const scaledCombSpacing = s;
+        const scaledCombSpacing = s*2;
         const scaledCombTeethLength = drawAttack * s;
 
         const circleCx = cx + scaledTrapezeHeight + scaledCircleRadius;
         const trapezeCx = circleCx - scaledCircleRadius - scaledTrapezeHeight / 2;
         const combCx = circleCx + scaledCircleRadius;
 
-        // Create wrapper group with rotation around circle center
+        // Create wrapper group with rotation around input position (cx, cy)
         const group = ShipDraw.createSvgElement("g", {
-            transform: `rotate(${rotation}, ${circleCx}, ${cy})`
+            transform: `rotate(${rotation}, ${cx}, ${cy})`
         });
+        // Alternative: rotate around circle center
+        // const group = ShipDraw.createSvgElement("g", {
+        //     transform: `rotate(${rotation}, ${circleCx}, ${cy})`
+        // });
 
         this.drawTrapeze(group, trapezeCx, cy, scaledTrapezeHeight, this.color);
         this.drawCircle(group, circleCx, cy, scaledCircleRadius, this.color, this.circleLineColor, drawDefence*this.scale/5);

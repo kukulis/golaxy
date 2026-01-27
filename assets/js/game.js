@@ -125,7 +125,18 @@ class Game {
     }
 
     drawShip(x, y, ship, color, side) {
-        this.svg.appendChild(ship.creteShipSvg(color, side));
+        const group = ship.createShipSvg(color, side);
+
+        // Add click handler
+        group.addEventListener('click', () => ship.handleShipClick());
+
+        // Add hover effect
+        group.style.cursor = 'pointer';
+
+        // Store reference to SVG element
+        ship.svgElement = group;
+
+        this.svg.appendChild(group);
     }
 
     clearAllShotsFromDrawing() {
