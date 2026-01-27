@@ -57,6 +57,19 @@ class Ship {
 
     creteShipSvg(color, side) {
 
+        let shipDraw = new ShipDraw(2, color, 'yellow')
+        let dp = this.buildDrawParams();
+
+        const group = document.createElementNS(SVG_NS, 'g');
+        group.setAttribute('class', 'ship');
+        let x = this.battleX;
+        let y = this.battleY;
+        shipDraw.drawShipRaw(group, x, y, dp.drawMass, dp.drawSpeed, dp.drawGuns, dp.drawAttack, dp.drawDefence, side * 180   )
+
+        return group;
+    }
+    creteShipSvgOld(color, side) {
+
         let x = this.battleX;
         let y = this.battleY;
 
@@ -138,6 +151,16 @@ class Ship {
         this.owner = data.owner;
 
         return this;
+    }
+
+    buildDrawParams() {
+        return new ShipDrawParams(
+            Math.log( this.tech.mass ),
+            this.tech.speed,
+            this.tech.guns,
+            this.tech.attack,
+            this.tech.defense
+        );
     }
 
     creteMotorSvg(color, side) {

@@ -1,3 +1,13 @@
+class ShipDrawParams {
+    constructor(drawMass, drawSpeed, drawGuns, drawAttack, drawDefence) {
+        this.drawMass = drawMass;
+        this.drawSpeed = drawSpeed;
+        this.drawGuns = drawGuns;
+        this.drawAttack = drawAttack;
+        this.drawDefence = drawDefence;
+    }
+}
+
 class ShipDraw {
     static SVG_NS = "http://www.w3.org/2000/svg";
 
