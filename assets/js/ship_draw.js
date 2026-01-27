@@ -90,19 +90,26 @@ class ShipDraw {
         svg.appendChild(group);
     }
 
-    drawCombined(svg, cx, cy, circleRadius, trapezeHeight, combTeethCount, combTeethLength, circleStrokeWidth) {
+    drawShipRaw(svg, cx, cy, drawMass, drawSpeed, drawGuns, drawAttack, drawDefence, rotation = 0) {
         const s = this.scale;
-        const scaledCircleRadius = circleRadius * s;
-        const scaledTrapezeHeight = trapezeHeight * s;
+        const scaledCircleRadius = drawMass * s;
+        const scaledTrapezeHeight = drawSpeed * s;
         const scaledCombSpacing = s;
-        const scaledCombTeethLength = combTeethLength * s;
+        const scaledCombTeethLength = drawAttack * s;
 
         const circleCx = cx + scaledTrapezeHeight + scaledCircleRadius;
         const trapezeCx = circleCx - scaledCircleRadius - scaledTrapezeHeight / 2;
         const combCx = circleCx + scaledCircleRadius;
 
-        this.drawTrapeze(svg, trapezeCx, cy, scaledTrapezeHeight, this.color);
-        this.drawCircle(svg, circleCx, cy, scaledCircleRadius, this.color, this.circleLineColor, circleStrokeWidth*this.scale/5);
-        this.drawComb(svg, combCx, cy, scaledCombSpacing, combTeethCount, scaledCombTeethLength, this.color);
+        // Create wrapper group with rotation around circle center
+        const group = ShipDraw.createSvgElement("g", {
+            transform: `rotate(${rotation}, ${circleCx}, ${cy})`
+        });
+
+        this.drawTrapeze(group, trapezeCx, cy, scaledTrapezeHeight, this.color);
+        this.drawCircle(group, circleCx, cy, scaledCircleRadius, this.color, this.circleLineColor, drawDefence*this.scale/5);
+        this.drawComb(group, combCx, cy, scaledCombSpacing, drawGuns, scaledCombTeethLength, this.color);
+
+        svg.appendChild(group);
     }
 }
