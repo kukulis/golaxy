@@ -11,12 +11,12 @@ func main() {
 	// Serve static files from assets directory
 	router.Static("/assets", "./assets")
 	router.StaticFile("/", "./assets/index.html")
-
+	router.StaticFile("/test-ship-designs", "./assets/test_ship_designs.html")
 	// API endpoints
 	apiRoute := router.Group("/api")
 
 	di.CreateSingletons("dev")
 	di.RegisterRoutes(apiRoute)
 
-	router.Run(":8080")
+	_ = router.Run(":8080")
 }
