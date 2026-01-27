@@ -9,6 +9,13 @@ class ShipDraw {
         return el;
     }
 
+
+    scale = 10;
+
+    constructor(scale) {
+        this.scale = scale
+    }
+
     drawTrapezeRaw(svg, cx, cy, height, topWidth, bottomWidth, color) {
         const halfHeight = height / 2;
         const halfTop = topWidth / 2;
@@ -79,13 +86,19 @@ class ShipDraw {
         svg.appendChild(group);
     }
 
-    drawCombined(svg, cy, circleRadius, trapezeHeight, combSpacing, combTeethCount, combTeethLength, color, circleLineColor) {
-        const circleCx = trapezeHeight + circleRadius;
-        const trapezeCx = circleCx - circleRadius - trapezeHeight / 2;
-        const combCx = circleCx + circleRadius;
+    drawCombined(svg, cx, cy, circleRadius, trapezeHeight, combTeethCount, combTeethLength, color, circleLineColor) {
+        const s = this.scale;
+        const scaledCircleRadius = circleRadius * s;
+        const scaledTrapezeHeight = trapezeHeight * s;
+        const scaledCombSpacing = s;
+        const scaledCombTeethLength = combTeethLength * s;
 
-        this.drawTrapeze(svg, trapezeCx, cy, trapezeHeight, color);
-        this.drawCircle(svg, circleCx, cy, circleRadius, color, circleLineColor, 2);
-        this.drawComb(svg, combCx, cy, combSpacing, combTeethCount, combTeethLength, color);
+        const circleCx = cx + scaledTrapezeHeight + scaledCircleRadius;
+        const trapezeCx = circleCx - scaledCircleRadius - scaledTrapezeHeight / 2;
+        const combCx = circleCx + scaledCircleRadius;
+
+        this.drawTrapeze(svg, trapezeCx, cy, scaledTrapezeHeight, color);
+        this.drawCircle(svg, circleCx, cy, scaledCircleRadius, color, circleLineColor, 2);
+        this.drawComb(svg, combCx, cy, scaledCombSpacing, combTeethCount, scaledCombTeethLength, color);
     }
 }
