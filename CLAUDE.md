@@ -150,3 +150,9 @@ go mod verify
 - Makes refactoring safer
 
 **Note**: While TDD is preferred, it may not be practical for all scenarios (e.g., exploratory prototyping, UI work). Use judgment, but default to test-first when feasible.
+
+### Test Readability
+
+- **Use "nice" numbers**: Choose test values that produce clean, easy-to-verify results. For example, use mass=64 (sqrt=8) instead of mass=60 (sqrt≈7.745) to get integer results.
+- **Avoid obvious comments**: Do not comment self-explanatory code like "// When: Calculating ship tech" before a `CalculateShipTech()` call. Let the code speak for itself.
+- **Keep tests concise**: Prefer minimal, focused test cases over verbose ones with excessive setup documentation.
