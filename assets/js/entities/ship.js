@@ -99,7 +99,7 @@ class Ship {
 
     buildDrawParams() {
         return new ShipDrawParams(
-            Math.log( this.tech.mass ),
+            Math.sqrt( this.tech.mass ),
             this.tech.speed,
             this.tech.guns,
             this.tech.attack,
