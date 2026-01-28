@@ -13,6 +13,7 @@ type ShipModel struct {
 	OneGunMass  float64 `json:"one_gun_mass"`
 	DefenseMass float64 `json:"defense_mass"`
 	EngineMass  float64 `json:"engine_mass"`
+	CargoMass   float64 `json:"cargo_mass"`
 	OwnerId     string  `json:"owner_id"`
 
 	validateError error

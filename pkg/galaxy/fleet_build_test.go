@@ -1,6 +1,7 @@
 package galaxy
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -280,4 +281,50 @@ func TestCalculateShipTech_GlassPerfo(t *testing.T) {
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("CalculateShipTech with all resources:\nexpected %+v\ngot      %+v", expected, result)
 	}
+}
+
+func TestCalculateAllShipTech_Simple(t *testing.T) {
+	fleetBuild := &FleetBuild{
+		AssignedShipModels: []ShipModelAssignment{
+			{
+				ShipModel: ShipModel{
+					Guns:        1,
+					OneGunMass:  1,
+					DefenseMass: 0,
+					EngineMass:  1,
+					CargoMass:   0,
+				},
+				Amount: 1,
+			},
+		},
+	}
+
+	fmt.Printf("TestCalculateAllShipTech_Simple fleetBuild: %+v\n", fleetBuild)
+
+	techs := fleetBuild.CalculateAllShipTechs()
+
+	if len(techs) != 1 {
+		t.Errorf("The resulting amount of techs must be 1")
+	}
+
+	expectedShipTech := &ShipTech{
+		Guns:          1,
+		Attack:        1,
+		Defense:       0,
+		Speed:         0.5,
+		Mass:          2,
+		CargoCapacity: 0,
+	}
+
+	if !reflect.DeepEqual(expectedShipTech, techs[0]) {
+		t.Errorf("Expected %v, got %v", expectedShipTech, techs[0])
+	}
+}
+
+func TestCalculateAllShipTech_Amount2(t *testing.T) {
+	// TODO
+}
+
+func TestCalculateAllShipTech_Combined(t *testing.T) {
+	// TODO
 }
