@@ -55,60 +55,24 @@ class Ship {
     svgElement = null;
 
 
-    creteShipSvg(color, side) {
+    createShipSvg(color, side) {
 
-        let x = this.battleX;
-        let y = this.battleY;
+        let shipDraw = new ShipDraw(3, color, 'yellow')
+        let dp = this.buildDrawParams();
 
-        // Create ship group
         const group = document.createElementNS(SVG_NS, 'g');
         group.setAttribute('class', 'ship');
-
-        // Draw ship as a triangle
-        const triangle = document.createElementNS(SVG_NS, 'polygon');
-
-        // Create triangle points based on side
-        let points;
-        if (side === 'a') {
-            // Right-pointing triangle for side A
-            points = `${x - 10},${y - 10} ${x + 15},${y} ${x - 10},${y + 10}`;
-        } else {
-            // Left-pointing triangle for side B
-            points = `${x + 10},${y - 10} ${x - 15},${y} ${x + 10},${y + 10}`;
-        }
-
-        triangle.setAttribute('points', points);
-        triangle.setAttribute('fill', this.destroyed ? 'gray' : color);
-        triangle.setAttribute('stroke', 'white');
-        triangle.setAttribute('stroke-width', 2);
-
-        // Add ship label
-        // TODO remake using css class
-        const text = document.createElementNS(SVG_NS, 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', y - 20);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('fill', 'white');
-        text.setAttribute('font-size', '12');
-        text.textContent = this.name;
-
-        group.appendChild(triangle);
-        group.appendChild(text);
-
-        // Add click handler
-        group.addEventListener('click', () => this.handleShipClick());
-
-        // Add hover effect
-        group.style.cursor = 'pointer';
-
-        this.svgElement = group;
+        let x = this.battleX;
+        let y = this.battleY;
+        const rotation = side === 'b' ? 180 : 0;
+        shipDraw.drawShipRaw(group, x, y, dp.drawMass, dp.drawSpeed, dp.drawGuns, dp.drawAttack, dp.drawDefence, rotation);
 
         return group;
     }
 
     handleShipClick() {
         console.log('Ship clicked:', this);
-        const info = `Ship: ${this.name}\nID: ${this.id}\nSpeed: ${this.tech.speed}\nAttack: ${this.tech.attack}\nDefense: ${this.tech.defense}\nDestroyed: ${this.destroyed}`;
+        const info = `Ship: ${this.name}\nID: ${this.id}\nSpeed: ${this.tech.speed}\nAttack: ${this.tech.attack}\nGuns:${this.tech.guns} \nDefense: ${this.tech.defense}\nDestroyed: ${this.destroyed}`;
         alert(info);
     }
 
@@ -131,5 +95,15 @@ class Ship {
         this.owner = data.owner;
 
         return this;
+    }
+
+    buildDrawParams() {
+        return new ShipDrawParams(
+            Math.log( this.tech.mass ),
+            this.tech.speed,
+            this.tech.guns,
+            this.tech.attack,
+            this.tech.defense
+        );
     }
 }
