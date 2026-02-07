@@ -106,4 +106,18 @@ class Ship {
             this.tech.defense
         );
     }
+
+    /**
+     * Builds a unique key string from ship tech properties
+     * @return {string}
+     */
+    buildTechKey() {
+        const t = this.tech;
+        return t.attack.toFixed(2)
+            + '-' + t.guns
+            + '-' + t.defense.toFixed(2)
+            + '-' + t.speed.toFixed(2)
+            + '-' + t.cargo_capacity.toFixed(2)
+            + '-' + t.mass.toFixed(2);
+    }
 }
