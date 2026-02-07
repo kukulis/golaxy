@@ -1,4 +1,4 @@
-class Shot {
+export class Shot {
     /**
      * Source ship ID that fired the shot
      * @type {string|number}

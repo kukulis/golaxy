@@ -1,4 +1,6 @@
-class Fleet {
+import { Ship } from './ship.js';
+
+export class Fleet {
     /**
      * Array of ships in this fleet
      * @type {Ship[]}

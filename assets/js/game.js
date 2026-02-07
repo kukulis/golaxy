@@ -1,8 +1,10 @@
 // Galaktika Game - Main JavaScript
 
+import { ApiClient } from './api.js';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-class Game {
+export class Game {
 
     /**
      * @type {HTMLElement}

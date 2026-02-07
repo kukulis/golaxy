@@ -1,4 +1,8 @@
-class Ship {
+import { ShipDraw, ShipDrawParams } from '../ship_draw.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+export class Ship {
     /**
      * Ship identifier
      * @type {string}

@@ -1,4 +1,6 @@
-class ApiClient {
+import { Battle } from './entities/battle.js';
+
+export class ApiClient {
 
     /**
      * @param id

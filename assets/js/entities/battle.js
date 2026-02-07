@@ -1,4 +1,7 @@
-class Battle {
+import { Fleet } from './fleet.js';
+import { Shot } from './shot.js';
+
+export class Battle {
     /**
      * Battle identifier
      * @type {string}

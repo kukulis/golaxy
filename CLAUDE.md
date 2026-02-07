@@ -134,6 +134,10 @@ go mod verify
 - Tests use standard `testing` package
 - Test function naming: `Test<Feature><Variation>` (e.g., `TestFlightSpeed0`, `TestFlightSpeed1`)
 
+### Frontend Visual Tests
+
+- `assets/test_ship_designs.html` - Visual test for ship rendering. This is for manual visual verification only, not automated testing.
+
 ### Test-Driven Development (TDD)
 
 **Project Decision**: Follow TDD principles where possible - write tests first before implementation.

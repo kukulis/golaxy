@@ -1,4 +1,4 @@
-class Race {
+export class Race {
     /**
      * Race identifier
      * @type {string}

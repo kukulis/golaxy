@@ -1,4 +1,4 @@
-class ShipDrawParams {
+export class ShipDrawParams {
     constructor(drawMass, drawSpeed, drawGuns, drawAttack, drawDefence) {
         this.drawMass = drawMass;
         this.drawSpeed = drawSpeed;
@@ -8,7 +8,7 @@ class ShipDrawParams {
     }
 }
 
-class ShipDraw {
+export class ShipDraw {
     static SVG_NS = "http://www.w3.org/2000/svg";
 
     static createSvgElement(tag, attrs) {
