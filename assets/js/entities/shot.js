@@ -51,11 +51,11 @@ export class Shot {
             return group;
         }
 
-        // Get coordinates from ships
-        const x1 = this.sourceShip.battleX;
-        const y1 = this.sourceShip.battleY;
-        const x2 = this.destinationShip.battleX;
-        const y2 = this.destinationShip.battleY;
+        // Get coordinates from ships (nose for source, center for destination)
+        const x1 = this.sourceShip.noseX;
+        const y1 = this.sourceShip.noseY;
+        const x2 = this.destinationShip.centerX;
+        const y2 = this.destinationShip.centerY;
 
         // Create line from source to destination
         const line = document.createElementNS(SVG_NS, 'line');
@@ -67,33 +67,39 @@ export class Shot {
         line.setAttribute('stroke-width', 2);
         group.appendChild(line);
 
+        // Calculate ship size for indicators
+        const scale = 3;
+        const dp = this.destinationShip.buildDrawParams();
+        const circleRadius = dp.drawMass * scale;
+
         // Draw hit or miss indicator
         if (this.result) {
-            // Hit - draw cross
+            // Hit - draw cross (orange for visibility on both blue and red ships)
+            const crossSize = circleRadius;
             const line1 = document.createElementNS(SVG_NS, 'line');
-            line1.setAttribute('x1', x2 - 15);
-            line1.setAttribute('y1', y2 - 15);
-            line1.setAttribute('x2', x2 + 15);
-            line1.setAttribute('y2', y2 + 15);
-            line1.setAttribute('stroke', 'red');
+            line1.setAttribute('x1', x2 - crossSize);
+            line1.setAttribute('y1', y2 - crossSize);
+            line1.setAttribute('x2', x2 + crossSize);
+            line1.setAttribute('y2', y2 + crossSize);
+            line1.setAttribute('stroke', 'orange');
             line1.setAttribute('stroke-width', 3);
 
             const line2 = document.createElementNS(SVG_NS, 'line');
-            line2.setAttribute('x1', x2 + 15);
-            line2.setAttribute('y1', y2 - 15);
-            line2.setAttribute('x2', x2 - 15);
-            line2.setAttribute('y2', y2 + 15);
-            line2.setAttribute('stroke', 'red');
+            line2.setAttribute('x1', x2 + crossSize);
+            line2.setAttribute('y1', y2 - crossSize);
+            line2.setAttribute('x2', x2 - crossSize);
+            line2.setAttribute('y2', y2 + crossSize);
+            line2.setAttribute('stroke', 'orange');
             line2.setAttribute('stroke-width', 3);
 
             group.appendChild(line1);
             group.appendChild(line2);
         } else {
-            // Miss - draw circle
+            // Miss - draw circle matching ship size
             const circle = document.createElementNS(SVG_NS, 'circle');
             circle.setAttribute('cx', x2);
             circle.setAttribute('cy', y2);
-            circle.setAttribute('r', 20);
+            circle.setAttribute('r', circleRadius+10);
             circle.setAttribute('fill', 'none');
             circle.setAttribute('stroke', 'white');
             circle.setAttribute('stroke-width', 2);

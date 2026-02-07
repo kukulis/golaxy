@@ -53,6 +53,30 @@ export class Ship {
     battleY = 0;
 
     /**
+     * X coordinate of ship nose (for shot source)
+     * @type {number}
+     */
+    noseX = 0;
+
+    /**
+     * Y coordinate of ship nose (for shot source)
+     * @type {number}
+     */
+    noseY = 0;
+
+    /**
+     * X coordinate of ship center (for shot destination)
+     * @type {number}
+     */
+    centerX = 0;
+
+    /**
+     * Y coordinate of ship center (for shot destination)
+     * @type {number}
+     */
+    centerY = 0;
+
+    /**
      *
      * @type {null|SVGElement}
      */

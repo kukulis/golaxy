@@ -103,10 +103,7 @@ export class BattleProcessor {
             for (const group of this.battle.side_a.shipGroupMap.values()) {
                 group.battleX = leftX;
                 group.battleY = currentY;
-                for (const ship of group.shipList) {
-                    ship.battleX = group.battleX;
-                    ship.battleY = group.battleY;
-                }
+                this.setShipPositions(group, 'a');
                 currentY += group.calculateHeight() + groupPadding;
             }
         }
@@ -117,11 +114,35 @@ export class BattleProcessor {
             for (const group of this.battle.side_b.shipGroupMap.values()) {
                 group.battleX = rightX;
                 group.battleY = currentY;
-                for (const ship of group.shipList) {
-                    ship.battleX = group.battleX;
-                    ship.battleY = group.battleY;
-                }
+                this.setShipPositions(group, 'b');
                 currentY += group.calculateHeight() + groupPadding;
+            }
+        }
+    }
+
+    setShipPositions(group, side) {
+        const scale = 3;
+        const dp = group.ship.buildDrawParams();
+        const circleRadius = dp.drawMass * scale;
+        const trapezeHeight = dp.drawSpeed * scale;
+        const combLength = dp.drawAttack * scale;
+
+        for (const ship of group.shipList) {
+            ship.battleX = group.battleX;
+            ship.battleY = group.battleY;
+
+            if (side === 'a') {
+                // Ship points right
+                ship.centerX = ship.battleX + trapezeHeight + circleRadius;
+                ship.centerY = ship.battleY;
+                ship.noseX = ship.battleX + trapezeHeight + circleRadius * 2 + combLength;
+                ship.noseY = ship.battleY;
+            } else {
+                // Ship points left (rotated 180)
+                ship.centerX = ship.battleX - trapezeHeight - circleRadius;
+                ship.centerY = ship.battleY;
+                ship.noseX = ship.battleX - trapezeHeight - circleRadius * 2 - combLength;
+                ship.noseY = ship.battleY;
             }
         }
     }
