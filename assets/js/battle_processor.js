@@ -95,33 +95,33 @@ export class BattleProcessor {
         const leftX = 100;
         const rightX = 700;
         const startY = 100;
-        const groupSpacing = 60;
+        const groupPadding = 20;
 
         // Position side A ship groups (left column)
         if (this.battle.side_a) {
-            let index = 0;
+            let currentY = startY;
             for (const group of this.battle.side_a.shipGroupMap.values()) {
                 group.battleX = leftX;
-                group.battleY = startY + (index * groupSpacing);
+                group.battleY = currentY;
                 for (const ship of group.shipList) {
                     ship.battleX = group.battleX;
                     ship.battleY = group.battleY;
                 }
-                index++;
+                currentY += group.calculateHeight() + groupPadding;
             }
         }
 
         // Position side B ship groups (right column)
         if (this.battle.side_b) {
-            let index = 0;
+            let currentY = startY;
             for (const group of this.battle.side_b.shipGroupMap.values()) {
                 group.battleX = rightX;
-                group.battleY = startY + (index * groupSpacing);
+                group.battleY = currentY;
                 for (const ship of group.shipList) {
                     ship.battleX = group.battleX;
                     ship.battleY = group.battleY;
                 }
-                index++;
+                currentY += group.calculateHeight() + groupPadding;
             }
         }
     }

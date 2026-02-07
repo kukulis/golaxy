@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Group Designs</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            width: 800px;
+            height: 600px;
+        }
+        .cell {
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        .cell h3 {
+            margin: 0 0 10px 0;
+        }
+        svg {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <div class="cell">
+            <h3>Side A (left)</h3>
+            <svg id="svg-side-a" width="300" height="180"></svg>
+        </div>
+        <div class="cell">
+            <h3>Side B (right)</h3>
+            <svg id="svg-side-b" width="300" height="180"></svg>
+        </div>
+        <div class="cell">
+            <h3>Small Ship Group</h3>
+            <svg id="svg-small" width="300" height="180"></svg>
+        </div>
+        <div class="cell">
+            <h3>Large Ship Group</h3>
+            <svg id="svg-large" width="300" height="180"></svg>
+        </div>
+    </div>
+
+    <script type="module">
+        import { Ship } from '/assets/js/entities/ship.js';
+        import { ShipGroup } from '/assets/js/entities/ship_group.js';
+
+        function createShipGroup(name, amount, attack, guns, defense, speed, cargoCapacity, mass) {
+            const ship = new Ship();
+            ship.name = name;
+            ship.tech = {
+                attack: attack,
+                guns: guns,
+                defense: defense,
+                speed: speed,
+                cargo_capacity: cargoCapacity,
+                mass: mass
+            };
+
+            const group = new ShipGroup();
+            group.ship = ship;
+            group.amount = amount;
+            return group;
+        }
+
+        // Side A group
+        const groupA = createShipGroup('Fighter', 5, 2, 3, 1, 4, 10, 16);
+        groupA.battleX = 20;
+        groupA.battleY = 90;
+        document.getElementById('svg-side-a').appendChild(groupA.createGroupSvg('blue', 'a'));
+
+        // Side B group
+        const groupB = createShipGroup('Destroyer', 3, 4, 5, 2, 3, 20, 36);
+        groupB.battleX = 150;
+        groupB.battleY = 90;
+        document.getElementById('svg-side-b').appendChild(groupB.createGroupSvg('red', 'b'));
+
+        // Small ship group
+        const groupSmall = createShipGroup('Scout', 12, 1, 1, 1, 6, 5, 4);
+        groupSmall.battleX = 20;
+        groupSmall.battleY = 90;
+        document.getElementById('svg-small').appendChild(groupSmall.createGroupSvg('green', 'a'));
+
+        // Large ship group
+        const groupLarge = createShipGroup('Battleship', 2, 5, 6, 4, 2, 50, 64);
+        groupLarge.battleX = 20;
+        groupLarge.battleY = 90;
+        document.getElementById('svg-large').appendChild(groupLarge.createGroupSvg('purple', 'a'));
+    </script>
+</body>
+</html>
