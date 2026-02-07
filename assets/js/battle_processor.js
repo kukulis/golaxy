@@ -183,19 +183,25 @@ export class BattleProcessor {
             ship.destroyed = true;
 
             // Find the ship's group and notify
-            const group = this.battle.side_a.findShipGroup(ship)
-                || this.battle.side_b.findShipGroup(ship);
+            const isOnSideA = this.battle.side_a.findShipGroup(ship) !== undefined;
+            const group = isOnSideA
+                ? this.battle.side_a.findShipGroup(ship)
+                : this.battle.side_b.findShipGroup(ship);
 
             if (group) {
-                // Find the fleet to call notifyDestroyed
-                const fleet = this.battle.side_a.findShipGroup(ship)
-                    ? this.battle.side_a
-                    : this.battle.side_b;
+                const fleet = isOnSideA ? this.battle.side_a : this.battle.side_b;
                 fleet.notifyDestroyed(ship);
 
-                // Remove group SVG if amount is 0
-                if (group.amount === 0 && group.svgElement) {
+                // Remove old SVG
+                if (group.svgElement) {
                     group.svgElement.remove();
+                }
+
+                // Redraw group if amount > 0
+                if (group.amount > 0) {
+                    const color = isOnSideA ? 'blue' : 'red';
+                    const side = isOnSideA ? 'a' : 'b';
+                    this.drawShipGroup(group, color, side);
                 }
             }
         }

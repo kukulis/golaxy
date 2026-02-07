@@ -56,6 +56,34 @@ func NewBattleRepository() *BattleRepository {
 					Owner:     "race_b",
 				},
 				{
+					ID: "B1_2",
+					Tech: galaxy.ShipTech{
+						Attack:        6,
+						Guns:          3,
+						Defense:       2,
+						Speed:         12,
+						CargoCapacity: 45,
+						Mass:          95,
+					},
+					Destroyed: false,
+					Name:      "Cruiser Beta",
+					Owner:     "race_b",
+				},
+				{
+					ID: "B1_3",
+					Tech: galaxy.ShipTech{
+						Attack:        6,
+						Guns:          3,
+						Defense:       2,
+						Speed:         12,
+						CargoCapacity: 45,
+						Mass:          95,
+					},
+					Destroyed: false,
+					Name:      "Cruiser Beta",
+					Owner:     "race_b",
+				},
+				{
 					ID: "B2",
 					Tech: galaxy.ShipTech{
 						Attack:        5,
@@ -76,6 +104,8 @@ func NewBattleRepository() *BattleRepository {
 				{"A2", "B2", true},
 				{"B1", "A1", true},
 				{"A2", "B1", true},
+				{"A2", "B1_2", true},
+				{"A2", "B1_3", false},
 			},
 		},
 	}
