@@ -25,7 +25,24 @@ export class ShipGroup {
      * @return {ShipGroup[]}
      */
     static groupShips(ships) {
-        // TODO: implement
-        return [];
+        const groupMap = new Map();
+
+        for (const ship of ships) {
+            const key = ship.buildTechKey();
+
+            if (groupMap.has(key)) {
+                const group = groupMap.get(key);
+                group.shipList.push(ship);
+                group.amount++;
+            } else {
+                const group = new ShipGroup();
+                group.ship = ship;
+                group.shipList = [ship];
+                group.amount = 1;
+                groupMap.set(key, group);
+            }
+        }
+
+        return Array.from(groupMap.values());
     }
 }
