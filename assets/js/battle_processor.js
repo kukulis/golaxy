@@ -1,10 +1,10 @@
-// Galaktika Game - Main JavaScript
+// Galaktika Battle Processor
 
 import { ApiClient } from './api.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export class Game {
+export class BattleProcessor {
 
     /**
      * @type {HTMLElement}

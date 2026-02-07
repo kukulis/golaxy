@@ -19,7 +19,7 @@
         </div>
     </div>
 <script type="module">
-    import { Game } from '/assets/js/game.js';
+    import { BattleProcessor } from '/assets/js/battle_processor.js';
     import { ApiClient } from '/assets/js/api.js';
 
     // Initialize game when DOM is loaded
@@ -27,9 +27,9 @@
         let svg = document.getElementById('galaxy');
         let apiClient = new ApiClient();
 
-        const game = new Game(apiClient, svg);
+        const battleProcessor = new BattleProcessor(apiClient, svg);
 
-        game.init();
+        battleProcessor.init();
     });
 </script>
 
