@@ -41,10 +41,10 @@ export class BattleProcessor {
     shotElements = [];
 
     /**
-     * Set of ship IDs that will be removed on the next shot
-     * @type {Set<string|number>}
+     * Ships that will be processed as destroyed on the next shot
+     * @type {Ship[]}
      */
-    destroyedShipsIds = new Set();
+    destroyedShips = [];
 
 
     /**
@@ -70,7 +70,7 @@ export class BattleProcessor {
         // Clear existing game
         this.svg.innerHTML = '';
         this.currentShotIndex = 0;
-        this.destroyedShipsIds.clear();
+        this.destroyedShips = [];
         this.shotElements = [];
         this.isAutoPlaying = false;
 
@@ -78,8 +78,12 @@ export class BattleProcessor {
             // Load battle from API
             this.battle = await this.apiClient.getBattle('1');
 
-            // Position and draw ships
-            this.positionShips();
+            // Build ship groups
+            this.battle.side_a.fillShipGroupMap();
+            this.battle.side_b.fillShipGroupMap();
+
+            // Position and draw ship groups
+            this.positionShipGroups();
             this.drawBattle();
         } catch (error) {
             console.error('Failed to load battle:', error);
@@ -87,58 +91,64 @@ export class BattleProcessor {
         }
     }
 
-    positionShips() {
+    positionShipGroups() {
         const leftX = 100;
         const rightX = 700;
         const startY = 100;
-        const shipSpacing = 60;
+        const groupSpacing = 60;
 
-        // Position side A ships (left column)
-        if (this.battle.side_a && this.battle.side_a.ships) {
-            this.battle.side_a.ships.forEach((ship, index) => {
-                ship.battleX = leftX;
-                ship.battleY = startY + (index * shipSpacing);
-            });
+        // Position side A ship groups (left column)
+        if (this.battle.side_a) {
+            let index = 0;
+            for (const group of this.battle.side_a.shipGroupMap.values()) {
+                group.battleX = leftX;
+                group.battleY = startY + (index * groupSpacing);
+                for (const ship of group.shipList) {
+                    ship.battleX = group.battleX;
+                    ship.battleY = group.battleY;
+                }
+                index++;
+            }
         }
 
-        // Position side B ships (right column)
-        if (this.battle.side_b && this.battle.side_b.ships) {
-            this.battle.side_b.ships.forEach((ship, index) => {
-                ship.battleX = rightX;
-                ship.battleY = startY + (index * shipSpacing);
-            });
+        // Position side B ship groups (right column)
+        if (this.battle.side_b) {
+            let index = 0;
+            for (const group of this.battle.side_b.shipGroupMap.values()) {
+                group.battleX = rightX;
+                group.battleY = startY + (index * groupSpacing);
+                for (const ship of group.shipList) {
+                    ship.battleX = group.battleX;
+                    ship.battleY = group.battleY;
+                }
+                index++;
+            }
         }
     }
 
     drawBattle() {
-        // Draw all ships from side A
-        if (this.battle.side_a && this.battle.side_a.ships) {
-            this.battle.side_a.ships.forEach(ship => {
-                this.drawShip(ship.battleX, ship.battleY, ship, 'blue', 'a');
-            });
+        // Draw all ship groups from side A
+        if (this.battle.side_a) {
+            for (const group of this.battle.side_a.shipGroupMap.values()) {
+                this.drawShipGroup(group, 'blue', 'a');
+            }
         }
 
-        // Draw all ships from side B
-        if (this.battle.side_b && this.battle.side_b.ships) {
-            this.battle.side_b.ships.forEach(ship => {
-                this.drawShip(ship.battleX, ship.battleY, ship, 'red', 'b');
-            });
+        // Draw all ship groups from side B
+        if (this.battle.side_b) {
+            for (const group of this.battle.side_b.shipGroupMap.values()) {
+                this.drawShipGroup(group, 'red', 'b');
+            }
         }
     }
 
-    drawShip(x, y, ship, color, side) {
-        const group = ship.createShipSvg(color, side);
-
-        // Add click handler
-        group.addEventListener('click', () => ship.handleShipClick());
+    drawShipGroup(shipGroup, color, side) {
+        const svgElement = shipGroup.createGroupSvg(color, side);
 
         // Add hover effect
-        group.style.cursor = 'pointer';
+        svgElement.style.cursor = 'pointer';
 
-        // Store reference to SVG element
-        ship.svgElement = group;
-
-        this.svg.appendChild(group);
+        this.svg.appendChild(svgElement);
     }
 
     clearAllShotsFromDrawing() {
@@ -148,11 +158,27 @@ export class BattleProcessor {
     }
 
     clearDestroyedShipsFromDrawing() {
-        // Remove ships marked for removal from previous hit
-        this.destroyedShipsIds.forEach(shipId => {
-            this.removeShipFromDrawing(shipId);
-        });
-        this.destroyedShipsIds.clear();
+        for (const ship of this.destroyedShips) {
+            ship.destroyed = true;
+
+            // Find the ship's group and notify
+            const group = this.battle.side_a.findShipGroup(ship)
+                || this.battle.side_b.findShipGroup(ship);
+
+            if (group) {
+                // Find the fleet to call notifyDestroyed
+                const fleet = this.battle.side_a.findShipGroup(ship)
+                    ? this.battle.side_a
+                    : this.battle.side_b;
+                fleet.notifyDestroyed(ship);
+
+                // Remove group SVG if amount is 0
+                if (group.amount === 0 && group.svgElement) {
+                    group.svgElement.remove();
+                }
+            }
+        }
+        this.destroyedShips = [];
     }
 
 
@@ -177,7 +203,7 @@ export class BattleProcessor {
         this.svg.appendChild(shot.svgElement);
 
         if ( shot.result ) {
-            this.destroyedShipsIds.add(shot.destinationShip.id)
+            this.destroyedShips.push(shot.destinationShip);
         }
 
         return true;
@@ -215,13 +241,6 @@ export class BattleProcessor {
             this.isAutoPlaying = false;
             document.getElementById('shot-button').disabled = false;
             document.getElementById('auto-button').disabled = false;
-        }
-    }
-
-    removeShipFromDrawing(shipId) {
-        const foundShip = this.battle.findShip(shipId)
-        if (foundShip && foundShip.svgElement) {
-            foundShip.svgElement.remove();
         }
     }
 

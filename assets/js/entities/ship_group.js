@@ -1,4 +1,7 @@
 import { Ship } from './ship.js';
+import { ShipDraw } from '../ship_draw.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export class ShipGroup {
     /**
@@ -18,6 +21,55 @@ export class ShipGroup {
      * @type {Ship[]}
      */
     shipList = [];
+
+    /**
+     * X coordinate for rendering (not received from API)
+     * @type {number}
+     */
+    battleX = 0;
+
+    /**
+     * Y coordinate for rendering (not received from API)
+     * @type {number}
+     */
+    battleY = 0;
+
+    /**
+     * @type {null|SVGElement}
+     */
+    svgElement = null;
+
+    /**
+     * Creates SVG for the ship group with name and amount label
+     * @param {string} color - Ship color
+     * @param {string} side - Side ('a' or 'b')
+     * @return {SVGElement}
+     */
+    createGroupSvg(color, side) {
+        const group = document.createElementNS(SVG_NS, 'g');
+        group.setAttribute('class', 'ship-group');
+
+        const x = this.battleX;
+        const y = this.battleY;
+
+        // Add label above ship
+        const label = document.createElementNS(SVG_NS, 'text');
+        label.setAttribute('x', x);
+        label.setAttribute('y', y - 10);
+        label.setAttribute('fill', color);
+        label.setAttribute('font-size', '12');
+        label.textContent = `${this.ship.name} [${this.amount}]`;
+        group.appendChild(label);
+
+        // Draw ship using ShipDraw
+        const shipDraw = new ShipDraw(3, color, 'yellow');
+        const dp = this.ship.buildDrawParams();
+        const rotation = side === 'b' ? 180 : 0;
+        shipDraw.drawShipRaw(group, x, y, dp.drawMass, dp.drawSpeed, dp.drawGuns, dp.drawAttack, dp.drawDefence, rotation);
+
+        this.svgElement = group;
+        return group;
+    }
 
     /**
      * Groups ships by their tech key

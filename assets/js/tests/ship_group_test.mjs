@@ -44,6 +44,12 @@ const ship3 = createShip('s3', 10, 2, 3, 4, 5, 6);
 const diffTechResult = ShipGroup.groupShips([ship1, ship3]);
 TestRunner.assertEquals(diffTechResult.length, 2, 'two ships with different tech return two groups');
 
+// Test: shipList contains references, not copies
+const shipRef = createShip('ref1', 1, 1, 1, 1, 1, 1);
+const refResult = ShipGroup.groupShips([shipRef]);
+shipRef.destroyed = true;
+TestRunner.assertEquals(refResult[0].shipList[0].destroyed, true, 'shipList contains references, not copies');
+
 // Print results
 const success = TestRunner.printResults();
 process.exit(success ? 0 : 1);
