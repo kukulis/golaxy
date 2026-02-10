@@ -9,27 +9,53 @@
 <body>
     <div id="game-container">
         <h1>Galaktika</h1>
-        <div id="game-board">
-            <svg id="galaxy" width="800" height="600"></svg>
+
+        <!-- Main Menu -->
+        <div id="main-menu">
+            <button id="open-battle">Open Battle</button>
         </div>
-        <div id="controls">
-            <button id="new-game">New Game</button>
-            <button id="shot-button">Shot</button>
-            <button id="auto-button">Auto</button>
+
+        <!-- Battle View (hidden by default) -->
+        <div id="battle-view" style="display: none;">
+            <div id="game-board">
+                <svg id="galaxy" width="800" height="600"></svg>
+            </div>
+            <div id="controls">
+                <button id="new-game">New Game</button>
+                <button id="shot-button">Shot</button>
+                <button id="auto-button">Auto</button>
+                <button id="close-battle">Close Battle</button>
+            </div>
         </div>
     </div>
 <script type="module">
     import { BattleProcessor } from '/assets/js/battle_processor.js';
     import { ApiClient } from '/assets/js/api.js';
 
-    // Initialize game when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
-        let svg = document.getElementById('galaxy');
-        let apiClient = new ApiClient();
+        const mainMenu = document.getElementById('main-menu');
+        const battleView = document.getElementById('battle-view');
+        const svg = document.getElementById('galaxy');
+        const apiClient = new ApiClient();
 
-        const battleProcessor = new BattleProcessor(apiClient, svg);
+        let battleProcessor = null;
 
-        battleProcessor.init();
+        document.getElementById('open-battle').addEventListener('click', () => {
+            mainMenu.style.display = 'none';
+            battleView.style.display = 'block';
+
+            if (!battleProcessor) {
+                battleProcessor = new BattleProcessor(apiClient, svg);
+                battleProcessor.init();
+            } else {
+                battleProcessor.newGame();
+            }
+        });
+
+        document.getElementById('close-battle').addEventListener('click', () => {
+            battleView.style.display = 'none';
+            mainMenu.style.display = 'block';
+        });
     });
 </script>
 
