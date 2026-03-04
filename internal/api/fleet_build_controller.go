@@ -22,6 +22,14 @@ func NewFleetBuildController(
 	}
 }
 
+// GetFleetBuild godoc
+// @Summary Get a fleet build by ID
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {object} galaxy.FleetBuild
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id} [get]
 func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 	id := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(id)
@@ -32,10 +40,25 @@ func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, fleetBuild)
 }
 
+// GetAllFleetBuilds godoc
+// @Summary List all fleet builds
+// @Tags fleet-builds
+// @Produce json
+// @Success 200 {array} galaxy.FleetBuild
+// @Router /fleet-builds [get]
 func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
 	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll())
 }
 
+// CreateFleetBuild godoc
+// @Summary Create a fleet build
+// @Tags fleet-builds
+// @Accept json
+// @Produce json
+// @Param fleetBuild body galaxy.FleetBuild true "FleetBuild data"
+// @Success 201 {object} galaxy.FleetBuild
+// @Failure 400 {object} map[string]string
+// @Router /fleet-builds [post]
 func (controller *FleetBuildController) CreateFleetBuild(c *gin.Context) {
 	var fleetBuild galaxy.FleetBuild
 	if err := c.ShouldBindJSON(&fleetBuild); err != nil {
@@ -46,6 +69,17 @@ func (controller *FleetBuildController) CreateFleetBuild(c *gin.Context) {
 	c.JSON(http.StatusCreated, fleetBuild)
 }
 
+// UpdateFleetBuild godoc
+// @Summary Update a fleet build
+// @Tags fleet-builds
+// @Accept json
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param fleetBuild body galaxy.FleetBuild true "FleetBuild data"
+// @Success 200 {object} galaxy.FleetBuild
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id} [put]
 func (controller *FleetBuildController) UpdateFleetBuild(c *gin.Context) {
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
@@ -65,6 +99,14 @@ func (controller *FleetBuildController) UpdateFleetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, fleetBuild)
 }
 
+// DeleteFleetBuild godoc
+// @Summary Delete a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id} [delete]
 func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
@@ -77,6 +119,14 @@ func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "FleetBuild deleted successfully"})
 }
 
+// GetAssignedShipModels godoc
+// @Summary List ship models assigned to a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {array} galaxy.FleetBuildToShipModel
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/ship-models [get]
 func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
@@ -89,6 +139,18 @@ func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	c.JSON(http.StatusOK, assignedModels)
 }
 
+// AssignShipModel godoc
+// @Summary Assign a ship model to a fleet build
+// @Tags fleet-builds
+// @Accept json
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param assignment body galaxy.FleetBuildToShipModel true "Assignment data"
+// @Success 201 {object} galaxy.FleetBuildToShipModel
+// @Success 200 {object} galaxy.FleetBuildToShipModel
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/ship-models [post]
 func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
 	fleetBuildId := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -114,6 +176,15 @@ func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
 	}
 }
 
+// UnassignShipModel godoc
+// @Summary Unassign a ship model from a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param shipModelId path string true "ShipModel ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/ship-models/{shipModelId} [delete]
 func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 	fleetBuildId := c.Param("id")
 	shipModelId := c.Param("shipModelId")

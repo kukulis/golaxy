@@ -1,0 +1,648 @@
+basePath: /api
+definitions:
+  galaxy.Battle:
+    properties:
+      id:
+        type: string
+      post_side_a:
+        $ref: '#/definitions/galaxy.Fleet'
+      post_side_b:
+        $ref: '#/definitions/galaxy.Fleet'
+      shots:
+        items:
+          $ref: '#/definitions/galaxy.Shot'
+        type: array
+      side_a:
+        $ref: '#/definitions/galaxy.Fleet'
+      side_b:
+        $ref: '#/definitions/galaxy.Fleet'
+    type: object
+  galaxy.Division:
+    properties:
+      id:
+        type: string
+      resources_amount:
+        type: integer
+      tech_attack:
+        type: integer
+      tech_cargo:
+        type: integer
+      tech_defense:
+        type: integer
+      tech_engines:
+        type: integer
+    type: object
+  galaxy.Fleet:
+    properties:
+      id:
+        type: string
+      owner:
+        description: owner race id
+        type: string
+      ships:
+        items:
+          $ref: '#/definitions/galaxy.Ship'
+        type: array
+    type: object
+  galaxy.FleetBuild:
+    properties:
+      assignedShipModels:
+        items:
+          $ref: '#/definitions/galaxy.ShipModelAssignment'
+        type: array
+      attack_resources:
+        type: number
+      cargo_resources:
+        type: number
+      defense_resources:
+        type: number
+      division_id:
+        type: string
+      engine_resources:
+        type: number
+      id:
+        description: stored to DB
+        type: string
+      race_id:
+        type: string
+      usedResources:
+        format: float64
+        type: number
+    type: object
+  galaxy.FleetBuildToShipModel:
+    properties:
+      amount:
+        type: integer
+      fleet_build_id:
+        type: string
+      result_mass:
+        type: number
+      ship_model_id:
+        type: string
+      shipModel:
+        allOf:
+        - $ref: '#/definitions/galaxy.ShipModel'
+        description: not stored to DB directly
+    type: object
+  galaxy.Ship:
+    properties:
+      destroyed:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      owner:
+        description: race owner id
+        type: string
+      tech:
+        $ref: '#/definitions/galaxy.ShipTech'
+      version_id:
+        type: string
+    type: object
+  galaxy.ShipModel:
+    properties:
+      cargo_mass:
+        type: number
+      defense_mass:
+        type: number
+      engine_mass:
+        type: number
+      guns:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      one_gun_mass:
+        type: number
+      owner_id:
+        type: string
+    type: object
+  galaxy.ShipModelAssignment:
+    properties:
+      amount:
+        type: integer
+      shipModel:
+        $ref: '#/definitions/galaxy.ShipModel'
+    type: object
+  galaxy.ShipTech:
+    properties:
+      attack:
+        type: number
+      cargo_capacity:
+        type: number
+      defense:
+        type: number
+      guns:
+        type: integer
+      mass:
+        type: number
+      speed:
+        type: number
+    type: object
+  galaxy.Shot:
+    properties:
+      destination:
+        type: string
+      result:
+        type: boolean
+      source:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for Galaktika galaxy game
+  title: Galaktika API
+  version: "1.0"
+paths:
+  /battle:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.Battle'
+      summary: Get battle
+      tags:
+      - battles
+  /divisions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/galaxy.Division'
+            type: array
+      summary: List all divisions
+      tags:
+      - divisions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Division data
+        in: body
+        name: division
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.Division'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/galaxy.Division'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a division
+      tags:
+      - divisions
+  /divisions/{id}:
+    delete:
+      parameters:
+      - description: Division ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a division
+      tags:
+      - divisions
+    get:
+      parameters:
+      - description: Division ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.Division'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a division by ID
+      tags:
+      - divisions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Division ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Division data
+        in: body
+        name: division
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.Division'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.Division'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a division
+      tags:
+      - divisions
+  /fleet-builds:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/galaxy.FleetBuild'
+            type: array
+      summary: List all fleet builds
+      tags:
+      - fleet-builds
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: FleetBuild data
+        in: body
+        name: fleetBuild
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.FleetBuild'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/galaxy.FleetBuild'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a fleet build
+      tags:
+      - fleet-builds
+  /fleet-builds/{id}:
+    delete:
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a fleet build
+      tags:
+      - fleet-builds
+    get:
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.FleetBuild'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a fleet build by ID
+      tags:
+      - fleet-builds
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: FleetBuild data
+        in: body
+        name: fleetBuild
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.FleetBuild'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.FleetBuild'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a fleet build
+      tags:
+      - fleet-builds
+  /fleet-builds/{id}/ship-models:
+    get:
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/galaxy.FleetBuildToShipModel'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List ship models assigned to a fleet build
+      tags:
+      - fleet-builds
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Assignment data
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.FleetBuildToShipModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.FleetBuildToShipModel'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/galaxy.FleetBuildToShipModel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assign a ship model to a fleet build
+      tags:
+      - fleet-builds
+  /fleet-builds/{id}/ship-models/{shipModelId}:
+    delete:
+      parameters:
+      - description: FleetBuild ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ShipModel ID
+        in: path
+        name: shipModelId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unassign a ship model from a fleet build
+      tags:
+      - fleet-builds
+  /ship-models:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/galaxy.ShipModel'
+            type: array
+      summary: List all ship models
+      tags:
+      - ship-models
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ShipModel data
+        in: body
+        name: shipModel
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.ShipModel'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/galaxy.ShipModel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a ship model
+      tags:
+      - ship-models
+  /ship-models/{id}:
+    delete:
+      parameters:
+      - description: ShipModel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a ship model
+      tags:
+      - ship-models
+    get:
+      parameters:
+      - description: ShipModel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.ShipModel'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a ship model by ID
+      tags:
+      - ship-models
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ShipModel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ShipModel data
+        in: body
+        name: shipModel
+        required: true
+        schema:
+          $ref: '#/definitions/galaxy.ShipModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/galaxy.ShipModel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a ship model
+      tags:
+      - ship-models
+swagger: "2.0"

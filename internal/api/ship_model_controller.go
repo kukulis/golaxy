@@ -15,6 +15,14 @@ func NewShipModelController(repository *dao.ShipModelRepository) *ShipModelContr
 	return &ShipModelController{shipModelRepository: repository}
 }
 
+// GetShipModel godoc
+// @Summary Get a ship model by ID
+// @Tags ship-models
+// @Produce json
+// @Param id path string true "ShipModel ID"
+// @Success 200 {object} galaxy.ShipModel
+// @Failure 404 {object} map[string]string
+// @Router /ship-models/{id} [get]
 func (controller *ShipModelController) GetShipModel(c *gin.Context) {
 	id := c.Param("id")
 	shipModel := controller.shipModelRepository.Get(id)
@@ -25,10 +33,25 @@ func (controller *ShipModelController) GetShipModel(c *gin.Context) {
 	c.JSON(http.StatusOK, shipModel)
 }
 
+// GetAllShipModels godoc
+// @Summary List all ship models
+// @Tags ship-models
+// @Produce json
+// @Success 200 {array} galaxy.ShipModel
+// @Router /ship-models [get]
 func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll())
 }
 
+// CreateShipModel godoc
+// @Summary Create a ship model
+// @Tags ship-models
+// @Accept json
+// @Produce json
+// @Param shipModel body galaxy.ShipModel true "ShipModel data"
+// @Success 201 {object} galaxy.ShipModel
+// @Failure 400 {object} map[string]string
+// @Router /ship-models [post]
 func (controller *ShipModelController) CreateShipModel(c *gin.Context) {
 	var shipModel galaxy.ShipModel
 	if err := c.ShouldBindJSON(&shipModel); err != nil {
@@ -39,6 +62,17 @@ func (controller *ShipModelController) CreateShipModel(c *gin.Context) {
 	c.JSON(http.StatusCreated, shipModel)
 }
 
+// UpdateShipModel godoc
+// @Summary Update a ship model
+// @Tags ship-models
+// @Accept json
+// @Produce json
+// @Param id path string true "ShipModel ID"
+// @Param shipModel body galaxy.ShipModel true "ShipModel data"
+// @Success 200 {object} galaxy.ShipModel
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /ship-models/{id} [put]
 func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
 	id := c.Param("id")
 	existing := controller.shipModelRepository.Get(id)
@@ -58,6 +92,14 @@ func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
 	c.JSON(http.StatusOK, shipModel)
 }
 
+// DeleteShipModel godoc
+// @Summary Delete a ship model
+// @Tags ship-models
+// @Produce json
+// @Param id path string true "ShipModel ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /ship-models/{id} [delete]
 func (controller *ShipModelController) DeleteShipModel(c *gin.Context) {
 	id := c.Param("id")
 	existing := controller.shipModelRepository.Get(id)
