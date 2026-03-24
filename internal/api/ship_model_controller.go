@@ -92,6 +92,33 @@ func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
 	c.JSON(http.StatusOK, shipModel)
 }
 
+// CalculateShipTech godoc
+// @Summary Calculate ship tech for a ship model
+// @Tags ship-models
+// @Accept json
+// @Produce json
+// @Param id path string true "ShipModel ID"
+// @Param technologies body galaxy.Technologies true "Technologies data"
+// @Success 200 {object} galaxy.ShipTech
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /ship-models/{id}/calculate-ship-tech [post]
+func (controller *ShipModelController) CalculateShipTech(c *gin.Context) {
+	id := c.Param("id")
+	shipModel := controller.shipModelRepository.Get(id)
+	if shipModel == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel not found"})
+		return
+	}
+	var tech galaxy.Technologies
+	if err := c.ShouldBindJSON(&tech); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	shipTech := shipModel.CalculateShipTech(&tech)
+	c.JSON(http.StatusOK, shipTech)
+}
+
 // DeleteShipModel godoc
 // @Summary Delete a ship model
 // @Tags ship-models

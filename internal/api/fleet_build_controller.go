@@ -10,15 +10,18 @@ import (
 type FleetBuildController struct {
 	fleetBuildRepository *dao.FleetBuildRepository
 	shipModelRepository  *dao.ShipModelRepository
+	divisionRepository   *dao.DivisionRepository
 }
 
 func NewFleetBuildController(
 	fleetBuildRepository *dao.FleetBuildRepository,
 	shipModelRepository *dao.ShipModelRepository,
+	divisionRepository *dao.DivisionRepository,
 ) *FleetBuildController {
 	return &FleetBuildController{
 		fleetBuildRepository: fleetBuildRepository,
 		shipModelRepository:  shipModelRepository,
+		divisionRepository:   divisionRepository,
 	}
 }
 
@@ -63,6 +66,10 @@ func (controller *FleetBuildController) CreateFleetBuild(c *gin.Context) {
 	var fleetBuild galaxy.FleetBuild
 	if err := c.ShouldBindJSON(&fleetBuild); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if controller.divisionRepository.Get(fleetBuild.DivisionId) == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Division not found"})
 		return
 	}
 	controller.fleetBuildRepository.Upsert(&fleetBuild)
@@ -204,7 +211,54 @@ func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ShipModel unassigned successfully"})
 }
 
-// TODO
+// GetStatistics godoc
+// @Summary Get fleet build statistics
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {object} galaxy.FleetBuildStatistics
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/statistics [get]
+func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
+	fleetBuildId := c.Param("id")
+
+	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	division := controller.divisionRepository.Get(fleetBuild.DivisionId)
+	if division == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Division not found"})
+		return
+	}
+
+	assignments := controller.fleetBuildRepository.FindAssignedShipModels(fleetBuildId)
+	fleetBuild.AssignedShipModels = make([]galaxy.ShipModelAssignment, 0, len(assignments))
+	for _, a := range assignments {
+		shipModel := controller.shipModelRepository.Get(a.ShipModelID)
+		if shipModel != nil {
+			fleetBuild.AssignedShipModels = append(fleetBuild.AssignedShipModels, galaxy.ShipModelAssignment{
+				ShipModel: *shipModel,
+				Amount:    a.Amount,
+			})
+		}
+	}
+
+	statistics := fleetBuild.CalculateStatistics(division.ResourcesAmount)
+	c.JSON(http.StatusOK, statistics)
+}
+
+// CalculateShipTech godoc
+// @Summary Calculate ship tech for a ship model assigned to a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param shipModelId path string true "ShipModel ID"
+// @Success 200 {object} galaxy.ShipTech
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/ship-models/{shipModelId}/calculate-ship-tech [get]
 func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 	fleetBuildId := c.Param("id")
 	shipModelId := c.Param("shipModelId")
@@ -215,17 +269,18 @@ func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 		return
 	}
 
-	//build2shipModel := controller.fleetBuildRepository.FindAssignedShipModel(fleetBuildId, shipModelId)
-	//build2shipModel.ShipModel = controller.shipModelRepository.Get(build2shipModel.ShipModelID)
+	assignment := controller.fleetBuildRepository.FindAssignedShipModel(fleetBuildId, shipModelId)
+	if assignment == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel is not assigned to this FleetBuild"})
+		return
+	}
 
 	shipModel := controller.shipModelRepository.Get(shipModelId)
-
 	if shipModel == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel not found"})
 		return
 	}
 
 	shipTech := fleetBuild.CalculateShipTech(shipModel)
-
 	c.JSON(http.StatusOK, shipTech)
 }

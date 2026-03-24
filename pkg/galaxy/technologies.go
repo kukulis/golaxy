@@ -3,10 +3,10 @@ package galaxy
 const ONE_TECH_RESOURCES = 100
 
 type Technologies struct {
-	Attack  float64
-	Defense float64
-	Engine  float64
-	Cargo   float64
+	Attack  float64 `json:"attack"`
+	Defense float64 `json:"defense"`
+	Engine  float64 `json:"engine"`
+	Cargo   float64 `json:"cargo"`
 }
 
 func NewTechnologies() *Technologies {

@@ -8,11 +8,23 @@ import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
+func createDivision(t *testing.T, baseURL string, id string) {
+	t.Helper()
+	resp, err := makeRequest("POST", baseURL+"/divisions", map[string]interface{}{"id": id, "name": id})
+	if err != nil {
+		t.Fatalf("Failed to create division %s: %v", id, err)
+	}
+	_ = resp.Body.Close()
+}
+
 func TestFleetBuildEndpoints(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
 	baseURL := server.URL + "/api"
+
+	createDivision(t, baseURL, "div1")
+	createDivision(t, baseURL, "div2")
 
 	tests := []struct {
 		name           string
@@ -219,6 +231,10 @@ func TestFleetBuildEndpoints_CreateMultiple(t *testing.T) {
 	defer server.Close()
 	baseURL := server.URL + "/api"
 
+	createDivision(t, baseURL, "div1")
+	createDivision(t, baseURL, "div2")
+	createDivision(t, baseURL, "div3")
+
 	// Create multiple fleet-builds
 	fleetBuilds := []map[string]interface{}{
 		{"id": "fb1", "division_id": "div1", "race_id": "race1", "attack_resources": 100.0, "defense_resources": 200.0, "engine_resources": 150.0, "cargo_resources": 50.0},
@@ -265,6 +281,8 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 	defer server.Close()
 
 	baseURL := server.URL + "/api"
+
+	createDivision(t, baseURL, "div1")
 
 	// First test: verify 404 when fleet-build doesn't exist
 	resp, _ := makeRequest("GET", baseURL+"/fleet-builds/fb1/ship-models", nil)

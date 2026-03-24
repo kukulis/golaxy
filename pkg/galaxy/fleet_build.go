@@ -7,6 +7,41 @@ type ShipModelAssignment struct {
 	Amount    int
 }
 
+type FleetBuildStatistics struct {
+	MaxResources                 int `json:"max_resources"`
+	UsedResources                int `json:"used_resources"`
+	UsedResourcesForShips        int `json:"used_resources_for_ships"`
+	UsedResourcesForTechnologies int `json:"used_resources_for_technologies"`
+	RemainingResources           int `json:"remaining_resources"`
+	ExceedingResources           int `json:"exceeding_resources"`
+}
+
+func (fleetBuild *FleetBuild) CalculateStatistics(maxResources int) FleetBuildStatistics {
+	usedForShips := 0
+	for _, assignment := range fleetBuild.AssignedShipModels {
+		usedForShips += int(assignment.ShipModel.CalculateTotalMass()) * assignment.Amount
+	}
+
+	usedForTech := int(fleetBuild.AttackResources + fleetBuild.DefenseResources + fleetBuild.EngineResources + fleetBuild.CargoResources)
+
+	usedResources := usedForShips + usedForTech
+	remaining := maxResources - usedResources
+	exceeding := 0
+	if remaining < 0 {
+		exceeding = -remaining
+		remaining = 0
+	}
+
+	return FleetBuildStatistics{
+		MaxResources:                 maxResources,
+		UsedResources:                usedResources,
+		UsedResourcesForShips:        usedForShips,
+		UsedResourcesForTechnologies: usedForTech,
+		RemainingResources:           remaining,
+		ExceedingResources:           exceeding,
+	}
+}
+
 // FleetBuild consists of some ship models and some resources spent on technologies research.
 type FleetBuild struct {
 	// stored to DB

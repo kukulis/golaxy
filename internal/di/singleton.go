@@ -34,7 +34,7 @@ func CreateSingletons(env string) {
 	// Controllers are environment-agnostic
 	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)
-	FleetBuildControllerInstance = api.NewFleetBuildController(FleetBuildRepositoryInstance, ShipModelRepositoryInstance)
+	FleetBuildControllerInstance = api.NewFleetBuildController(FleetBuildRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
 	ShipModelControllerInstance = api.NewShipModelController(ShipModelRepositoryInstance)
 }
 
