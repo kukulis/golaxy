@@ -22,3 +22,4 @@ User id is not provided in the request. User id will be loaded by authorization 
 9) build fleet of the given fleet build id, and upsert division+user -> fleet.
 10) Get fleet by the given division id + user id 
  
+TODO tests for all endpoints.
