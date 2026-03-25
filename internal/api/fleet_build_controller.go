@@ -1,27 +1,35 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
 	"net/http"
 )
 
 type FleetBuildController struct {
-	fleetBuildRepository *dao.FleetBuildRepository
-	shipModelRepository  *dao.ShipModelRepository
-	divisionRepository   *dao.DivisionRepository
+	authenticationManager AuthenticationManager
+	fleetBuildRepository  *dao.FleetBuildRepository
+	fleetRepository       *dao.FleetRepository
+	shipModelRepository   *dao.ShipModelRepository
+	divisionRepository    *dao.DivisionRepository
 }
 
 func NewFleetBuildController(
+	authenticationManager AuthenticationManager,
 	fleetBuildRepository *dao.FleetBuildRepository,
+	fleetRepository *dao.FleetRepository,
 	shipModelRepository *dao.ShipModelRepository,
 	divisionRepository *dao.DivisionRepository,
 ) *FleetBuildController {
 	return &FleetBuildController{
-		fleetBuildRepository: fleetBuildRepository,
-		shipModelRepository:  shipModelRepository,
-		divisionRepository:   divisionRepository,
+		authenticationManager: authenticationManager,
+		fleetBuildRepository:  fleetBuildRepository,
+		fleetRepository:       fleetRepository,
+		shipModelRepository:   shipModelRepository,
+		divisionRepository:    divisionRepository,
 	}
 }
 
@@ -248,6 +256,103 @@ func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
 
 	statistics := fleetBuild.CalculateStatistics(division.ResourcesAmount)
 	c.JSON(http.StatusOK, statistics)
+}
+
+// Build godoc
+// @Summary Build a fleet from a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/build [post]
+func (controller *FleetBuildController) Build(c *gin.Context) {
+	token := c.GetHeader("token")
+	if !controller.authenticationManager.TokenValid(token) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+	userId := controller.authenticationManager.Authenticate(token)
+
+	fleetBuildId := c.Param("id")
+	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	assignments := controller.fleetBuildRepository.FindAssignedShipModels(fleetBuildId)
+	var ships []*galaxy.Ship
+	for _, a := range assignments {
+		shipModel := controller.shipModelRepository.Get(a.ShipModelID)
+		if shipModel == nil {
+			continue
+		}
+		shipTech := fleetBuild.CalculateShipTech(shipModel)
+		for i := 0; i < a.Amount; i++ {
+			ship := &galaxy.Ship{
+				ID:    uuid.New().String(),
+				Name:  shipModel.Name,
+				Tech:  shipTech,
+				Owner: userId,
+			}
+			ships = append(ships, ship)
+		}
+	}
+
+	fleet := galaxy.NewFleet(ships)
+	fleet.ID = uuid.New().String()
+	fleet.Owner = userId
+	fmt.Printf("Built fleet %s for user %s with %d ships\n", fleet.ID, userId, len(ships))
+
+	controller.fleetRepository.Upsert(fleet)
+	controller.fleetRepository.UpsertDivisionFleet(&galaxy.DivisionFleet{
+		DivisionId: fleetBuild.DivisionId,
+		UserId:     userId,
+		FleetId:    fleet.ID,
+	})
+
+	c.JSON(http.StatusOK, fleet)
+}
+
+// GetFleet godoc
+// @Summary Get fleet for a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param token header string true "Authentication token"
+// @Success 200 {object} galaxy.Fleet
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/fleet [get]
+func (controller *FleetBuildController) GetFleet(c *gin.Context) {
+	token := c.GetHeader("token")
+	if !controller.authenticationManager.TokenValid(token) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+	userId := controller.authenticationManager.Authenticate(token)
+
+	fleetBuildId := c.Param("id")
+	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	divisionFleet := controller.fleetRepository.GetDivisionFleet(fleetBuild.DivisionId, userId)
+	if divisionFleet == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Fleet not found"})
+		return
+	}
+
+	fleet := controller.fleetRepository.Get(divisionFleet.FleetId)
+	if fleet == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Fleet not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, fleet)
 }
 
 // CalculateShipTech godoc

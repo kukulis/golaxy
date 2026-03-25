@@ -20,6 +20,8 @@ func RegisterRoutes(apiRoute *gin.RouterGroup) {
 	apiRoute.GET("/fleet-builds/:id/ship-models", func(c *gin.Context) { FleetBuildControllerInstance.GetAssignedShipModels(c) })
 	apiRoute.POST("/fleet-builds/:id/ship-models", func(c *gin.Context) { FleetBuildControllerInstance.AssignShipModel(c) })
 	apiRoute.DELETE("/fleet-builds/:id/ship-models/:shipModelId", func(c *gin.Context) { FleetBuildControllerInstance.UnassignShipModel(c) })
+	apiRoute.POST("/fleet-builds/:id/build", func(c *gin.Context) { FleetBuildControllerInstance.Build(c) })
+	apiRoute.GET("/fleet-builds/:id/fleet", func(c *gin.Context) { FleetBuildControllerInstance.GetFleet(c) })
 	apiRoute.GET("/fleet-builds/:id/ship-models/:shipModelId/calculate-ship-tech", func(c *gin.Context) { FleetBuildControllerInstance.CalculateShipTech(c) })
 
 	apiRoute.GET("/ship-models", func(c *gin.Context) { ShipModelControllerInstance.GetAllShipModels(c) })

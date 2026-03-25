@@ -5,12 +5,14 @@ import (
 	"glaktika.eu/galaktika/internal/dao"
 )
 
+var AuthenticationManagerInstance api.AuthenticationManager
 var BattleRepositoryInstance *dao.BattleRepository
 var BattleControllerInstance *api.BattleController
 var DivisionRepositoryInstance *dao.DivisionRepository
 var DivisionControllerInstance *api.DivisionController
 var FleetBuildRepositoryInstance *dao.FleetBuildRepository
 var FleetBuildControllerInstance *api.FleetBuildController
+var FleetRepositoryInstance *dao.FleetRepository
 var ShipModelRepositoryInstance *dao.ShipModelRepository
 var ShipModelControllerInstance *api.ShipModelController
 
@@ -19,10 +21,16 @@ func CreateSingletons(env string) {
 	// Currently only in-memory repos are implemented
 	switch env {
 	case "test", "dev":
+		AuthenticationManagerInstance = api.NewMemoryAuthenticationManager()
 		BattleRepositoryInstance = dao.NewBattleRepository()
 		DivisionRepositoryInstance = dao.NewDivisionRepository()
 		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
+		FleetRepositoryInstance = dao.NewFleetRepository()
 		ShipModelRepositoryInstance = dao.NewShipModelRepository()
+
+		AuthenticationManagerInstance.AddToken("user1", "user1")
+		AuthenticationManagerInstance.AddToken("user2", "user2")
+
 	case "prod":
 		// Future: DB-backed repositories
 		// Example: DivisionRepositoryInstance = dao.NewDBDivisionRepository(dbConn)
@@ -34,7 +42,7 @@ func CreateSingletons(env string) {
 	// Controllers are environment-agnostic
 	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)
-	FleetBuildControllerInstance = api.NewFleetBuildController(FleetBuildRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
+	FleetBuildControllerInstance = api.NewFleetBuildController(AuthenticationManagerInstance, FleetBuildRepositoryInstance, FleetRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
 	ShipModelControllerInstance = api.NewShipModelController(ShipModelRepositoryInstance)
 }
 
