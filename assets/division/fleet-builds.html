@@ -44,8 +44,7 @@
 
     const api = new ApiClient();
     try {
-        const all = await api.getFleetBuilds();
-        const builds = all.filter(b => b.division_id === divisionId);
+        const builds = await api.getFleetBuilds(divisionId);
         const tbody = document.getElementById('fleet-builds-body');
         for (const b of builds) {
             const tr = document.createElement('tr');

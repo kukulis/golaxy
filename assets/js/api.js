@@ -48,8 +48,9 @@ export class ApiClient {
 
     // Fleet Builds
 
-    async getFleetBuilds() {
-        return this._request('GET', '/fleet-builds');
+    async getFleetBuilds(divisionId) {
+        const query = divisionId ? `?division_id=${encodeURIComponent(divisionId)}` : '';
+        return this._request('GET', `/fleet-builds${query}`);
     }
 
     async getFleetBuild(id) {
