@@ -1,6 +1,7 @@
 import { Battle } from './entities/battle.js';
 import { Division } from './entities/division.js';
 import { FleetBuild } from './entities/fleet_build.js';
+import { ShipModel } from './entities/ship_model.js';
 
 export class ApiClient {
 
@@ -87,11 +88,12 @@ export class ApiClient {
     // Ship Models
 
     async getShipModels() {
-        return this._request('GET', '/ship-models');
+        const data = await this._request('GET', '/ship-models');
+        return data.map(d => (new ShipModel()).updateFromDTO(d));
     }
 
     async getShipModel(id) {
-        return this._request('GET', `/ship-models/${id}`);
+        return (new ShipModel()).updateFromDTO(await this._request('GET', `/ship-models/${id}`));
     }
 
     async createShipModel(shipModel) {
