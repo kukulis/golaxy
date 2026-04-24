@@ -48,7 +48,7 @@
         const tbody = document.getElementById('fleet-builds-body');
         for (const b of builds) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${b.id}</td><td>${b.race_id ?? ''}</td>`;
+            tr.innerHTML = `<td><a href="/fleet-build/${b.id}/main.html">${b.id}</a></td><td>${b.race_id ?? ''}</td>`;
             tbody.appendChild(tr);
         }
         document.getElementById('fleet-builds-table').style.display = '';
