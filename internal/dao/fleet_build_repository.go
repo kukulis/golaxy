@@ -24,8 +24,15 @@ func (r *FleetBuildRepository) Get(id string) *galaxy.FleetBuild {
 	return r.fleetBuildMap[id]
 }
 
-func (r *FleetBuildRepository) GetAll() []*galaxy.FleetBuild {
+func (r *FleetBuildRepository) GetAll(divisionId, raceId string) []*galaxy.FleetBuild {
 	fleetBuilds := slices.Collect(maps.Values(r.fleetBuildMap))
+
+	if divisionId != "" {
+		fleetBuilds = util.ArrayFilter(fleetBuilds, func(b *galaxy.FleetBuild) bool { return b.DivisionId == divisionId })
+	}
+	if raceId != "" {
+		fleetBuilds = util.ArrayFilter(fleetBuilds, func(b *galaxy.FleetBuild) bool { return b.RaceId == raceId })
+	}
 
 	slices.SortFunc(fleetBuilds, func(a, b *galaxy.FleetBuild) int {
 		return strings.Compare(a.ID, b.ID)

@@ -7,7 +7,13 @@ import (
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
 	"net/http"
+	"strings"
 )
+
+func bearerToken(c *gin.Context) string {
+	header := c.GetHeader("Authorization")
+	return strings.TrimPrefix(header, "Bearer ")
+}
 
 type FleetBuildController struct {
 	authenticationManager AuthenticationManager
@@ -58,7 +64,17 @@ func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 // @Success 200 {array} galaxy.FleetBuild
 // @Router /fleet-builds [get]
 func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
-	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll())
+	divisionId := c.Query("division_id")
+
+	token := bearerToken(c)
+	race := controller.authenticationManager.Authenticate(token)
+
+	raceId := ""
+	if race != nil {
+		raceId = race.ID
+	}
+
+	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, raceId))
 }
 
 // CreateFleetBuild godoc
@@ -267,12 +283,12 @@ func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/build [post]
 func (controller *FleetBuildController) Build(c *gin.Context) {
-	token := c.GetHeader("token")
+	token := bearerToken(c)
 	if !controller.authenticationManager.TokenValid(token) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
-	userId := controller.authenticationManager.Authenticate(token)
+	race := controller.authenticationManager.Authenticate(token)
 
 	fleetBuildId := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -294,7 +310,7 @@ func (controller *FleetBuildController) Build(c *gin.Context) {
 				ID:    uuid.New().String(),
 				Name:  shipModel.Name,
 				Tech:  shipTech,
-				Owner: userId,
+				Owner: race.ID,
 			}
 			ships = append(ships, ship)
 		}
@@ -302,13 +318,13 @@ func (controller *FleetBuildController) Build(c *gin.Context) {
 
 	fleet := galaxy.NewFleet(ships)
 	fleet.ID = uuid.New().String()
-	fleet.Owner = userId
-	fmt.Printf("Built fleet %s for user %s with %d ships\n", fleet.ID, userId, len(ships))
+	fleet.Owner = race.ID
+	fmt.Printf("Built fleet %s for user %s with %d ships\n", fleet.ID, race.ID, len(ships))
 
 	controller.fleetRepository.Upsert(fleet)
 	controller.fleetRepository.UpsertDivisionFleet(&galaxy.DivisionFleet{
 		DivisionId: fleetBuild.DivisionId,
-		UserId:     userId,
+		UserId:     race.ID,
 		FleetId:    fleet.ID,
 	})
 
@@ -326,12 +342,12 @@ func (controller *FleetBuildController) Build(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/fleet [get]
 func (controller *FleetBuildController) GetFleet(c *gin.Context) {
-	token := c.GetHeader("token")
+	token := bearerToken(c)
 	if !controller.authenticationManager.TokenValid(token) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
-	userId := controller.authenticationManager.Authenticate(token)
+	race := controller.authenticationManager.Authenticate(token)
 
 	fleetBuildId := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -340,7 +356,7 @@ func (controller *FleetBuildController) GetFleet(c *gin.Context) {
 		return
 	}
 
-	divisionFleet := controller.fleetRepository.GetDivisionFleet(fleetBuild.DivisionId, userId)
+	divisionFleet := controller.fleetRepository.GetDivisionFleet(fleetBuild.DivisionId, race.ID)
 	if divisionFleet == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Fleet not found"})
 		return

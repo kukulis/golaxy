@@ -4,6 +4,8 @@ export class ApiClient {
 
     async _request(method, path, body) {
         const options = { method, headers: {} };
+        const token = localStorage.getItem('token');
+        if (token) options.headers['Authorization'] = `Bearer ${token}`;
         if (body !== undefined) {
             options.headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(body);

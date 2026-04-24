@@ -1,29 +1,32 @@
 package api
 
+import "glaktika.eu/galaktika/pkg/galaxy"
+
 type AuthenticationManager interface {
-	Authenticate(token string) string
+	Authenticate(token string) *galaxy.Race
 	TokenValid(token string) bool
-	AddToken(token string, userId string)
+	AddToken(token string, race *galaxy.Race)
 }
+
 type MemoryAuthenticationManager struct {
-	tokenToUserId map[string]string
+	tokenToRace map[string]*galaxy.Race
 }
 
 func NewMemoryAuthenticationManager() *MemoryAuthenticationManager {
 	return &MemoryAuthenticationManager{
-		tokenToUserId: make(map[string]string),
+		tokenToRace: make(map[string]*galaxy.Race),
 	}
 }
 
-func (am *MemoryAuthenticationManager) Authenticate(token string) string {
-	return am.tokenToUserId[token]
+func (am *MemoryAuthenticationManager) Authenticate(token string) *galaxy.Race {
+	return am.tokenToRace[token]
 }
 
 func (am *MemoryAuthenticationManager) TokenValid(token string) bool {
-	_, yes := am.tokenToUserId[token]
+	_, yes := am.tokenToRace[token]
 	return yes
 }
 
-func (am *MemoryAuthenticationManager) AddToken(token string, userId string) {
-	am.tokenToUserId[token] = userId
+func (am *MemoryAuthenticationManager) AddToken(token string, race *galaxy.Race) {
+	am.tokenToRace[token] = race
 }

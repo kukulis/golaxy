@@ -1,1 +1,63 @@
-TODO fleet builds list
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Fleet Builds</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        #fleet-builds-container { width: 100%; max-width: 600px; }
+        table { width: 100%; border-collapse: collapse; background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
+        th { background-color: #222; color: #4a9eff; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #222; }
+        #error-msg { color: #ff4a4a; }
+        a { color: #4a9eff; }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <h1 id="page-title"></h1>
+    <div id="fleet-builds-container">
+        <p id="error-msg" style="display:none"></p>
+        <table id="fleet-builds-table" style="display:none">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Race</th>
+            </tr>
+            </thead>
+            <tbody id="fleet-builds-body"></tbody>
+        </table>
+    </div>
+    <p><a id="back-link" href="#">Back</a></p>
+</div>
+<script type="module">
+    import '/assets/js/user-bar.js';
+    import {ApiClient} from '/assets/js/api.js';
+
+    const divisionId = location.pathname.split('/')[2];
+    document.getElementById('page-title').textContent = `Fleet Builds: ${divisionId}`;
+    document.getElementById('back-link').href = `/division/${divisionId}/main.html`;
+
+    const api = new ApiClient();
+    try {
+        const all = await api.getFleetBuilds();
+        const builds = all.filter(b => b.division_id === divisionId);
+        const tbody = document.getElementById('fleet-builds-body');
+        for (const b of builds) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${b.id}</td><td>${b.race_id ?? ''}</td>`;
+            tbody.appendChild(tr);
+        }
+        document.getElementById('fleet-builds-table').style.display = '';
+    } catch (e) {
+        const err = document.getElementById('error-msg');
+        err.textContent = e.message;
+        err.style.display = '';
+    }
+</script>
+</body>
+</html>

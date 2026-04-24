@@ -21,16 +21,12 @@ func CreateSingletons(env string) {
 	// Currently only in-memory repos are implemented
 	switch env {
 	case "test", "dev":
-		AuthenticationManagerInstance = api.NewMemoryAuthenticationManager()
+		AuthenticationManagerInstance = NewAuthenticationManager()
 		BattleRepositoryInstance = dao.NewBattleRepository()
 		DivisionRepositoryInstance = NewDivisionRepository()
-
-		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
+		FleetBuildRepositoryInstance = NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
 		ShipModelRepositoryInstance = dao.NewShipModelRepository()
-
-		AuthenticationManagerInstance.AddToken("user1", "user1")
-		AuthenticationManagerInstance.AddToken("user2", "user2")
 
 	case "prod":
 		// Future: DB-backed repositories
