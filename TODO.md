@@ -27,3 +27,10 @@ TODO tests for all endpoints.
 
 TODO refactor html files to generate html with pure js instead of modifying existing html with js. May be move js from html to separate js files.
 
+Remaining work:
+1) Assigning and unassigning shipModel to a FleetBuild
+2) CRUD for ShipModel
+3) CRUD for FleetBuild
+4) CRUD for divisions ( only for admin role )
+5) Build a fleet from a FleetBuild for a review.
+6) Run a battle between two races selected fleet builds. 
