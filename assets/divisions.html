@@ -69,9 +69,10 @@
             <tbody id="divisions-body"></tbody>
         </table>
     </div>
-    <p><a href="index.html">Back</a></p>
+    <p><a href="/">Back</a></p>
 </div>
 <script type="module">
+    import '/assets/js/user-bar.js';
     import {ApiClient} from '/assets/js/api.js';
 
     const api = new ApiClient();
@@ -80,7 +81,7 @@
         const tbody = document.getElementById('divisions-body');
         for (const d of divisions) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${d.id}</td>
+            tr.innerHTML = `<td><a href="/divisions/${d.id}" style="color:#4a9eff">${d.id}</a></td>
                 <td>${d.resources_amount}</td>
                 <td>${d.tech_attack}</td>
                 <td>${d.tech_defense}</td>

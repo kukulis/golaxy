@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Division</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+</head>
+<body>
+<div id="game-container">
+    <h1 id="division-title"></h1>
+    <p><a href="/divisions.html" style="color:#4a9eff">Back</a></p>
+</div>
+<script type="module">
+    import '/assets/js/user-bar.js';
+    const id = location.pathname.split('/').at(-1);
+    document.getElementById('division-title').textContent = `Division: ${id}`;
+</script>
+</body>
+</html>

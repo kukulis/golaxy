@@ -19,7 +19,9 @@ func main() {
 	// Serve static files from assets directory
 	router.Static("/assets", "./assets")
 	router.StaticFile("/", "./assets/index.html")
+	router.StaticFile("/dummy_login.html", "./assets/dummy_login.html")
 	router.StaticFile("/divisions.html", "./assets/divisions.html")
+	router.GET("/divisions/:id", func(c *gin.Context) { c.File("./assets/division/index.html") })
 	router.StaticFile("/test-ship-designs", "./assets/test_ship_designs.html")
 	router.StaticFile("/test-ship-group-designs", "./assets/test_ship_group_designs.html")
 

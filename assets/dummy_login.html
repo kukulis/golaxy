@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Login</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        table { width: 100%; max-width: 400px; border-collapse: collapse; background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
+        th { background-color: #222; color: #4a9eff; font-weight: bold; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #222; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <h1>Login</h1>
+    <table>
+        <thead><tr><th>Name</th><th>Race</th></tr></thead>
+        <tbody>
+            <tr data-name="Commander Rex" data-token="token-rex-001">
+                <td>Commander Rex</td><td>Human</td>
+            </tr>
+            <tr data-name="Admiral Zyx" data-token="token-zyx-002">
+                <td>Admiral Zyx</td><td>Zylonian</td>
+            </tr>
+            <tr data-name="Warlord Keth" data-token="token-keth-003">
+                <td>Warlord Keth</td><td>Ketharan</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+    document.querySelectorAll('tbody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+            localStorage.setItem('loginName', tr.dataset.name);
+            localStorage.setItem('token', tr.dataset.token);
+            window.location.href = '/';
+        });
+    });
+</script>
+</body>
+</html>
