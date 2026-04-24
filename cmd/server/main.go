@@ -16,16 +16,15 @@ import (
 func main() {
 	router := gin.Default()
 
-	// Serve static files from assets directory
 	router.Static("/assets", "./assets")
-	router.StaticFile("/", "./assets/index.html")
-	router.StaticFile("/dummy_login.html", "./assets/dummy_login.html")
-	router.StaticFile("/divisions.html", "./assets/divisions.html")
-	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { c.File("./assets/division/main.html") })
-	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./assets/division/fleet-builds.html") })
-	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./assets/division/fleet-build/main.html") })
-	router.StaticFile("/test-ship-designs", "./assets/test_ship_designs.html")
-	router.StaticFile("/test-ship-group-designs", "./assets/test_ship_group_designs.html")
+	router.StaticFile("/", "./pages/index.html")
+	router.StaticFile("/dummy_login.html", "./pages/dummy_login.html")
+	router.StaticFile("/divisions.html", "./pages/divisions.html")
+	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { c.File("./pages/division/main.html") })
+	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.html") })
+	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })
+	router.StaticFile("/test-ship-designs", "./pages/test_ship_designs.html")
+	router.StaticFile("/test-ship-group-designs", "./pages/test_ship_group_designs.html")
 
 	// Swagger UI
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
