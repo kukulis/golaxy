@@ -23,3 +23,7 @@ User id is not provided in the request. User id will be loaded by authorization 
 10) Get fleet by the given division id + user id 
  
 TODO tests for all endpoints.
+
+
+TODO refactor html files to generate html with pure js instead of modifying existing html with js. May be move js from html to separate js files.
+

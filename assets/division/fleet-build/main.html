@@ -19,45 +19,43 @@
 <body>
 <div id="game-container">
     <h1 id="page-title"></h1>
-    <div id="fleet-build-container">
-        <p id="error-msg" style="display:none"></p>
-        <table id="fleet-build-table" style="display:none">
-            <tbody>
-                <tr><th>ID</th><td id="fb-id"></td></tr>
-                <tr><th>Division</th><td id="fb-division"></td></tr>
-                <tr><th>Race</th><td id="fb-race"></td></tr>
-                <tr><th>Attack Resources</th><td id="fb-attack"></td></tr>
-                <tr><th>Defense Resources</th><td id="fb-defense"></td></tr>
-                <tr><th>Engine Resources</th><td id="fb-engine"></td></tr>
-                <tr><th>Cargo Resources</th><td id="fb-cargo"></td></tr>
-            </tbody>
-        </table>
-    </div>
+    <div id="fleet-build-container"></div>
     <p><a id="back-link" href="#">Back</a></p>
 </div>
 <script type="module">
     import '/assets/js/user-bar.js';
     import {ApiClient} from '/assets/js/api.js';
+    import {createDivisionTable} from '/assets/js/division_table.js';
+    import {createFleetBuildStatisticsTable} from '/assets/js/fleet_build_table.js';
 
     const buildId = location.pathname.split('/')[2];
     document.getElementById('page-title').textContent = `Fleet Build: ${buildId}`;
 
     const api = new ApiClient();
     try {
+        /** @var {FleetBuild} b */
         const b = await api.getFleetBuild(buildId);
-        document.getElementById('fb-id').textContent = b.id;
-        document.getElementById('fb-division').textContent = b.division_id;
-        document.getElementById('fb-race').textContent = b.race_id ?? '';
-        document.getElementById('fb-attack').textContent = b.attack_resources ?? 0;
-        document.getElementById('fb-defense').textContent = b.defense_resources ?? 0;
-        document.getElementById('fb-engine').textContent = b.engine_resources ?? 0;
-        document.getElementById('fb-cargo').textContent = b.cargo_resources ?? 0;
+        /** @var {Division} division */
+        const division = await api.getDivision(b.division_id);
+
+        const container = document.getElementById('fleet-build-container');
+
+        const fleetBuildTitle = document.createElement('h2');
+        fleetBuildTitle.appendChild(document.createTextNode('Fleet Build'));
+        container.appendChild(fleetBuildTitle);
+        container.appendChild(createFleetBuildStatisticsTable(b));
+
+        const divisionTitle = document.createElement('h2');
+        divisionTitle.appendChild(document.createTextNode('Division'));
+        container.appendChild(divisionTitle);
+        container.appendChild(createDivisionTable(division));
+
         document.getElementById('back-link').href = `/divisions/${b.division_id}/fleet-builds`;
-        document.getElementById('fleet-build-table').style.display = '';
     } catch (e) {
-        const err = document.getElementById('error-msg');
-        err.textContent = e.message;
-        err.style.display = '';
+        const err = document.createElement('p');
+        err.id = 'error-msg';
+        err.appendChild(document.createTextNode(e.message));
+        document.getElementById('fleet-build-container').appendChild(err);
     }
 </script>
 </body>

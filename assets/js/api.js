@@ -1,4 +1,6 @@
 import { Battle } from './entities/battle.js';
+import { Division } from './entities/division.js';
+import { FleetBuild } from './entities/fleet_build.js';
 
 export class ApiClient {
 
@@ -27,11 +29,12 @@ export class ApiClient {
     // Divisions
 
     async getDivisions() {
-        return this._request('GET', '/divisions');
+        const data = await this._request('GET', '/divisions');
+        return data.map(d => (new Division()).updateFromDTO(d));
     }
 
     async getDivision(id) {
-        return this._request('GET', `/divisions/${id}`);
+        return (new Division()).updateFromDTO(await this._request('GET', `/divisions/${id}`));
     }
 
     async createDivision(division) {
@@ -54,7 +57,7 @@ export class ApiClient {
     }
 
     async getFleetBuild(id) {
-        return this._request('GET', `/fleet-builds/${id}`);
+        return (new FleetBuild()).updateFromDTO(await this._request('GET', `/fleet-builds/${id}`));
     }
 
     async createFleetBuild(fleetBuild) {
