@@ -6,8 +6,80 @@
     <title>Galaktika - Divisions</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        #divisions-container {
+            width: 100%;
+            max-width: 800px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        th {
+            background-color: #222;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background-color: #222;
+        }
+        #error-msg {
+            color: #ff4a4a;
+        }
+        a {
+            color: #4a9eff;
+        }
+    </style>
 </head>
 <body>
-TODO divisions
+    <div id="game-container">
+        <h1>Divisions</h1>
+        <div id="divisions-container">
+            <p id="error-msg" style="display:none"></p>
+            <table id="divisions-table" style="display:none">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Resources</th>
+                        <th>Attack</th>
+                        <th>Defense</th>
+                        <th>Engines</th>
+                        <th>Cargo</th>
+                    </tr>
+                </thead>
+                <tbody id="divisions-body"></tbody>
+            </table>
+        </div>
+        <p><a href="index.html">Back</a></p>
+    </div>
+    <script type="module">
+        const res = await fetch('/api/divisions');
+        if (!res.ok) {
+            const err = document.getElementById('error-msg');
+            err.textContent = `Failed to load divisions: ${res.status}`;
+            err.style.display = '';
+        } else {
+            const divisions = await res.json();
+            const tbody = document.getElementById('divisions-body');
+            for (const d of divisions) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${d.id}</td><td>${d.resources_amount}</td><td>${d.tech_attack}</td><td>${d.tech_defense}</td><td>${d.tech_engines}</td><td>${d.tech_cargo}</td>`;
+                tbody.appendChild(tr);
+            }
+            document.getElementById('divisions-table').style.display = '';
+        }
+    </script>
 </body>
 </html>

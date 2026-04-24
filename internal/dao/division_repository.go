@@ -12,9 +12,11 @@ type DivisionRepository struct {
 }
 
 func NewDivisionRepository() *DivisionRepository {
-	return &DivisionRepository{
+	divisionRepository := &DivisionRepository{
 		divisionMap: make(map[string]*galaxy.Division),
 	}
+
+	return divisionRepository
 }
 
 func (r *DivisionRepository) Get(id string) *galaxy.Division {

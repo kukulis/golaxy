@@ -23,7 +23,8 @@ func CreateSingletons(env string) {
 	case "test", "dev":
 		AuthenticationManagerInstance = api.NewMemoryAuthenticationManager()
 		BattleRepositoryInstance = dao.NewBattleRepository()
-		DivisionRepositoryInstance = dao.NewDivisionRepository()
+		DivisionRepositoryInstance = NewDivisionRepository()
+
 		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
 		ShipModelRepositoryInstance = dao.NewShipModelRepository()

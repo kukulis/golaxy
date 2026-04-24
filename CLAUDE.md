@@ -155,6 +155,10 @@ go mod verify
 
 **Note**: While TDD is preferred, it may not be practical for all scenarios (e.g., exploratory prototyping, UI work). Use judgment, but default to test-first when feasible.
 
+### Frontend / Backend Boundary
+
+When working on frontend (JS/HTML), only consult the API documentation (Swagger/OpenAPI spec) — never read Go source files to understand the API. The API contract is the spec, not the implementation.
+
 ### Test Readability
 
 - **Use "nice" numbers**: Choose test values that produce clean, easy-to-verify results. For example, use mass=64 (sqrt=8) instead of mass=60 (sqrt≈7.745) to get integer results.
