@@ -2,6 +2,7 @@ package dao
 
 import (
 	"glaktika.eu/galaktika/pkg/galaxy"
+	"glaktika.eu/galaktika/pkg/util"
 	"maps"
 	"slices"
 	"strings"
@@ -21,8 +22,12 @@ func (r *ShipModelRepository) Get(id string) *galaxy.ShipModel {
 	return r.shipModelMap[id]
 }
 
-func (r *ShipModelRepository) GetAll() []*galaxy.ShipModel {
+func (r *ShipModelRepository) GetAll(ownerId string) []*galaxy.ShipModel {
 	shipModels := slices.Collect(maps.Values(r.shipModelMap))
+
+	if ownerId != "" {
+		shipModels = util.ArrayFilter(shipModels, func(m *galaxy.ShipModel) bool { return m.OwnerId == ownerId })
+	}
 
 	slices.SortFunc(shipModels, func(a, b *galaxy.ShipModel) int {
 		return strings.Compare(a.ID, b.ID)

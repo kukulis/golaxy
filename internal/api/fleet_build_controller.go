@@ -7,13 +7,7 @@ import (
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
 	"net/http"
-	"strings"
 )
-
-func bearerToken(c *gin.Context) string {
-	header := c.GetHeader("Authorization")
-	return strings.TrimPrefix(header, "Bearer ")
-}
 
 type FleetBuildController struct {
 	authenticationManager AuthenticationManager
@@ -66,9 +60,7 @@ func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
 	divisionId := c.Query("division_id")
 
-	token := bearerToken(c)
-	race := controller.authenticationManager.Authenticate(token)
-
+	race := controller.authenticationManager.AuthenticateFromContext(c)
 	raceId := ""
 	if race != nil {
 		raceId = race.ID

@@ -8,11 +8,12 @@ import (
 )
 
 type ShipModelController struct {
-	shipModelRepository *dao.ShipModelRepository
+	authenticationManager AuthenticationManager
+	shipModelRepository   *dao.ShipModelRepository
 }
 
-func NewShipModelController(repository *dao.ShipModelRepository) *ShipModelController {
-	return &ShipModelController{shipModelRepository: repository}
+func NewShipModelController(authenticationManager AuthenticationManager, repository *dao.ShipModelRepository) *ShipModelController {
+	return &ShipModelController{authenticationManager: authenticationManager, shipModelRepository: repository}
 }
 
 // GetShipModel godoc
@@ -40,7 +41,12 @@ func (controller *ShipModelController) GetShipModel(c *gin.Context) {
 // @Success 200 {array} galaxy.ShipModel
 // @Router /ship-models [get]
 func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
-	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll())
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	ownerId := ""
+	if race != nil {
+		ownerId = race.ID
+	}
+	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll(ownerId))
 }
 
 // CreateShipModel godoc

@@ -26,7 +26,7 @@ func CreateSingletons(env string) {
 		DivisionRepositoryInstance = NewDivisionRepository()
 		FleetBuildRepositoryInstance = NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
-		ShipModelRepositoryInstance = dao.NewShipModelRepository()
+		ShipModelRepositoryInstance = NewShipModelRepository()
 
 	case "prod":
 		// Future: DB-backed repositories
@@ -40,7 +40,7 @@ func CreateSingletons(env string) {
 	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)
 	FleetBuildControllerInstance = api.NewFleetBuildController(AuthenticationManagerInstance, FleetBuildRepositoryInstance, FleetRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
-	ShipModelControllerInstance = api.NewShipModelController(ShipModelRepositoryInstance)
+	ShipModelControllerInstance = api.NewShipModelController(AuthenticationManagerInstance, ShipModelRepositoryInstance)
 }
 
 // ResetTestData clears all data in repositories for testing.

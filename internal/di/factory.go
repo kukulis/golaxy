@@ -28,6 +28,18 @@ func NewFleetBuildRepository() *dao.FleetBuildRepository {
 	return r
 }
 
+func NewShipModelRepository() *dao.ShipModelRepository {
+	r := dao.NewShipModelRepository()
+
+	for _, raceID := range []string{"rex", "zyx", "keth"} {
+		r.Upsert(&galaxy.ShipModel{ID: raceID + "-fighter", Name: "Fighter", OwnerId: raceID, Guns: 2, OneGunMass: 1, DefenseMass: 1, EngineMass: 1, CargoMass: 0})
+		r.Upsert(&galaxy.ShipModel{ID: raceID + "-cruiser", Name: "Cruiser", OwnerId: raceID, Guns: 4, OneGunMass: 2, DefenseMass: 3, EngineMass: 2, CargoMass: 1})
+		r.Upsert(&galaxy.ShipModel{ID: raceID + "-freighter", Name: "Freighter", OwnerId: raceID, Guns: 1, OneGunMass: 1, DefenseMass: 1, EngineMass: 2, CargoMass: 5})
+	}
+
+	return r
+}
+
 func NewDivisionRepository() *dao.DivisionRepository {
 	divisionRepository := dao.NewDivisionRepository()
 

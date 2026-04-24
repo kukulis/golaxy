@@ -1,9 +1,13 @@
 package api
 
-import "glaktika.eu/galaktika/pkg/galaxy"
+import (
+	"github.com/gin-gonic/gin"
+	"glaktika.eu/galaktika/pkg/galaxy"
+)
 
 type AuthenticationManager interface {
 	Authenticate(token string) *galaxy.Race
+	AuthenticateFromContext(c *gin.Context) *galaxy.Race
 	TokenValid(token string) bool
 	AddToken(token string, race *galaxy.Race)
 }
@@ -20,6 +24,10 @@ func NewMemoryAuthenticationManager() *MemoryAuthenticationManager {
 
 func (am *MemoryAuthenticationManager) Authenticate(token string) *galaxy.Race {
 	return am.tokenToRace[token]
+}
+
+func (am *MemoryAuthenticationManager) AuthenticateFromContext(c *gin.Context) *galaxy.Race {
+	return am.Authenticate(bearerToken(c))
 }
 
 func (am *MemoryAuthenticationManager) TokenValid(token string) bool {
