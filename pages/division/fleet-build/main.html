@@ -27,6 +27,7 @@
     import {ApiClient} from '/assets/js/api.js';
     import {createDivisionTable} from '/assets/js/division_table.js';
     import {createFleetBuildStatisticsTable} from '/assets/js/fleet_build_table.js';
+    import {createFleetBuildShipModelTable} from '/assets/js/fleet_build_ship_model_table.js';
 
     const buildId = location.pathname.split('/')[2];
     document.getElementById('page-title').textContent = `Fleet Build: ${buildId}`;
@@ -35,8 +36,10 @@
     try {
         /** @var {FleetBuild} b */
         const b = await api.getFleetBuild(buildId);
-        /** @var {Division} division */
-        const division = await api.getDivision(b.division_id);
+        const [division, assignments] = await Promise.all([
+            api.getDivision(b.division_id),
+            api.getFleetBuildShipModels(buildId),
+        ]);
 
         const container = document.getElementById('fleet-build-container');
 
@@ -49,6 +52,13 @@
         divisionTitle.appendChild(document.createTextNode('Division'));
         container.appendChild(divisionTitle);
         container.appendChild(createDivisionTable(division));
+
+        const shipModelsTitle = document.createElement('h2');
+        shipModelsTitle.appendChild(document.createTextNode('Assigned Ship Models'));
+        container.appendChild(shipModelsTitle);
+        container.appendChild(createFleetBuildShipModelTable(assignments));
+
+        // TODO work on assigning/unassigning ship model to the build.
 
         document.getElementById('back-link').href = `/divisions/${b.division_id}/fleet-builds`;
     } catch (e) {
