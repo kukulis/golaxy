@@ -15,13 +15,30 @@ export function createShipModelTable(models) {
     thead.appendChild(headerRow);
 
     const tbody = document.createElement('tbody');
+
     for (const m of models) {
         const tr = document.createElement('tr');
-        ['id', 'name', 'guns', 'one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(key => {
+
+        const tdId = document.createElement('td');
+        const linkId = document.createElement('a');
+        linkId.appendChild(document.createTextNode(m['id']));
+        linkId.setAttribute('href', '#');
+        tdId.appendChild(linkId);
+        tr.appendChild(tdId);
+
+        const tdName = document.createElement('td');
+        const linkName = document.createElement('a');
+        linkName.appendChild(document.createTextNode(m['name']));
+        linkName.setAttribute('href', '#');
+        tdName.appendChild( linkName);
+        tr.appendChild(tdName);
+
+        ['guns', 'one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(key => {
             const td = document.createElement('td');
             td.appendChild(document.createTextNode(m[key]));
             tr.appendChild(td);
         });
+
         tbody.appendChild(tr);
     }
 
