@@ -25,6 +25,7 @@ func main() {
 	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })
 	router.StaticFile("/ship-model/list.html", "./pages/ship-model/list.html")
 	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { c.File("./pages/ship-model/details.html") })
+	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { c.File("./pages/ship-model/edit.html") })
 	router.StaticFile("/test-ship-designs", "./pages/test_ship_designs.html")
 	router.StaticFile("/test-ship-group-designs", "./pages/test_ship_group_designs.html")
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Edit Ship Model</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        #container { width: 100%; max-width: 500px; }
+        table { width: 100%; border-collapse: collapse; background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
+        th { background-color: #222; color: #4a9eff; font-weight: bold; width: 40%; }
+        tr:last-child td { border-bottom: none; }
+        input { background-color: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 6px 8px; width: 100%; box-sizing: border-box; font-size: 14px; }
+        button { margin-top: 16px; }
+        #error-msg { color: #ff4a4a; }
+        a { color: #4a9eff; }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <h1 id="page-title"></h1>
+    <div id="container"></div>
+    <p><a id="back-link" href="#">Back</a></p>
+</div>
+<script type="module">
+    import '/assets/js/user-bar.js';
+    import {ApiClient} from '/assets/js/api.js';
+    import {ShipModelComponent} from '/assets/js/ship_model_component.js';
+
+    const id = location.pathname.split('/')[2];
+    document.getElementById('page-title').textContent = `Edit Ship Model: ${id}`;
+    document.getElementById('back-link').href = `/ship-model/${id}/details.html`;
+
+    const api = new ApiClient();
+    const shipModelComponent = new ShipModelComponent(api);
+    try {
+        document.getElementById('container').appendChild(await shipModelComponent.renderEdit(id));
+    } catch (e) {
+        const err = document.createElement('p');
+        err.id = 'error-msg';
+        err.appendChild(document.createTextNode(e.message));
+        document.getElementById('container').appendChild(err);
+    }
+</script>
+</body>
+</html>
