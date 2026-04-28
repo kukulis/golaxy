@@ -26,12 +26,13 @@
 <script type="module">
     import '/assets/js/user-bar.js';
     import {ApiClient} from '/assets/js/api.js';
-    import {createShipModelTable} from '/assets/js/ship_model_table.js';
+    import {ShipModelComponent} from '/assets/js/ship_model_component.js';
 
     const api = new ApiClient();
+    const shipModelComponent = new ShipModelComponent(api);
     try {
         const models = await api.getShipModels();
-        document.getElementById('container').appendChild(createShipModelTable(models));
+        document.getElementById('container').appendChild(shipModelComponent.renderList(models));
     } catch (e) {
         const err = document.createElement('p');
         err.id = 'error-msg';
