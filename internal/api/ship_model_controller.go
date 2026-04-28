@@ -80,6 +80,12 @@ func (controller *ShipModelController) CreateShipModel(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /ship-models/{id} [put]
 func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized"})
+		return
+	}
+
 	id := c.Param("id")
 	existing := controller.shipModelRepository.Get(id)
 	if existing == nil {
@@ -94,6 +100,7 @@ func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
 	}
 
 	shipModel.ID = id
+	shipModel.OwnerId = race.ID
 	controller.shipModelRepository.Upsert(&shipModel)
 	c.JSON(http.StatusOK, shipModel)
 }
