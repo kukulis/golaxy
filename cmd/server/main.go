@@ -29,6 +29,9 @@ func main() {
 	router.StaticFile("/test-ship-designs", "./pages/test_ship_designs.html")
 	router.StaticFile("/test-ship-group-designs", "./pages/test_ship_group_designs.html")
 
+	router.LoadHTMLGlob("pages/**/*")
+	router.GET("/test", func(c *gin.Context) { c.File("./pages/test.html") })
+
 	// Swagger UI
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

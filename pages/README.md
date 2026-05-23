@@ -1,0 +1,1 @@
+Pages layout is hybrid. Meaning, that templates are served in backend, but the data load and display in frontend JS.
