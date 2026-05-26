@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "glaktika.eu/galaktika/docs"
 	"glaktika.eu/galaktika/internal/di"
+	"glaktika.eu/galaktika/internal/web"
 )
 
 // @title Galaktika API
@@ -15,13 +16,14 @@ import (
 // @BasePath /api
 func main() {
 	router := gin.Default()
+	router.LoadHTMLFiles("./pages/division/main.gohtml")
 
 	router.Static("/assets", "./assets")
 	router.StaticFile("/", "./pages/index.html")
 	router.StaticFile("/dummy_login.html", "./pages/dummy_login.html")
 	router.StaticFile("/divisions.html", "./pages/divisions.html")
 	router.StaticFile("/races.html", "./pages/races.html")
-	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { c.File("./pages/division/main.html") })
+	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { web.RenderDivision(c) })
 	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.html") })
 	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })
 	router.StaticFile("/ship-model/list.html", "./pages/ship-model/list.html")
