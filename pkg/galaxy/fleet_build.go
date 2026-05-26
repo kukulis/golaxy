@@ -28,12 +28,13 @@ type ShipModelAssignment struct {
 }
 
 type FleetBuildStatistics struct {
-	MaxResources                 int `json:"max_resources"`
-	UsedResources                int `json:"used_resources"`
-	UsedResourcesForShips        int `json:"used_resources_for_ships"`
-	UsedResourcesForTechnologies int `json:"used_resources_for_technologies"`
-	RemainingResources           int `json:"remaining_resources"`
-	ExceedingResources           int `json:"exceeding_resources"`
+	MaxResources                 int           `json:"max_resources"`
+	UsedResources                int           `json:"used_resources"`
+	UsedResourcesForShips        int           `json:"used_resources_for_ships"`
+	UsedResourcesForTechnologies int           `json:"used_resources_for_technologies"`
+	RemainingResources           int           `json:"remaining_resources"`
+	ExceedingResources           int           `json:"exceeding_resources"`
+	Technologies                 *Technologies `json:"technologies"`
 }
 
 func (fleetBuild *FleetBuild) CalculateStatistics(maxResources int) FleetBuildStatistics {
@@ -59,7 +60,14 @@ func (fleetBuild *FleetBuild) CalculateStatistics(maxResources int) FleetBuildSt
 		UsedResourcesForTechnologies: usedForTech,
 		RemainingResources:           remaining,
 		ExceedingResources:           exceeding,
+		Technologies:                 fleetBuild.CalculateTechnologies(),
 	}
+}
+
+func (fleetBuild *FleetBuild) CalculateTechnologies() *Technologies {
+	tech := NewTechnologies()
+	tech.Research(fleetBuild.AttackResources, fleetBuild.DefenseResources, fleetBuild.EngineResources, fleetBuild.CargoResources)
+	return tech
 }
 
 func (fleetBuild *FleetBuild) CalculateShipTech(shipModel *ShipModel) ShipTech {

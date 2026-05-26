@@ -39,9 +39,22 @@ func (wc *WebController) RenderShipModelList(c *gin.Context) {
 }
 
 func (wc *WebController) RenderShipModelDetails(c *gin.Context) {
-	c.HTML(http.StatusOK, "ship_model_details", gin.H{"Id": c.Param("id")})
+	c.HTML(http.StatusOK, "ship_model_details", wc.shipModelData(c))
 }
 
 func (wc *WebController) RenderShipModelEdit(c *gin.Context) {
-	c.HTML(http.StatusOK, "ship_model_edit", gin.H{"Id": c.Param("id")})
+	c.HTML(http.StatusOK, "ship_model_edit", wc.shipModelData(c))
+}
+
+func (wc *WebController) shipModelData(c *gin.Context) gin.H {
+	data := gin.H{"Id": c.Param("id")}
+	fleetBuildId := c.Query("FleetBuildId")
+	if fleetBuildId != "" {
+		fleetBuild := wc.fleetBuildRepository.Get(fleetBuildId)
+		if fleetBuild != nil {
+			data["FleetBuildId"] = fleetBuildId
+			data["DivisionId"] = fleetBuild.DivisionId
+		}
+	}
+	return data
 }

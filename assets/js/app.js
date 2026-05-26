@@ -90,8 +90,9 @@ export class App {
             this.dispatcher.addListener("redirect", (url) => {
                 window.location.href = url
             })
-            this.dispatcher.addListener("afterShipModelEdit", (shipModelId) => {
-                location.href = `/ship-model/${shipModelId}/details.html`
+            this.dispatcher.addListener("afterShipModelEdit", ({shipModelId, fleetBuildId}) => {
+                const query = fleetBuildId ? `?FleetBuildId=${fleetBuildId}` : ''
+                location.href = `/ship-model/${shipModelId}/details.html${query}`
             })
             this.dispatcher.addListener("logout", () => {
                 this.setLoginName('')

@@ -57,10 +57,11 @@ export default class FleetBuildView {
         const container = NewE('div')
 
         try {
-            const [b, division, assignments] = await Promise.all([
+            const [b, division, assignments, technologies] = await Promise.all([
                 this.apiClient.getFleetBuild(this.buildId),
                 this.apiClient.getDivision(this.divisionId),
                 this.apiClient.getFleetBuildShipModels(this.buildId),
+                this.apiClient.getFleetBuildTechnologies(this.buildId),
             ])
 
             const leftCol = NewE('div')
@@ -68,7 +69,7 @@ export default class FleetBuildView {
             const fleetBuildTitle = NewE('h2')
             fleetBuildTitle.appendChild(NewT('Fleet Build'))
             leftCol.appendChild(fleetBuildTitle)
-            leftCol.appendChild(createFleetBuildStatisticsTable(b))
+            leftCol.appendChild(createFleetBuildStatisticsTable(b, technologies))
 
             const divisionTitle = NewE('h2')
             divisionTitle.appendChild(NewT('Division'))

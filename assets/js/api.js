@@ -101,6 +101,14 @@ export class ApiClient {
         return this._request('DELETE', `/fleet-builds/${id}/ship-models/${shipModelId}`);
     }
 
+    async getFleetBuildTechnologies(fleetBuildId) {
+        return this._request('GET', `/fleet-builds/${fleetBuildId}/technologies`);
+    }
+
+    async calculateShipTech(fleetBuildId, shipModelId) {
+        return this._request('GET', `/fleet-builds/${fleetBuildId}/ship-models/${shipModelId}/calculate-ship-tech`);
+    }
+
     // Ship Models
 
     async getShipModels() {

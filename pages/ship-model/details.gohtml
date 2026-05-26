@@ -13,7 +13,7 @@
 </head>
 <body>
 <div id="game-container">
-    <div id="user-menu" data-ship-model="{{.Id}}"></div>
+    <div id="user-menu" data-ship-model="{{.Id}}"{{if .FleetBuildId}} data-fleet-build="{{.FleetBuildId}}" data-division-id="{{.DivisionId}}"{{end}}></div>
     <h1 id="page-title"></h1>
     <p id="error-msg" style="display:none"></p>
     <div id="container">

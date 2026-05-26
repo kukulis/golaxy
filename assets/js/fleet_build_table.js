@@ -3,17 +3,19 @@ import {FleetBuild} from './entities/fleet_build.js';
 
 /**
  * @param {FleetBuild} b
+ * @param {Object|null} technologies
  * @returns {HTMLElement}
  */
-export function createFleetBuildStatisticsTable(b) {
+export function createFleetBuildStatisticsTable(b, technologies = null) {
+    const tech = (value, key) => technologies ? `${value} (${technologies[key]})` : value;
     const rows = [
         ['ID',                    b.id],
         ['Division',              b.division_id],
         ['Race',                  b.race_id],
-        ['Used Attack Resources', b.attack_resources],
-        ['Used Defense Resources',b.defense_resources],
-        ['Used Engine Resources', b.engine_resources],
-        ['Used Cargo Resources',  b.cargo_resources],
+        ['Used Attack Resources', tech(b.attack_resources, 'attack')],
+        ['Used Defense Resources',tech(b.defense_resources, 'defense')],
+        ['Used Engine Resources', tech(b.engine_resources, 'engine')],
+        ['Used Cargo Resources',  tech(b.cargo_resources, 'cargo')],
     ];
 
     const tbody = NewE('tbody');

@@ -363,6 +363,23 @@ func (controller *FleetBuildController) GetFleet(c *gin.Context) {
 	c.JSON(http.StatusOK, fleet)
 }
 
+// GetTechnologies godoc
+// @Summary Get researched technologies for a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {object} galaxy.Technologies
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/technologies [get]
+func (controller *FleetBuildController) GetTechnologies(c *gin.Context) {
+	fleetBuild := controller.fleetBuildRepository.Get(c.Param("id"))
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+	c.JSON(http.StatusOK, fleetBuild.CalculateTechnologies())
+}
+
 // CalculateShipTech godoc
 // @Summary Calculate ship tech for a ship model assigned to a fleet build
 // @Tags fleet-builds

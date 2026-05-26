@@ -2,6 +2,8 @@ import {NewE, NewT} from '/assets/js/helper.js';
 import {ApiClient} from "/assets/js/api.js";
 import {Dispatcher} from './dispatcher.js';
 import {ShipModel} from './entities/ship_model.js';
+import {createFleetBuildStatisticsTable} from './fleet_build_table.js';
+import {createDivisionTable} from './division_table.js';
 
 export class ShipModelComponent {
 
@@ -114,8 +116,9 @@ export class ShipModelComponent {
             const table = NewE('table');
             table.appendChild(tbody);
 
+            const fleetBuildId = new URLSearchParams(window.location.search).get('FleetBuildId')
             const editLink = NewE('a');
-            editLink.href = `/ship-model/${shipModelId}/edit.html`;
+            editLink.href = `/ship-model/${shipModelId}/edit.html` + (fleetBuildId ? `?FleetBuildId=${fleetBuildId}` : '');
             editLink.appendChild(NewT('✏ Edit'));
 
             const wrapper = NewE('div');
@@ -134,7 +137,40 @@ export class ShipModelComponent {
      */
     async renderEdit(shipModelId) {
         try {
-            const m = await this.apiClient.getShipModel(shipModelId);
+            const fleetBuildId = new URLSearchParams(window.location.search).get('FleetBuildId')
+
+            const requests = [this.apiClient.getShipModel(shipModelId)]
+            if (fleetBuildId) {
+                requests.push(this.apiClient.getFleetBuild(fleetBuildId))
+            }
+            const [m, fleetBuild] = await Promise.all(requests)
+
+            const wrapper = NewE('div')
+            let formCol = wrapper
+
+            if (fleetBuild) {
+                const [division, technologies] = await Promise.all([
+                    this.apiClient.getDivision(fleetBuild.division_id),
+                    this.apiClient.getFleetBuildTechnologies(fleetBuildId),
+                ])
+
+                const leftCol = NewE('div')
+
+                const fleetBuildTitle = NewE('h2')
+                fleetBuildTitle.appendChild(NewT('Fleet Build'))
+                leftCol.appendChild(fleetBuildTitle)
+                leftCol.appendChild(createFleetBuildStatisticsTable(fleetBuild, technologies))
+
+                const divisionTitle = NewE('h2')
+                divisionTitle.appendChild(NewT('Division'))
+                leftCol.appendChild(divisionTitle)
+                leftCol.appendChild(createDivisionTable(division))
+
+                formCol = NewE('div')
+                wrapper.className = 'two-col-layout'
+                wrapper.appendChild(leftCol)
+                wrapper.appendChild(formCol)
+            }
 
             const tbody = NewE('tbody');
             [
@@ -167,7 +203,7 @@ export class ShipModelComponent {
             button.appendChild(NewT('Save'));
 
             const cancelLink = NewE('a');
-            cancelLink.href = `/ship-model/${shipModelId}/details.html`;
+            cancelLink.href = `/ship-model/${shipModelId}/details.html` + (fleetBuildId ? `?FleetBuildId=${fleetBuildId}` : '');
             cancelLink.className = 'btn';
             cancelLink.style.marginLeft = '12px';
             cancelLink.appendChild(NewT('Cancel'));
@@ -183,13 +219,14 @@ export class ShipModelComponent {
                     data.guns = parseInt(data.guns);
                     ['one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(k => data[k] = parseFloat(data[k]));
                     await this.apiClient.updateShipModel(shipModelId, data);
-                    this.dispatcher.dispatch('afterShipModelEdit', shipModelId);
+                    this.dispatcher.dispatch('afterShipModelEdit', {shipModelId, fleetBuildId});
                 } catch (e) {
                     this.dispatcher.dispatch('displayError', [e.message, true]);
                 }
             });
 
-            return form;
+            formCol.appendChild(form)
+            return wrapper;
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true]);
             return NewE('div');
