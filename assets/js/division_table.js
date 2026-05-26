@@ -1,9 +1,9 @@
+import {NewE, NewT} from './helper.js';
 import {Division} from './entities/division.js';
 
 /**
- * @deprecated use DivisionsView instead
  * @param {Division} division
- * @returns {HTMLTableElement}
+ * @returns {HTMLElement}
  */
 export function createDivisionTable(division) {
     const rows = [
@@ -15,19 +15,36 @@ export function createDivisionTable(division) {
         ['Tech Cargo',  division.tech_cargo],
     ];
 
-    const tbody = document.createElement('tbody');
+    const tbody = NewE('tbody');
     for (const [label, value] of rows) {
-        const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        const td = document.createElement('td');
-        th.appendChild(document.createTextNode(label));
-        td.appendChild(document.createTextNode(value));
+        const tr = NewE('tr');
+        const th = NewE('th');
+        const td = NewE('td');
+        th.appendChild(NewT(label));
+        td.appendChild(NewT(value));
         tr.appendChild(th);
         tr.appendChild(td);
         tbody.appendChild(tr);
     }
 
-    const table = document.createElement('table');
+    const table = NewE('table');
     table.appendChild(tbody);
-    return table;
+    table.style.display = 'none';
+
+    const button = NewE('button');
+    button.appendChild(NewT('▶'));
+    button.addEventListener('click', () => {
+        if (table.style.display === 'none') {
+            table.style.display = '';
+            button.textContent = '▼';
+        } else {
+            table.style.display = 'none';
+            button.textContent = '▶';
+        }
+    });
+
+    const wrapper = NewE('div');
+    wrapper.appendChild(button);
+    wrapper.appendChild(table);
+    return wrapper;
 }

@@ -110,6 +110,17 @@ a {
     color: #4a9eff;
 }
 
+.two-col-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.two-col-layout > div {
+    flex: 1;
+}
+
 .nav-item {
     display: inline-block;
     vertical-align: top;

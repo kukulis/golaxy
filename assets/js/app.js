@@ -2,6 +2,7 @@ import {Dispatcher} from "./dispatcher.js";
 import {ClearE, GetE, NewT} from "./helper.js";
 import DivisionsView from "./divisions_view.js";
 import FleetBuildsView from "./fleet_builds_view.js";
+import FleetBuildView from "./fleet_build_view.js";
 import RacesView from "./races_view.js";
 import DummyLoginView from "./dummy_login_view.js";
 import UserBarView from "./user_bar_view.js";
@@ -28,6 +29,12 @@ export class App {
      * @type {FleetBuildsView}
      */
     fleetBuildsView = null;
+
+    /**
+     *
+     * @type {FleetBuildView}
+     */
+    fleetBuildView = null;
 
     /**
      *
@@ -107,6 +114,17 @@ export class App {
         }
 
         return this.fleetBuildsView
+    }
+
+    /**
+     * @returns {FleetBuildView}
+     */
+    getFleetBuildView() {
+        if ( this.fleetBuildView == null ) {
+            this.fleetBuildView = new FleetBuildView(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.fleetBuildView
     }
 
     /**

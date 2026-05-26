@@ -15,12 +15,12 @@
 </head>
 <body>
 <div id="game-container">
+    <div id="user-menu"></div>
     <h1>Races</h1>
     <p id="error-msg" style="display:none"></p>
     <div id="races-container">
         <!-- generated with JS -->
     </div>
-    <p><a href="/">Back</a></p>
 </div>
 <script type="module">
     import '/assets/js/user-bar.js';
@@ -28,6 +28,8 @@
     import {App} from '/assets/js/app.js';
 
     const app = new App()
+    app.renderMenu()
+
     const view = await app.getRacesView().generateView()
     ClearE(GetE('races-container')).appendChild(view)
 </script>

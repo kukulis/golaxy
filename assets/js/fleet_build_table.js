@@ -1,9 +1,9 @@
+import {NewE, NewT} from './helper.js';
 import {FleetBuild} from './entities/fleet_build.js';
 
 /**
- * @deprecated TODO refactor to a FleetBuildView class in a separate file
  * @param {FleetBuild} b
- * @returns {HTMLTableElement}
+ * @returns {HTMLElement}
  */
 export function createFleetBuildStatisticsTable(b) {
     const rows = [
@@ -16,19 +16,36 @@ export function createFleetBuildStatisticsTable(b) {
         ['Used Cargo Resources',  b.cargo_resources],
     ];
 
-    const tbody = document.createElement('tbody');
+    const tbody = NewE('tbody');
     for (const [label, value] of rows) {
-        const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        const td = document.createElement('td');
-        th.appendChild(document.createTextNode(label));
-        td.appendChild(document.createTextNode(value));
+        const tr = NewE('tr');
+        const th = NewE('th');
+        const td = NewE('td');
+        th.appendChild(NewT(label));
+        td.appendChild(NewT(value));
         tr.appendChild(th);
         tr.appendChild(td);
         tbody.appendChild(tr);
     }
 
-    const table = document.createElement('table');
+    const table = NewE('table');
     table.appendChild(tbody);
-    return table;
+    table.style.display = 'none';
+
+    const button = NewE('button');
+    button.appendChild(NewT('▶'));
+    button.addEventListener('click', () => {
+        if (table.style.display === 'none') {
+            table.style.display = '';
+            button.textContent = '▼';
+        } else {
+            table.style.display = 'none';
+            button.textContent = '▶';
+        }
+    });
+
+    const wrapper = NewE('div');
+    wrapper.appendChild(button);
+    wrapper.appendChild(table);
+    return wrapper;
 }

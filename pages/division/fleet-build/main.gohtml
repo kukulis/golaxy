@@ -8,68 +8,34 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
     <style>
-        #fleet-build-container { width: 100%; max-width: 500px; }
-        table { width: 100%; border-collapse: collapse; background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
-        th { background-color: #222; color: #4a9eff; font-weight: bold; width: 40%; }
-        tr:last-child td { border-bottom: none; }
-        #error-msg { color: #ff4a4a; }
-        a { color: #4a9eff; }
+        #fleet-build-container { width: 100%; max-width: 1100px; }
     </style>
 </head>
 <body>
 <div id="game-container">
     <div id="user-menu" data-division-id="{{.DivisionId}}" data-fleet-build="{{.Id}}"></div>
     <h1 id="page-title"></h1>
-    <div id="fleet-build-container"></div>
+    <p id="error-msg" style="display:none"></p>
+    <div id="fleet-build-container">
+        <!-- generated with JS -->
+    </div>
 </div>
 <script type="module">
+    import {ClearE, GetE} from '/assets/js/helper.js';
     import {App} from '/assets/js/app.js';
-    import {ApiClient} from '/assets/js/api.js';
-
-    const app = new App();
-    app.renderMenu();
-    import {createDivisionTable} from '/assets/js/division_table.js';
-    import {createFleetBuildStatisticsTable} from '/assets/js/fleet_build_table.js';
-    import {createFleetBuildShipModelTable} from '/assets/js/fleet_build_ship_model_table.js';
 
     const buildId = '{{.Id}}';
     const divisionId = '{{.DivisionId}}';
     document.getElementById('page-title').textContent = `Fleet Build: ${buildId}`;
 
-    const api = new ApiClient();
-    try {
-        /** @var {FleetBuild} b */
-        const b = await api.getFleetBuild(buildId);
-        const [division, assignments] = await Promise.all([
-            api.getDivision(divisionId),
-            api.getFleetBuildShipModels(buildId),
-        ]);
+    const app = new App();
+    app.renderMenu();
 
-        const container = document.getElementById('fleet-build-container');
-
-        const fleetBuildTitle = document.createElement('h2');
-        fleetBuildTitle.appendChild(document.createTextNode('Fleet Build'));
-        container.appendChild(fleetBuildTitle);
-        container.appendChild(createFleetBuildStatisticsTable(b));
-
-        const divisionTitle = document.createElement('h2');
-        divisionTitle.appendChild(document.createTextNode('Division'));
-        container.appendChild(divisionTitle);
-        container.appendChild(createDivisionTable(division));
-
-        const shipModelsTitle = document.createElement('h2');
-        shipModelsTitle.appendChild(document.createTextNode('Assigned Ship Models'));
-        container.appendChild(shipModelsTitle);
-        container.appendChild(createFleetBuildShipModelTable(assignments));
-
-        // TODO work on assigning/unassigning ship model to the build.
-    } catch (e) {
-        const err = document.createElement('p');
-        err.id = 'error-msg';
-        err.appendChild(document.createTextNode(e.message));
-        document.getElementById('fleet-build-container').appendChild(err);
-    }
+    const fleetBuildView = app.getFleetBuildView();
+    fleetBuildView.setBuildId(buildId);
+    fleetBuildView.setDivisionId(divisionId);
+    const view = await fleetBuildView.generateView();
+    ClearE(GetE('fleet-build-container')).appendChild(view);
 </script>
 </body>
 </html>
