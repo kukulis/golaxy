@@ -1,4 +1,6 @@
+import {NewE, NewT} from '/assets/js/helper.js';
 import {ApiClient} from "/assets/js/api.js";
+import {Dispatcher} from './dispatcher.js';
 import {ShipModel} from './entities/ship_model.js';
 
 export class ShipModelComponent {
@@ -9,62 +11,73 @@ export class ShipModelComponent {
     apiClient = null;
 
     /**
-     * @param {ApiClient} apiClient
+     * @type {Dispatcher}
      */
-    constructor(apiClient) {
+    dispatcher = null;
+
+    /**
+     * @param {ApiClient} apiClient
+     * @param {Dispatcher} dispatcher
+     */
+    constructor(apiClient, dispatcher) {
         this.apiClient = apiClient;
+        this.dispatcher = dispatcher;
     }
 
     /**
-     * @param {ShipModel[]} models
-     * @returns {HTMLTableElement}
+     * @returns {Promise<HTMLElement>}
      */
-    renderList(models) {
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+    async renderList() {
+        const thead = NewE('thead');
+        const headerRow = NewE('tr');
         ['', 'ID', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass'].forEach(label => {
-            const th = document.createElement('th');
-            th.appendChild(document.createTextNode(label));
+            const th = NewE('th');
+            th.appendChild(NewT(label));
             headerRow.appendChild(th);
         });
         thead.appendChild(headerRow);
 
-        const tbody = document.createElement('tbody');
+        const tbody = NewE('tbody');
 
-        for (const m of models) {
-            const tr = document.createElement('tr');
+        try {
+            const models = await this.apiClient.getShipModels();
+            for (const m of models) {
+                const tr = NewE('tr');
 
-            const tdEdit = document.createElement('td');
-            const linkEdit = document.createElement('a');
-            linkEdit.appendChild(document.createTextNode('✏'));
-            linkEdit.setAttribute('href', `/ship-model/${m['id']}/edit.html`);
-            tdEdit.appendChild(linkEdit);
-            tr.appendChild(tdEdit);
+                const tdEdit = NewE('td');
+                const linkEdit = NewE('a');
+                linkEdit.appendChild(NewT('✏'));
+                linkEdit.setAttribute('href', `/ship-model/${m['id']}/edit.html`);
+                tdEdit.appendChild(linkEdit);
+                tr.appendChild(tdEdit);
 
-            const tdId = document.createElement('td');
-            const linkId = document.createElement('a');
-            linkId.appendChild(document.createTextNode(m['id']));
-            linkId.setAttribute('href', `/ship-model/${m['id']}/details.html`);
-            tdId.appendChild(linkId);
-            tr.appendChild(tdId);
+                const tdId = NewE('td');
+                const linkId = NewE('a');
+                linkId.appendChild(NewT(m['id']));
+                linkId.setAttribute('href', `/ship-model/${m['id']}/details.html`);
+                tdId.appendChild(linkId);
+                tr.appendChild(tdId);
 
-            const tdName = document.createElement('td');
-            const linkName = document.createElement('a');
-            linkName.appendChild(document.createTextNode(m['name']));
-            linkName.setAttribute('href', `/ship-model/${m['id']}/details.html`);
-            tdName.appendChild(linkName);
-            tr.appendChild(tdName);
+                const tdName = NewE('td');
+                const linkName = NewE('a');
+                linkName.appendChild(NewT(m['name']));
+                linkName.setAttribute('href', `/ship-model/${m['id']}/details.html`);
+                tdName.appendChild(linkName);
+                tr.appendChild(tdName);
 
-            ['guns', 'one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(key => {
-                const td = document.createElement('td');
-                td.appendChild(document.createTextNode(m[key]));
-                tr.appendChild(td);
-            });
+                ['guns', 'one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(key => {
+                    const td = NewE('td');
+                    td.appendChild(NewT(m[key]));
+                    tr.appendChild(td);
+                });
 
-            tbody.appendChild(tr);
+                tbody.appendChild(tr);
+            }
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true]);
         }
 
-        const table = document.createElement('table');
+        const table = NewE('table');
         table.appendChild(thead);
         table.appendChild(tbody);
         return table;
@@ -72,34 +85,47 @@ export class ShipModelComponent {
 
     /**
      * @param {string} shipModelId
-     * @returns {Promise<HTMLTableElement>}
+     * @returns {Promise<HTMLElement>}
      */
     async renderDetails(shipModelId) {
-        const m = await this.apiClient.getShipModel(shipModelId);
-        const tbody = document.createElement('tbody');
-        [
-            ['ID', m.id],
-            ['Name', m.name],
-            ['Guns', m.guns],
-            ['Gun Mass', m.one_gun_mass],
-            ['Defense Mass', m.defense_mass],
-            ['Engine Mass', m.engine_mass],
-            ['Cargo Mass', m.cargo_mass],
-            ['Owner ID', m.owner_id],
-        ].forEach(([label, value]) => {
-            const tr = document.createElement('tr');
-            const th = document.createElement('th');
-            th.appendChild(document.createTextNode(label));
-            const td = document.createElement('td');
-            td.appendChild(document.createTextNode(value));
-            tr.appendChild(th);
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        });
+        try {
+            const m = await this.apiClient.getShipModel(shipModelId);
+            const tbody = NewE('tbody');
+            [
+                ['ID', m.id],
+                ['Name', m.name],
+                ['Guns', m.guns],
+                ['Gun Mass', m.one_gun_mass],
+                ['Defense Mass', m.defense_mass],
+                ['Engine Mass', m.engine_mass],
+                ['Cargo Mass', m.cargo_mass],
+                ['Owner ID', m.owner_id],
+            ].forEach(([label, value]) => {
+                const tr = NewE('tr');
+                const th = NewE('th');
+                th.appendChild(NewT(label));
+                const td = NewE('td');
+                td.appendChild(NewT(value));
+                tr.appendChild(th);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            });
 
-        const table = document.createElement('table');
-        table.appendChild(tbody);
-        return table;
+            const table = NewE('table');
+            table.appendChild(tbody);
+
+            const editLink = NewE('a');
+            editLink.href = `/ship-model/${shipModelId}/edit.html`;
+            editLink.appendChild(NewT('✏ Edit'));
+
+            const wrapper = NewE('div');
+            wrapper.appendChild(table);
+            wrapper.appendChild(editLink);
+            return wrapper;
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true]);
+            return NewE('div');
+        }
     }
 
     /**
@@ -107,50 +133,66 @@ export class ShipModelComponent {
      * @returns {Promise<HTMLFormElement>}
      */
     async renderEdit(shipModelId) {
-        const m = await this.apiClient.getShipModel(shipModelId);
+        try {
+            const m = await this.apiClient.getShipModel(shipModelId);
 
-        const tbody = document.createElement('tbody');
-        [
-            ['Name', 'name', 'text', m.name],
-            ['Guns', 'guns', 'number', m.guns],
-            ['Gun Mass', 'one_gun_mass', 'number', m.one_gun_mass],
-            ['Defense Mass', 'defense_mass', 'number', m.defense_mass],
-            ['Engine Mass', 'engine_mass', 'number', m.engine_mass],
-            ['Cargo Mass', 'cargo_mass', 'number', m.cargo_mass],
-        ].forEach(([label, name, type, value]) => {
-            const tr = document.createElement('tr');
-            const th = document.createElement('th');
-            th.appendChild(document.createTextNode(label));
-            const td = document.createElement('td');
-            const input = document.createElement('input');
-            input.type = type;
-            input.name = name;
-            input.value = value;
-            td.appendChild(input);
-            tr.appendChild(th);
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        });
+            const tbody = NewE('tbody');
+            [
+                ['Name', 'name', 'text', m.name],
+                ['Guns', 'guns', 'number', m.guns],
+                ['Gun Mass', 'one_gun_mass', 'number', m.one_gun_mass],
+                ['Defense Mass', 'defense_mass', 'number', m.defense_mass],
+                ['Engine Mass', 'engine_mass', 'number', m.engine_mass],
+                ['Cargo Mass', 'cargo_mass', 'number', m.cargo_mass],
+            ].forEach(([label, name, type, value]) => {
+                const tr = NewE('tr');
+                const th = NewE('th');
+                th.appendChild(NewT(label));
+                const td = NewE('td');
+                const input = NewE('input');
+                input.type = type;
+                input.name = name;
+                input.value = value;
+                td.appendChild(input);
+                tr.appendChild(th);
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            });
 
-        const table = document.createElement('table');
-        table.appendChild(tbody);
+            const table = NewE('table');
+            table.appendChild(tbody);
 
-        const button = document.createElement('button');
-        button.type = 'submit';
-        button.appendChild(document.createTextNode('Save'));
+            const button = NewE('button');
+            button.type = 'submit';
+            button.appendChild(NewT('Save'));
 
-        const form = document.createElement('form');
-        form.appendChild(table);
-        form.appendChild(button);
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = Object.fromEntries(new FormData(form));
-            data.guns = parseInt(data.guns);
-            ['one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(k => data[k] = parseFloat(data[k]));
-            await this.apiClient.updateShipModel(shipModelId, data);
-            location.href = `/ship-model/${shipModelId}/details.html`;
-        });
+            const cancelLink = NewE('a');
+            cancelLink.href = `/ship-model/${shipModelId}/details.html`;
+            cancelLink.className = 'btn';
+            cancelLink.style.marginLeft = '12px';
+            cancelLink.appendChild(NewT('Cancel'));
 
-        return form;
+            const form = NewE('form');
+            form.appendChild(table);
+            form.appendChild(button);
+            form.appendChild(cancelLink);
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    const data = Object.fromEntries(new FormData(form));
+                    data.guns = parseInt(data.guns);
+                    ['one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(k => data[k] = parseFloat(data[k]));
+                    await this.apiClient.updateShipModel(shipModelId, data);
+                    this.dispatcher.dispatch('afterShipModelEdit', shipModelId);
+                } catch (e) {
+                    this.dispatcher.dispatch('displayError', [e.message, true]);
+                }
+            });
+
+            return form;
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true]);
+            return NewE('div');
+        }
     }
 }

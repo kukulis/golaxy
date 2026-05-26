@@ -9,41 +9,25 @@
     <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
     <style>
         #container { width: 100%; max-width: 800px; }
-        table { width: 100%; border-collapse: collapse; background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
-        th { background-color: #222; color: #4a9eff; font-weight: bold; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background-color: #222; }
-        #error-msg { color: #ff4a4a; }
-        a { color: #4a9eff; }
     </style>
 </head>
 <body>
 <div id="game-container">
     <div id="user-menu"></div>
     <h1>Ship Models</h1>
-    <div id="container"></div>
+    <p id="error-msg" style="display:none"></p>
+    <div id="container">
+        <!-- generated with JS -->
+    </div>
 </div>
 <script type="module">
+    import {ClearE, GetE} from '/assets/js/helper.js';
     import {App} from '/assets/js/app.js';
-    import {ApiClient} from '/assets/js/api.js';
 
     const app = new App();
     app.renderMenu();
 
-    import {ShipModelComponent} from '/assets/js/ship_model_component.js';
-
-    const api = new ApiClient();
-    const shipModelComponent = new ShipModelComponent(api);
-    try {
-        const models = await api.getShipModels();
-        document.getElementById('container').appendChild(shipModelComponent.renderList(models));
-    } catch (e) {
-        const err = document.createElement('p');
-        err.id = 'error-msg';
-        err.appendChild(document.createTextNode(e.message));
-        document.getElementById('container').appendChild(err);
-    }
+    ClearE(GetE('container')).appendChild(await app.getShipModelComponent().renderList());
 </script>
 </body>
 </html>

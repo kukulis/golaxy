@@ -1,4 +1,4 @@
-import {NewE, NewT} from '/assets/js/helper.js'
+import {GetE, NewE, NewT} from '/assets/js/helper.js'
 import {MenuItem} from './menu_item.js'
 
 export default class UserMenuView {
@@ -7,9 +7,10 @@ export default class UserMenuView {
      * @return {HTMLElement}
      */
     generateView() {
-        const divisionId = document.getElementById('user-menu')?.dataset.divisionId
-
-        const fleetBuildId = document.getElementById('user-menu')?.dataset.fleetBuild
+        const userMenu = GetE('user-menu')
+        const divisionId = userMenu?.dataset.divisionId
+        const fleetBuildId = userMenu?.dataset.fleetBuild
+        const shipModelId = userMenu?.dataset.shipModel
 
         const divisionsItem = new MenuItem('Divisions', '/divisions.html')
         if (divisionId) {
@@ -24,11 +25,16 @@ export default class UserMenuView {
             divisionsItem.children.push(divisionItem)
         }
 
+        const shipModelsItem = new MenuItem('Ship Models', '/ship-model/list.html')
+        if (shipModelId) {
+            shipModelsItem.children.push(new MenuItem(`Ship Model: ${shipModelId}`, `/ship-model/${shipModelId}/details.html`))
+        }
+
         const items = [
             new MenuItem('Home', '/'),
             divisionsItem,
             new MenuItem('Races', '/races.html'),
-            new MenuItem('Ship Models', '/ship-model/list.html'),
+            shipModelsItem,
         ]
 
         return this.#buildDom(items)

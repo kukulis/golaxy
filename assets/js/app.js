@@ -8,6 +8,7 @@ import DummyLoginView from "./dummy_login_view.js";
 import UserBarView from "./user_bar_view.js";
 import UserMenuView from "./user_menu_view.js";
 import {ApiClient} from "./api.js";
+import {ShipModelComponent} from "./ship_model_component.js";
 
 export class App {
 
@@ -50,6 +51,12 @@ export class App {
 
     /**
      *
+     * @type {ShipModelComponent}
+     */
+    shipModelComponent = null;
+
+    /**
+     *
      * @type {ApiClient}
      */
     apiClient = null;
@@ -82,6 +89,9 @@ export class App {
             })
             this.dispatcher.addListener("redirect", (url) => {
                 window.location.href = url
+            })
+            this.dispatcher.addListener("afterShipModelEdit", (shipModelId) => {
+                location.href = `/ship-model/${shipModelId}/details.html`
             })
             this.dispatcher.addListener("logout", () => {
                 this.setLoginName('')
@@ -185,6 +195,17 @@ export class App {
      */
     setToken(token) {
         localStorage.setItem('token', token)
+    }
+
+    /**
+     * @returns {ShipModelComponent}
+     */
+    getShipModelComponent() {
+        if ( this.shipModelComponent == null ) {
+            this.shipModelComponent = new ShipModelComponent(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.shipModelComponent
     }
 
     /**
