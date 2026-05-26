@@ -1,5 +1,7 @@
-import {Dispatcher} from "./dispatcher";
-import {GetE, NewT} from "./helper";
+import {Dispatcher} from "./dispatcher.js";
+import {ClearE, GetE, NewT} from "./helper.js";
+import DivisionsView from "./divisions_view.js";
+import {ApiClient} from "./api.js";
 
 export class App {
 
@@ -11,6 +13,18 @@ export class App {
     dispatcher = null;
 
     /**
+     *
+     * @type {DivisionsView}
+     */
+    divisionsView = null;
+
+    /**
+     *
+     * @type {ApiClient}
+     */
+    apiClient = null;
+
+    /**
      * @returns {Dispatcher}
      */
     getDispatcher() {
@@ -18,12 +32,16 @@ export class App {
             this.dispatcher = new Dispatcher()
 
             // error handling
+            this.dispatcher.addListener("displayError", ([msg, clear]) => {
+                console.error( "Error received", msg)
 
-            this.dispatcher.addListener("displayError", (msg, clear) => {
                 let errorMsg = GetE("error-msg")
                 if ( clear) {
-                    errorMsg.appendChild(NewT(msg))
+                    ClearE(errorMsg)
                 }
+
+                errorMsg.appendChild(NewT(msg))
+                errorMsg.style.display = 'block'
             })
         }
 
@@ -31,5 +49,26 @@ export class App {
     }
 
 
+    /**
+     * @returns {DivisionsView}
+     */
+    getDivisionsView() {
+        if ( this.divisionsView == null ) {
+            this.divisionsView = new DivisionsView(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.divisionsView
+    }
+
+    /**
+     * @returns {ApiClient}
+     */
+    getApiClient() {
+        if ( this.apiClient == null ) {
+            this.apiClient = new ApiClient()
+        }
+
+        return this.apiClient
+    }
 
 }

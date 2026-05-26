@@ -1,5 +1,6 @@
 import {ClearE, GetE, NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from "./api.js";
+import {Dispatcher} from "./dispatcher.js";
 
 export default class DivisionsView {
 
@@ -11,6 +12,12 @@ export default class DivisionsView {
 
     /**
      *
+     * @type {Dispatcher}
+     */
+    dispatcher = null;
+
+    /**
+     *
      * @type {HTMLElement}
      */
     tBody = null;
@@ -18,9 +25,11 @@ export default class DivisionsView {
     /**
      *
      * @param {ApiClient} apiClient
+     * @param {Dispatcher} dispatcher
      */
-    constructor(apiClient) {
+    constructor(apiClient, dispatcher ) {
         this.apiClient = apiClient
+        this.dispatcher = dispatcher
     }
 
     /**
@@ -93,10 +102,7 @@ export default class DivisionsView {
                 this.tBody.appendChild(tr);
             }
         } catch (e) {
-            // TODO use own event dispatcher
-            const err = GetE('error-msg');
-            err.textContent = e.message;
-            err.style.display = '';
+            this.dispatcher.dispatch("displayError", [e.message, true] )
         }
     }
 

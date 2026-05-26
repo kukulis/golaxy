@@ -63,20 +63,17 @@
     <p><a href="/">Back</a></p>
 </div>
 <script type="module">
+    // TODO make class
     import '/assets/js/user-bar.js';
 
-    import DivisionsView from "../assets/js/divisions_view.js";
+
     import {ClearE, GetE} from "../assets/js/helper.js";
-    import {ApiClient} from "../assets/js/api.js";
-
-    // TODO use dependency injection later
-    const apiClient = new ApiClient();
-    const divisionsView = new DivisionsView(apiClient)
-
+    import {App} from "../assets/js/app.js";
+    const app = new App()
+    const divisionsView = app.getDivisionsView()
     const view = await divisionsView.generateView()
-
-    // console.log('divisions.html[81] view', view)
     ClearE(GetE("divisions-container")).appendChild(view)
+
 </script>
 </body>
 </html>
