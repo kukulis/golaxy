@@ -17,6 +17,7 @@
 <body>
 <div id="game-container">
     <h1>Login</h1>
+    <!-- TODO generate using JS -->
     <table>
         <thead><tr><th>Name</th><th>Race</th></tr></thead>
         <tbody>
@@ -35,6 +36,7 @@
 <script>
     document.querySelectorAll('tbody tr').forEach(tr => {
         tr.addEventListener('click', () => {
+            // TODO use App for storing and loading loginName and token
             localStorage.setItem('loginName', tr.dataset.name);
             localStorage.setItem('token', tr.dataset.token);
             window.location.href = '/';

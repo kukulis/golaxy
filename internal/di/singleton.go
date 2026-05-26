@@ -13,6 +13,7 @@ var DivisionControllerInstance *api.DivisionController
 var FleetBuildRepositoryInstance *dao.FleetBuildRepository
 var FleetBuildControllerInstance *api.FleetBuildController
 var FleetRepositoryInstance *dao.FleetRepository
+var RaceRepositoryInstance *dao.RaceRepository
 var ShipModelRepositoryInstance *dao.ShipModelRepository
 var ShipModelControllerInstance *api.ShipModelController
 
@@ -21,7 +22,8 @@ func CreateSingletons(env string) {
 	// Currently only in-memory repos are implemented
 	switch env {
 	case "test", "dev":
-		AuthenticationManagerInstance = NewAuthenticationManager()
+		RaceRepositoryInstance = NewRaceRepository()
+		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
 		BattleRepositoryInstance = dao.NewBattleRepository()
 		DivisionRepositoryInstance = NewDivisionRepository()
 		FleetBuildRepositoryInstance = NewFleetBuildRepository()
@@ -54,6 +56,9 @@ func ResetTestData() {
 	}
 	if FleetBuildRepositoryInstance != nil {
 		FleetBuildRepositoryInstance.ResetData()
+	}
+	if RaceRepositoryInstance != nil {
+		RaceRepositoryInstance.ResetData()
 	}
 	if ShipModelRepositoryInstance != nil {
 		ShipModelRepositoryInstance.ResetData()

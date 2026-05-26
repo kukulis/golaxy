@@ -6,14 +6,8 @@ import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
-func NewAuthenticationManager() api.AuthenticationManager {
-	am := api.NewMemoryAuthenticationManager()
-
-	am.AddToken("token-rex-001", &galaxy.Race{ID: "rex", Name: "Commander Rex", Role: "commander"})
-	am.AddToken("token-zyx-002", &galaxy.Race{ID: "zyx", Name: "Admiral Zyx", Role: "admiral"})
-	am.AddToken("token-keth-003", &galaxy.Race{ID: "keth", Name: "Warlord Keth", Role: "warlord"})
-
-	return am
+func NewAuthenticationManager(raceRepository *dao.RaceRepository) api.AuthenticationManager {
+	return api.NewMemoryAuthenticationManager(raceRepository)
 }
 
 func NewFleetBuildRepository() *dao.FleetBuildRepository {
@@ -36,6 +30,17 @@ func NewShipModelRepository() *dao.ShipModelRepository {
 		r.Upsert(&galaxy.ShipModel{ID: raceID + "-cruiser", Name: "Cruiser", OwnerId: raceID, Guns: 4, OneGunMass: 2, DefenseMass: 3, EngineMass: 2, CargoMass: 1})
 		r.Upsert(&galaxy.ShipModel{ID: raceID + "-freighter", Name: "Freighter", OwnerId: raceID, Guns: 1, OneGunMass: 1, DefenseMass: 1, EngineMass: 2, CargoMass: 5})
 	}
+
+	return r
+}
+
+func NewRaceRepository() *dao.RaceRepository {
+	r := dao.NewRaceRepository()
+
+	r.Upsert(&galaxy.Race{ID: "rex", Name: "Commander Rex", Role: galaxy.RolePlayer, Token: "token-rex-001"})
+	r.Upsert(&galaxy.Race{ID: "zyx", Name: "Admiral Zyx", Role: galaxy.RolePlayer, Token: "token-zyx-002"})
+	r.Upsert(&galaxy.Race{ID: "keth", Name: "Warlord Keth", Role: galaxy.RolePlayer, Token: "token-keth-003"})
+	r.Upsert(&galaxy.Race{ID: "admin", Name: "Administrator", Role: galaxy.RoleAdmin, Token: "token-admin-000"})
 
 	return r
 }

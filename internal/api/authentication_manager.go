@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
@@ -9,21 +10,20 @@ type AuthenticationManager interface {
 	Authenticate(token string) *galaxy.Race
 	AuthenticateFromContext(c *gin.Context) *galaxy.Race
 	TokenValid(token string) bool
-	AddToken(token string, race *galaxy.Race)
 }
 
 type MemoryAuthenticationManager struct {
-	tokenToRace map[string]*galaxy.Race
+	raceRepository *dao.RaceRepository
 }
 
-func NewMemoryAuthenticationManager() *MemoryAuthenticationManager {
+func NewMemoryAuthenticationManager(raceRepository *dao.RaceRepository) *MemoryAuthenticationManager {
 	return &MemoryAuthenticationManager{
-		tokenToRace: make(map[string]*galaxy.Race),
+		raceRepository: raceRepository,
 	}
 }
 
 func (am *MemoryAuthenticationManager) Authenticate(token string) *galaxy.Race {
-	return am.tokenToRace[token]
+	return am.raceRepository.GetByToken(token)
 }
 
 func (am *MemoryAuthenticationManager) AuthenticateFromContext(c *gin.Context) *galaxy.Race {
@@ -31,10 +31,5 @@ func (am *MemoryAuthenticationManager) AuthenticateFromContext(c *gin.Context) *
 }
 
 func (am *MemoryAuthenticationManager) TokenValid(token string) bool {
-	_, yes := am.tokenToRace[token]
-	return yes
-}
-
-func (am *MemoryAuthenticationManager) AddToken(token string, race *galaxy.Race) {
-	am.tokenToRace[token] = race
+	return am.raceRepository.GetByToken(token) != nil
 }
