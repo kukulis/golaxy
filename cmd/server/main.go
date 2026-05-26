@@ -16,7 +16,10 @@ import (
 // @BasePath /api
 func main() {
 	router := gin.Default()
-	router.LoadHTMLFiles("./pages/division/main.gohtml")
+	router.LoadHTMLFiles(
+		"./pages/division/main.gohtml",
+		"./pages/division/fleet-builds.gohtml",
+	)
 
 	router.Static("/assets", "./assets")
 	router.StaticFile("/", "./pages/index.html")
@@ -24,7 +27,7 @@ func main() {
 	router.StaticFile("/divisions.html", "./pages/divisions.html")
 	router.StaticFile("/races.html", "./pages/races.html")
 	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { web.RenderDivision(c) })
-	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.html") })
+	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.gohtml") })
 	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })
 	router.StaticFile("/ship-model/list.html", "./pages/ship-model/list.html")
 	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { c.File("./pages/ship-model/details.html") })

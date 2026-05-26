@@ -10,8 +10,8 @@
 </head>
 <body>
 <div id="game-container">
-    <div id="user-menu"></div>
-    <h1 id="division-title"></h1>
+    <div id="user-menu" data-division-id="{{.DivisionId}}"></div>
+    <h1 id="division-title">Division {{.DivisionId}}</h1>
     <p><a href="fleet-builds.html">Fleet builds</a></p>
 </div>
 <script type="module">
@@ -19,9 +19,6 @@
 
     const app = new App();
     app.renderMenu()
-
-    const id = {{ .DivisionId }}
-    document.getElementById('division-title').textContent = `Division: ${id}`;
 </script>
 </body>
 </html>
