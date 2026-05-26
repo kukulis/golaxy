@@ -1,4 +1,5 @@
 import { Battle } from './entities/battle.js';
+import { Race } from './entities/race.js';
 import { Division } from './entities/division.js';
 import { FleetBuild } from './entities/fleet_build.js';
 import { FleetBuildShipModel } from './entities/fleet_build_ship_model.js';
@@ -21,6 +22,17 @@ export class ApiClient {
             throw new Error(`${method} ${path} failed: ${response.statusText}`);
         }
         return response.json();
+    }
+
+    // Races
+
+    async getRaces() {
+        const data = await this._request('GET', '/races');
+        return data.map(d => (new Race()).updateFromDTO(d));
+    }
+
+    async getRace(id) {
+        return (new Race()).updateFromDTO(await this._request('GET', `/races/${id}`));
     }
 
     // Battle

@@ -2,6 +2,7 @@ import {Dispatcher} from "./dispatcher.js";
 import {ClearE, GetE, NewT} from "./helper.js";
 import DivisionsView from "./divisions_view.js";
 import FleetBuildsView from "./fleet_builds_view.js";
+import RacesView from "./races_view.js";
 import {ApiClient} from "./api.js";
 
 export class App {
@@ -24,6 +25,12 @@ export class App {
      * @type {FleetBuildsView}
      */
     fleetBuildsView = null;
+
+    /**
+     *
+     * @type {RacesView}
+     */
+    racesView = null;
 
     /**
      *
@@ -76,6 +83,17 @@ export class App {
         }
 
         return this.fleetBuildsView
+    }
+
+    /**
+     * @returns {RacesView}
+     */
+    getRacesView() {
+        if ( this.racesView == null ) {
+            this.racesView = new RacesView(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.racesView
     }
 
     /**

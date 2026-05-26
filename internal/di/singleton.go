@@ -12,6 +12,7 @@ var DivisionRepositoryInstance *dao.DivisionRepository
 var DivisionControllerInstance *api.DivisionController
 var FleetBuildRepositoryInstance *dao.FleetBuildRepository
 var FleetBuildControllerInstance *api.FleetBuildController
+var RaceControllerInstance *api.RaceController
 var FleetRepositoryInstance *dao.FleetRepository
 var RaceRepositoryInstance *dao.RaceRepository
 var ShipModelRepositoryInstance *dao.ShipModelRepository
@@ -39,6 +40,7 @@ func CreateSingletons(env string) {
 	}
 
 	// Controllers are environment-agnostic
+	RaceControllerInstance = api.NewRaceController(RaceRepositoryInstance)
 	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)
 	FleetBuildControllerInstance = api.NewFleetBuildController(AuthenticationManagerInstance, FleetBuildRepositoryInstance, FleetRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)

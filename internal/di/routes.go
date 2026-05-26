@@ -3,6 +3,9 @@ package di
 import "github.com/gin-gonic/gin"
 
 func RegisterRoutes(apiRoute *gin.RouterGroup) {
+	apiRoute.GET("/races", func(c *gin.Context) { RaceControllerInstance.GetAllRaces(c) })
+	apiRoute.GET("/races/:id", func(c *gin.Context) { RaceControllerInstance.GetRace(c) })
+
 	apiRoute.GET("/battle", func(c *gin.Context) { BattleControllerInstance.GetBattle(c) })
 
 	apiRoute.GET("/divisions", func(c *gin.Context) { DivisionControllerInstance.GetAllDivisions(c) })

@@ -20,6 +20,7 @@ func main() {
 	router.StaticFile("/", "./pages/index.html")
 	router.StaticFile("/dummy_login.html", "./pages/dummy_login.html")
 	router.StaticFile("/divisions.html", "./pages/divisions.html")
+	router.StaticFile("/races.html", "./pages/races.html")
 	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { c.File("./pages/division/main.html") })
 	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.html") })
 	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Races</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        #races-container {
+            width: 100%;
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <h1>Races</h1>
+    <p id="error-msg" style="display:none"></p>
+    <div id="races-container">
+        <!-- generated with JS -->
+    </div>
+    <p><a href="/">Back</a></p>
+</div>
+<script type="module">
+    import '/assets/js/user-bar.js';
+    import {ClearE, GetE} from '/assets/js/helper.js';
+    import {App} from '/assets/js/app.js';
+
+    const app = new App()
+    const view = await app.getRacesView().generateView()
+    ClearE(GetE('races-container')).appendChild(view)
+</script>
+</body>
+</html>
