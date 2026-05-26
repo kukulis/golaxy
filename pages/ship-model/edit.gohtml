@@ -1,3 +1,4 @@
+{{define "ship_model_edit"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,18 +21,22 @@
 </head>
 <body>
 <div id="game-container">
+    <div id="user-menu"></div>
     <h1 id="page-title"></h1>
     <div id="container"></div>
-    <p><a id="back-link" href="#">Back</a></p>
+
 </div>
 <script type="module">
-    import '/assets/js/user-bar.js';
+    import {App} from '/assets/js/app.js';
     import {ApiClient} from '/assets/js/api.js';
+
+    const app = new App();
+    app.renderMenu();
     import {ShipModelComponent} from '/assets/js/ship_model_component.js';
 
-    const id = location.pathname.split('/')[2];
+    const id = '{{.Id}}';
     document.getElementById('page-title').textContent = `Edit Ship Model: ${id}`;
-    document.getElementById('back-link').href = `/ship-model/${id}/details.html`;
+
 
     const api = new ApiClient();
     const shipModelComponent = new ShipModelComponent(api);
@@ -46,3 +51,4 @@
 </script>
 </body>
 </html>
+{{end}}

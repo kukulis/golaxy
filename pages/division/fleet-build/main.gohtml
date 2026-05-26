@@ -1,3 +1,4 @@
+{{define "fleet_build_main"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,18 +19,22 @@
 </head>
 <body>
 <div id="game-container">
+    <div id="user-menu" data-division-id="{{.DivisionId}}" data-fleet-build="{{.Id}}"></div>
     <h1 id="page-title"></h1>
     <div id="fleet-build-container"></div>
-    <p><a id="back-link" href="#">Back</a></p>
 </div>
 <script type="module">
-    import '/assets/js/user-bar.js';
+    import {App} from '/assets/js/app.js';
     import {ApiClient} from '/assets/js/api.js';
+
+    const app = new App();
+    app.renderMenu();
     import {createDivisionTable} from '/assets/js/division_table.js';
     import {createFleetBuildStatisticsTable} from '/assets/js/fleet_build_table.js';
     import {createFleetBuildShipModelTable} from '/assets/js/fleet_build_ship_model_table.js';
 
-    const buildId = location.pathname.split('/')[2];
+    const buildId = '{{.Id}}';
+    const divisionId = '{{.DivisionId}}';
     document.getElementById('page-title').textContent = `Fleet Build: ${buildId}`;
 
     const api = new ApiClient();
@@ -37,7 +42,7 @@
         /** @var {FleetBuild} b */
         const b = await api.getFleetBuild(buildId);
         const [division, assignments] = await Promise.all([
-            api.getDivision(b.division_id),
+            api.getDivision(divisionId),
             api.getFleetBuildShipModels(buildId),
         ]);
 
@@ -59,8 +64,6 @@
         container.appendChild(createFleetBuildShipModelTable(assignments));
 
         // TODO work on assigning/unassigning ship model to the build.
-
-        document.getElementById('back-link').href = `/divisions/${b.division_id}/fleet-builds`;
     } catch (e) {
         const err = document.createElement('p');
         err.id = 'error-msg';
@@ -70,3 +73,4 @@
 </script>
 </body>
 </html>
+{{end}}

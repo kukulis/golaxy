@@ -9,9 +9,19 @@ export default class UserMenuView {
     generateView() {
         const divisionId = document.getElementById('user-menu')?.dataset.divisionId
 
+        const fleetBuildId = document.getElementById('user-menu')?.dataset.fleetBuild
+
         const divisionsItem = new MenuItem('Divisions', '/divisions.html')
         if (divisionId) {
-            divisionsItem.children.push(new MenuItem(`Division: ${divisionId}`, `/division/${divisionId}/main.html`))
+            const divisionItem = new MenuItem(`Division: ${divisionId}`, `/division/${divisionId}/main.html`)
+            if (fleetBuildId !== undefined) {
+                const fleetBuildsItem = new MenuItem('Fleet builds', `/division/${divisionId}/fleet-builds.html`)
+                if (fleetBuildId && fleetBuildId !== '0') {
+                    fleetBuildsItem.children.push(new MenuItem(`Fleet Build: ${fleetBuildId}`, `/fleet-build/${fleetBuildId}/main.html`))
+                }
+                divisionItem.children.push(fleetBuildsItem)
+            }
+            divisionsItem.children.push(divisionItem)
         }
 
         const items = [
@@ -31,6 +41,7 @@ export default class UserMenuView {
      */
     #buildDom(items, root = true) {
         const container = NewE(root ? 'nav' : 'span')
+        if (!root) container.className = 'nav-submenu'
 
         for (let i = 0; i < items.length; i++) {
             if (i > 0) container.appendChild(NewT(' | '))
@@ -46,6 +57,7 @@ export default class UserMenuView {
      */
     #buildItemDom(item) {
         const wrapper = NewE('span')
+        wrapper.className = 'nav-item'
 
         if (item.link && window.location.pathname !== item.link) {
             const a = NewE('a')
@@ -57,9 +69,7 @@ export default class UserMenuView {
         }
 
         if (item.children.length > 0) {
-            wrapper.appendChild(NewT(' ('))
             wrapper.appendChild(this.#buildDom(item.children, false))
-            wrapper.appendChild(NewT(')'))
         }
 
         return wrapper

@@ -6,7 +6,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "glaktika.eu/galaktika/docs"
 	"glaktika.eu/galaktika/internal/di"
-	"glaktika.eu/galaktika/internal/web"
 )
 
 // @title Galaktika API
@@ -19,6 +18,10 @@ func main() {
 	router.LoadHTMLFiles(
 		"./pages/division/main.gohtml",
 		"./pages/division/fleet-builds.gohtml",
+		"./pages/division/fleet-build/main.gohtml",
+		"./pages/ship-model/list.gohtml",
+		"./pages/ship-model/details.gohtml",
+		"./pages/ship-model/edit.gohtml",
 	)
 
 	router.Static("/assets", "./assets")
@@ -26,12 +29,12 @@ func main() {
 	router.StaticFile("/dummy_login.html", "./pages/dummy_login.html")
 	router.StaticFile("/divisions.html", "./pages/divisions.html")
 	router.StaticFile("/races.html", "./pages/races.html")
-	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { web.RenderDivision(c) })
-	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { c.File("./pages/division/fleet-builds.gohtml") })
-	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { c.File("./pages/division/fleet-build/main.html") })
-	router.StaticFile("/ship-model/list.html", "./pages/ship-model/list.html")
-	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { c.File("./pages/ship-model/details.html") })
-	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { c.File("./pages/ship-model/edit.html") })
+	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderDivision(c) })
+	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuilds(c) })
+	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuild(c) })
+	router.GET("/ship-model/list.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelList(c) })
+	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelDetails(c) })
+	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelEdit(c) })
 	router.StaticFile("/test-ship-designs", "./pages/test_ship_designs.html")
 	router.StaticFile("/test-ship-group-designs", "./pages/test_ship_group_designs.html")
 

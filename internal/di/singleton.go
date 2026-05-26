@@ -3,6 +3,7 @@ package di
 import (
 	"glaktika.eu/galaktika/internal/api"
 	"glaktika.eu/galaktika/internal/dao"
+	"glaktika.eu/galaktika/internal/web"
 )
 
 var AuthenticationManagerInstance api.AuthenticationManager
@@ -17,6 +18,7 @@ var FleetRepositoryInstance *dao.FleetRepository
 var RaceRepositoryInstance *dao.RaceRepository
 var ShipModelRepositoryInstance *dao.ShipModelRepository
 var ShipModelControllerInstance *api.ShipModelController
+var WebControllerInstance *web.WebController
 
 func CreateSingletons(env string) {
 	// Based on env, choose repository implementation
@@ -40,6 +42,7 @@ func CreateSingletons(env string) {
 	}
 
 	// Controllers are environment-agnostic
+	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
 	RaceControllerInstance = api.NewRaceController(RaceRepositoryInstance)
 	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)

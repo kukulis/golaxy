@@ -109,3 +109,13 @@ tr:hover td {
 a {
     color: #4a9eff;
 }
+
+.nav-item {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.nav-submenu {
+    display: block;
+    padding-left: 1em;
+}
