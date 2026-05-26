@@ -1,6 +1,7 @@
 import {Dispatcher} from "./dispatcher.js";
 import {ClearE, GetE, NewT} from "./helper.js";
 import DivisionsView from "./divisions_view.js";
+import FleetBuildsView from "./fleet_builds_view.js";
 import {ApiClient} from "./api.js";
 
 export class App {
@@ -17,6 +18,12 @@ export class App {
      * @type {DivisionsView}
      */
     divisionsView = null;
+
+    /**
+     *
+     * @type {FleetBuildsView}
+     */
+    fleetBuildsView = null;
 
     /**
      *
@@ -58,6 +65,17 @@ export class App {
         }
 
         return this.divisionsView
+    }
+
+    /**
+     * @returns {FleetBuildsView}
+     */
+    getFleetBuildsView() {
+        if ( this.fleetBuildsView == null ) {
+            this.fleetBuildsView = new FleetBuildsView(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.fleetBuildsView
     }
 
     /**
