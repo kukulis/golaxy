@@ -3,6 +3,7 @@ import {ClearE, GetE, NewT} from "./helper.js";
 import DivisionsView from "./divisions_view.js";
 import FleetBuildsView from "./fleet_builds_view.js";
 import RacesView from "./races_view.js";
+import DummyLoginView from "./dummy_login_view.js";
 import {ApiClient} from "./api.js";
 
 export class App {
@@ -34,6 +35,12 @@ export class App {
 
     /**
      *
+     * @type {DummyLoginView}
+     */
+    dummyLoginView = null;
+
+    /**
+     *
      * @type {ApiClient}
      */
     apiClient = null;
@@ -56,6 +63,21 @@ export class App {
 
                 errorMsg.appendChild(NewT(msg))
                 errorMsg.style.display = 'block'
+            })
+
+            this.dispatcher.addListener("getToken", () => this.getToken())
+            this.dispatcher.addListener("getLoginName", () => this.getLoginName())
+            this.dispatcher.addListener("storeLoginData", ([name, token]) => {
+                this.setLoginName(name)
+                this.setToken(token)
+            })
+            this.dispatcher.addListener("redirect", (url) => {
+                window.location.href = url
+            })
+            this.dispatcher.addListener("logout", () => {
+                this.setLoginName('')
+                this.setToken('')
+                this.dispatcher.dispatch('redirect', '/')
             })
         }
 
@@ -94,6 +116,45 @@ export class App {
         }
 
         return this.racesView
+    }
+
+    /**
+     * @returns {DummyLoginView}
+     */
+    getDummyLoginView() {
+        if ( this.dummyLoginView == null ) {
+            this.dummyLoginView = new DummyLoginView(this.getApiClient(), this.getDispatcher())
+        }
+
+        return this.dummyLoginView
+    }
+
+    /**
+     * @returns {string}
+     */
+    getLoginName() {
+        return localStorage.getItem('loginName')
+    }
+
+    /**
+     * @param {string} name
+     */
+    setLoginName(name) {
+        localStorage.setItem('loginName', name)
+    }
+
+    /**
+     * @returns {string}
+     */
+    getToken() {
+        return localStorage.getItem('token')
+    }
+
+    /**
+     * @param {string} token
+     */
+    setToken(token) {
+        localStorage.setItem('token', token)
     }
 
     /**
