@@ -23,10 +23,28 @@ export default class UserBarView {
     generateView() {
         const bar = NewE('div')
         bar.id = 'user-bar'
-        bar.style.cssText = 'position:fixed;top:12px;right:20px;color:#4a9eff;font-size:14px'
 
         const loginName = this.dispatcher.dispatch('getLoginName')
-        bar.appendChild(NewT(loginName ?? ''))
+
+        if (loginName) {
+            bar.appendChild(NewT(loginName))
+
+            const logoutLink = NewE('a')
+            logoutLink.href = '#'
+            logoutLink.appendChild(NewT('Logout'))
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault()
+                this.dispatcher.dispatch('logout')
+            })
+
+            bar.appendChild(NewT(' | '))
+            bar.appendChild(logoutLink)
+        } else {
+            const loginLink = NewE('a')
+            loginLink.href = '/dummy_login.html'
+            loginLink.appendChild(NewT('Login'))
+            bar.appendChild(loginLink)
+        }
 
         return bar
     }

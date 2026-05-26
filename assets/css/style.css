@@ -55,6 +55,14 @@ button:hover {
     fill: #00ff00;
 }
 
+#user-bar {
+    position: fixed;
+    top: 12px;
+    right: 20px;
+    color: #4a9eff;
+    font-size: 14px;
+}
+
 ul.menu {
     list-style: none;
     padding: 0;

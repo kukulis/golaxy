@@ -4,6 +4,8 @@ import DivisionsView from "./divisions_view.js";
 import FleetBuildsView from "./fleet_builds_view.js";
 import RacesView from "./races_view.js";
 import DummyLoginView from "./dummy_login_view.js";
+import UserBarView from "./user_bar_view.js";
+import UserMenuView from "./user_menu_view.js";
 import {ApiClient} from "./api.js";
 
 export class App {
@@ -116,6 +118,16 @@ export class App {
         }
 
         return this.racesView
+    }
+
+    renderMenu() {
+        const container = document.getElementById('user-menu')
+        if ( container == null ) {
+            return
+        }
+
+        container.appendChild(new UserMenuView().generateView())
+        container.appendChild(new UserBarView(this.getDispatcher()).generateView())
     }
 
     /**

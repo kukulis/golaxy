@@ -16,17 +16,15 @@ export class Dispatcher {
 
     dispatch(eventName, parameters) {
         if (!this.listeners.has(eventName)) {
-            return 0;
+            return null;
         }
 
-        let count = 0;
+        let result = null;
         for (let listener of this.listeners.get(eventName)) {
-            if (listener(parameters)) {
-                count++;
-            }
+            result = listener(parameters);
         }
 
-        return count;
+        return result;
     }
 }
 

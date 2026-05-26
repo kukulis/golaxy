@@ -15,7 +15,7 @@
 </head>
 <body>
 <div id="game-container">
-    <div id="user-bar"></div>
+    <div id="user-menu"></div>
     <h1>Divisions</h1>
     <p id="error-msg" style="display:none"></p>
     <div id="divisions-container">
@@ -24,13 +24,12 @@
     <p><a href="/">Back</a></p>
 </div>
 <script type="module">
-    // TODO make class
-    import '/assets/js/user-bar.js';
-
-
     import {ClearE, GetE} from "../assets/js/helper.js";
     import {App} from "../assets/js/app.js";
     const app = new App()
+
+    app.renderMenu()
+
     const divisionsView = app.getDivisionsView()
     const view = await divisionsView.generateView()
     ClearE(GetE("divisions-container")).appendChild(view)
