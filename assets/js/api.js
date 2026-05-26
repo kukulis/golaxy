@@ -6,6 +6,8 @@ import { ShipModel } from './entities/ship_model.js';
 
 export class ApiClient {
 
+    // TODO constructor
+
     async _request(method, path, body) {
         const options = { method, headers: {} };
         const token = localStorage.getItem('token');

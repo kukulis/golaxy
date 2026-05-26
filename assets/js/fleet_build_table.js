@@ -1,6 +1,7 @@
 import {FleetBuild} from './entities/fleet_build.js';
 
 /**
+ * @deprecated TODO refactor to a FleetBuildView class in a separate file
  * @param {FleetBuild} b
  * @returns {HTMLTableElement}
  */

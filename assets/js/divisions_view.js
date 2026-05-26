@@ -1,4 +1,4 @@
-import {NewE, NewT, GetE} from '/assets/js/helper.js'
+import {ClearE, GetE, NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from "./api.js";
 
 export default class DivisionsView {
@@ -8,6 +8,12 @@ export default class DivisionsView {
      * @type {ApiClient}
      */
     apiClient = null;
+
+    /**
+     *
+     * @type {HTMLElement}
+     */
+    tBody = null;
 
     /**
      *
@@ -37,13 +43,31 @@ export default class DivisionsView {
         thead.appendChild(tr)
         table.appendChild(thead)
 
-        let tbody = NewE('tbody')
-        tbody.id = 'divisions-body'
-        table.appendChild(tbody)
+        this.tBody = NewE('tbody')
+        this.tBody.id = 'divisions-body'
+        table.appendChild(this.tBody)
         table.style.display = ''
 
         viewDiv.appendChild(table)
 
+        await this.reloadTableBody()
+
+        // testing
+        const refreshButton = NewE('button')
+        refreshButton.appendChild(NewT('Refresh'))
+        refreshButton.addEventListener('click', async (event) => {
+            console.log('TODO implement click')
+            await this.reloadTableBody()
+        })
+
+        viewDiv.appendChild(refreshButton)
+
+        return viewDiv
+    }
+
+    async reloadTableBody() {
+
+        ClearE(this.tBody)
 
         try {
             const divisions = await this.apiClient.getDivisions();
@@ -66,7 +90,7 @@ export default class DivisionsView {
                     tr.appendChild(td);
                 }
 
-                tbody.appendChild(tr);
+                this.tBody.appendChild(tr);
             }
         } catch (e) {
             // TODO use own event dispatcher
@@ -74,7 +98,6 @@ export default class DivisionsView {
             err.textContent = e.message;
             err.style.display = '';
         }
-
-        return viewDiv
     }
+
 }

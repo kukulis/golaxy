@@ -1,6 +1,7 @@
 import {Division} from './entities/division.js';
 
 /**
+ * @deprecated use DivisionsView instead
  * @param {Division} division
  * @returns {HTMLTableElement}
  */
