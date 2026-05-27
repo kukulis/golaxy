@@ -11,8 +11,6 @@ import {ApiClient} from "./api.js";
 import {ShipModelComponent} from "./ship_model_component.js";
 
 export class App {
-
-
     /**
      *
      * @type {Dispatcher}
@@ -196,6 +194,7 @@ export class App {
      */
     setToken(token) {
         localStorage.setItem('token', token)
+        this.apiClient.setToken(token)
     }
 
     /**
@@ -216,6 +215,7 @@ export class App {
         if ( this.apiClient == null ) {
             this.apiClient = new ApiClient()
         }
+        this.apiClient.setToken(this.getToken())
 
         return this.apiClient
     }

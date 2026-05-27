@@ -6,12 +6,14 @@ import { FleetBuildShipModel } from './entities/fleet_build_ship_model.js';
 import { ShipModel } from './entities/ship_model.js';
 
 export class ApiClient {
-
-    // TODO constructor
+    token = '';
 
     async _request(method, path, body) {
         const options = { method, headers: {} };
-        const token = localStorage.getItem('token');
+
+        // localStorage.getItem('token');
+        let token = this.token;
+
         if (token) options.headers['Authorization'] = `Bearer ${token}`;
         if (body !== undefined) {
             options.headers['Content-Type'] = 'application/json';
@@ -22,6 +24,10 @@ export class ApiClient {
             throw new Error(`${method} ${path} failed: ${response.statusText}`);
         }
         return response.json();
+    }
+
+    setToken(t) {
+        this.token = t
     }
 
     // Races

@@ -32,7 +32,7 @@ export class ShipModelComponent {
     async renderList() {
         const thead = NewE('thead');
         const headerRow = NewE('tr');
-        ['', 'ID', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass'].forEach(label => {
+        ['', 'ID', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass', ''].forEach(label => {
             const th = NewE('th');
             th.appendChild(NewT(label));
             headerRow.appendChild(th);
@@ -73,6 +73,15 @@ export class ShipModelComponent {
                     tr.appendChild(td);
                 });
 
+                const tdDelete = NewE ('td');
+                const buttonDelete = NewE('button');
+                tdDelete.appendChild(buttonDelete);
+                buttonDelete.appendChild(NewT('Delete'));
+                const thisShipModel = this;
+                tdDelete.addEventListener('click', () =>  thisShipModel.deleteShipModel(m['id']));
+
+                tr.appendChild(tdDelete);
+
                 tbody.appendChild(tr);
             }
         } catch (e) {
@@ -82,7 +91,32 @@ export class ShipModelComponent {
         const table = NewE('table');
         table.appendChild(thead);
         table.appendChild(tbody);
-        return table;
+
+        const addButton = NewE('button');
+        addButton.appendChild(NewT('Add ship model'));
+        addButton.addEventListener('click', this.addShipModel);
+
+        const wrapper = NewE('div');
+        wrapper.appendChild(table);
+        wrapper.appendChild(addButton);
+
+        return wrapper;
+    }
+
+    async addShipModel(e) {
+        console.log("ShipModelComponent.addShipModel called");
+
+        const shipModel = new ShipModel();
+
+        // TODO generate ID, generate Name and other parameters
+        // send object to the backend through apiClient
+
+    }
+
+    async deleteShipModel(id) {
+        console.log("ShipModelComponent.deleteShipModel id="+id)
+
+        // TODO call apiClient
     }
 
     /**
