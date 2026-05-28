@@ -52,11 +52,10 @@ export default class FleetBuildsView {
         let viewDiv = NewE('div')
 
         let table = NewE('table')
-        table.style.display = 'none'
 
         let thead = NewE('thead')
         let tr = NewE('tr')
-        for (const header of ['ID', 'Race']) {
+        for (const header of ['ID', 'Race', '']) {
             let th = NewE('th')
             th.appendChild(NewT(header))
             tr.appendChild(th)
@@ -66,13 +65,41 @@ export default class FleetBuildsView {
 
         this.tBody = NewE('tbody')
         table.appendChild(this.tBody)
-        table.style.display = ''
 
         viewDiv.appendChild(table)
 
         await this.reloadTableBody()
 
+        const addButton = NewE('button')
+        addButton.appendChild(NewT('Add fleet build'))
+        addButton.addEventListener('click', this.addFleetBuild)
+        viewDiv.appendChild(addButton)
+
         return viewDiv
+    }
+
+    addFleetBuild = async () => {
+        try {
+            const race = await this.apiClient.getCurrentRace()
+            await this.apiClient.createFleetBuild({
+                id: crypto.randomUUID(),
+                race_id: race.id,
+                division_id: this.divisionId,
+            })
+            await this.reloadTableBody(true)
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true])
+        }
+    }
+
+    deleteFleetBuild = async (build) => {
+        if (!confirm(`Delete fleet build ${build.id}?`)) return
+        try {
+            await this.apiClient.deleteFleetBuild(build.id)
+            await this.reloadTableBody(true)
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true])
+        }
     }
 
     async reloadTableBody() {
@@ -93,6 +120,13 @@ export default class FleetBuildsView {
                 const tdRace = NewE('td');
                 tdRace.appendChild(NewT(b.race_id ?? ''));
                 tr.appendChild(tdRace);
+
+                const tdActions = NewE('td')
+                const buttonDelete = NewE('button')
+                buttonDelete.appendChild(NewT('Delete'))
+                buttonDelete.addEventListener('click', () => this.deleteFleetBuild(b))
+                tdActions.appendChild(buttonDelete)
+                tr.appendChild(tdActions)
 
                 this.tBody.appendChild(tr);
             }

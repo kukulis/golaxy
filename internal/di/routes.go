@@ -5,7 +5,9 @@ import "github.com/gin-gonic/gin"
 func RegisterRoutes(apiRoute *gin.RouterGroup) {
 	apiRoute.GET("/current-race", func(c *gin.Context) { RaceControllerInstance.GetCurrentRace(c) })
 	apiRoute.GET("/races", func(c *gin.Context) { RaceControllerInstance.GetAllRaces(c) })
+	apiRoute.POST("/races", func(c *gin.Context) { RaceControllerInstance.CreateRace(c) })
 	apiRoute.GET("/races/:id", func(c *gin.Context) { RaceControllerInstance.GetRace(c) })
+	apiRoute.DELETE("/races/:id", func(c *gin.Context) { RaceControllerInstance.DeleteRace(c) })
 
 	apiRoute.GET("/battle", func(c *gin.Context) { BattleControllerInstance.GetBattle(c) })
 

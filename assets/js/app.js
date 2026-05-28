@@ -63,15 +63,19 @@ export class App {
      * @returns {Dispatcher}
      */
     getDispatcher() {
-        if ( this.dispatcher == null ) {
+        if (this.dispatcher == null) {
             this.dispatcher = new Dispatcher()
 
             // error handling
             this.dispatcher.addListener("displayError", ([msg, clear]) => {
-                console.error( "Error received", msg)
+                console.error("Error received", msg)
 
                 let errorMsg = GetE("error-msg")
-                if ( clear) {
+                if (errorMsg === undefined) {
+                    alert(msg)
+                    return
+                }
+                if (clear) {
                     ClearE(errorMsg)
                 }
 
@@ -107,7 +111,7 @@ export class App {
      * @returns {DivisionsView}
      */
     getDivisionsView() {
-        if ( this.divisionsView == null ) {
+        if (this.divisionsView == null) {
             this.divisionsView = new DivisionsView(this.getApiClient(), this.getDispatcher())
         }
 
@@ -118,7 +122,7 @@ export class App {
      * @returns {FleetBuildsView}
      */
     getFleetBuildsView() {
-        if ( this.fleetBuildsView == null ) {
+        if (this.fleetBuildsView == null) {
             this.fleetBuildsView = new FleetBuildsView(this.getApiClient(), this.getDispatcher())
         }
 
@@ -129,7 +133,7 @@ export class App {
      * @returns {FleetBuildView}
      */
     getFleetBuildView() {
-        if ( this.fleetBuildView == null ) {
+        if (this.fleetBuildView == null) {
             this.fleetBuildView = new FleetBuildView(this.getApiClient(), this.getDispatcher())
         }
 
@@ -140,7 +144,7 @@ export class App {
      * @returns {RacesView}
      */
     getRacesView() {
-        if ( this.racesView == null ) {
+        if (this.racesView == null) {
             this.racesView = new RacesView(this.getApiClient(), this.getDispatcher())
         }
 
@@ -149,7 +153,7 @@ export class App {
 
     renderMenu() {
         const container = document.getElementById('user-menu')
-        if ( container == null ) {
+        if (container == null) {
             return
         }
 
@@ -161,7 +165,7 @@ export class App {
      * @returns {DummyLoginView}
      */
     getDummyLoginView() {
-        if ( this.dummyLoginView == null ) {
+        if (this.dummyLoginView == null) {
             this.dummyLoginView = new DummyLoginView(this.getApiClient(), this.getDispatcher())
         }
 
@@ -201,7 +205,7 @@ export class App {
      * @returns {ShipModelComponent}
      */
     getShipModelComponent() {
-        if ( this.shipModelComponent == null ) {
+        if (this.shipModelComponent == null) {
             this.shipModelComponent = new ShipModelComponent(this.getApiClient(), this.getDispatcher())
         }
 
@@ -212,7 +216,7 @@ export class App {
      * @returns {ApiClient}
      */
     getApiClient() {
-        if ( this.apiClient == null ) {
+        if (this.apiClient == null) {
             this.apiClient = new ApiClient()
         }
         this.apiClient.setToken(this.getToken())

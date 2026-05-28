@@ -45,6 +45,14 @@ export class ApiClient {
         return (new Race()).updateFromDTO(await this._request('GET', `/races/${id}`));
     }
 
+    async createRace(race) {
+        return (new Race()).updateFromDTO(await this._request('POST', '/races', race));
+    }
+
+    async deleteRace(id) {
+        return this._request('DELETE', `/races/${id}`);
+    }
+
     // Battle
 
     async getBattle() {
