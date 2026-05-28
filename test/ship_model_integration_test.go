@@ -29,7 +29,7 @@ func TestShipModelEndpoints(t *testing.T) {
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
-				if string(body) != "null" {
+				if string(body) != "null" && string(body) != "[]" {
 					t.Errorf("Expected empty array or null, got: %s", string(body))
 				}
 			},

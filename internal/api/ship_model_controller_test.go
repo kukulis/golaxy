@@ -69,6 +69,10 @@ func getShipModelTestCases() []getShipModelTestCase {
 }
 
 func TestGetShipModel(t *testing.T) {
+	raceRepo := dao.NewRaceRepository()
+	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token"})
+	auth := NewMemoryAuthenticationManager(raceRepo)
+
 	for _, tc := range getShipModelTestCases() {
 		t.Run(tc.name, func(t *testing.T) {
 			id, stored, expectedStatus, expectedModel := tc.id, tc.storedShipModel, tc.expectedStatus, tc.expectedShipModel
@@ -78,10 +82,11 @@ func TestGetShipModel(t *testing.T) {
 				repo.Upsert(stored)
 			}
 
-			controller := NewShipModelController(NewMemoryAuthenticationManager(), repo)
+			controller := NewShipModelController(auth, repo)
 			router := setupShipModelRouter(controller)
 
 			req := httptest.NewRequest(http.MethodGet, "/api/ship-models/"+id, nil)
+			req.Header.Set("Authorization", "Bearer test-token")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 
@@ -183,8 +188,9 @@ func buildUpdateShipModelTestCases() []updateShipModelTestCase {
 }
 
 func TestUpdateShipModel(t *testing.T) {
-	auth := NewMemoryAuthenticationManager()
-	auth.AddToken("test-token", &galaxy.Race{ID: "race-1", Name: "Race One"})
+	raceRepo := dao.NewRaceRepository()
+	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token"})
+	auth := NewMemoryAuthenticationManager(raceRepo)
 
 	for _, tc := range buildUpdateShipModelTestCases() {
 		t.Run(tc.name, func(t *testing.T) {

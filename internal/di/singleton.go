@@ -24,7 +24,16 @@ func CreateSingletons(env string) {
 	// Based on env, choose repository implementation
 	// Currently only in-memory repos are implemented
 	switch env {
-	case "test", "dev":
+	case "test":
+		RaceRepositoryInstance = dao.NewRaceRepository()
+		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
+		BattleRepositoryInstance = dao.NewBattleRepository()
+		DivisionRepositoryInstance = dao.NewDivisionRepository()
+		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
+		FleetRepositoryInstance = dao.NewFleetRepository()
+		ShipModelRepositoryInstance = dao.NewShipModelRepository()
+
+	case "dev":
 		RaceRepositoryInstance = NewRaceRepository()
 		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
 		BattleRepositoryInstance = dao.NewBattleRepository()
@@ -43,9 +52,9 @@ func CreateSingletons(env string) {
 
 	// Controllers are environment-agnostic
 	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
-	RaceControllerInstance = api.NewRaceController(RaceRepositoryInstance)
-	BattleControllerInstance = api.NewBattleController(BattleRepositoryInstance)
-	DivisionControllerInstance = api.NewDivisionController(DivisionRepositoryInstance)
+	RaceControllerInstance = api.NewRaceController(AuthenticationManagerInstance, RaceRepositoryInstance)
+	BattleControllerInstance = api.NewBattleController(AuthenticationManagerInstance, BattleRepositoryInstance)
+	DivisionControllerInstance = api.NewDivisionController(AuthenticationManagerInstance, DivisionRepositoryInstance)
 	FleetBuildControllerInstance = api.NewFleetBuildController(AuthenticationManagerInstance, FleetBuildRepositoryInstance, FleetRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
 	ShipModelControllerInstance = api.NewShipModelController(AuthenticationManagerInstance, ShipModelRepositoryInstance)
 }

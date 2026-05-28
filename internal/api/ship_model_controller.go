@@ -25,6 +25,11 @@ func NewShipModelController(authenticationManager AuthenticationManager, reposit
 // @Failure 404 {object} map[string]string
 // @Router /ship-models/{id} [get]
 func (controller *ShipModelController) GetShipModel(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	shipModel := controller.shipModelRepository.Get(id)
 	if shipModel == nil {
@@ -42,14 +47,11 @@ func (controller *ShipModelController) GetShipModel(c *gin.Context) {
 // @Router /ship-models [get]
 func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
-	ownerId := ""
-	if race != nil {
-		ownerId = race.ID
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
 	}
-	// TODO remove after debug
-	//ownerId = ""
-
-	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll(ownerId))
+	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll(race.ID))
 }
 
 // CreateShipModel godoc
@@ -62,12 +64,11 @@ func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /ship-models [post]
 func (controller *ShipModelController) CreateShipModel(c *gin.Context) {
-	token := bearerToken(c)
-	if !controller.authenticationManager.TokenValid(token) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	race := controller.authenticationManager.Authenticate(token)
 
 	var shipModel galaxy.ShipModel
 	if err := c.ShouldBindJSON(&shipModel); err != nil {
@@ -130,6 +131,11 @@ func (controller *ShipModelController) UpdateShipModel(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /ship-models/{id}/calculate-ship-tech [post]
 func (controller *ShipModelController) CalculateShipTech(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	shipModel := controller.shipModelRepository.Get(id)
 	if shipModel == nil {
@@ -154,6 +160,11 @@ func (controller *ShipModelController) CalculateShipTech(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /ship-models/{id} [delete]
 func (controller *ShipModelController) DeleteShipModel(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.shipModelRepository.Get(id)
 	if existing == nil {

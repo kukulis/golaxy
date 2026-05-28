@@ -13,12 +13,15 @@ import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
+const testToken = "token-rex-001"
+
 func setupTestServer() *httptest.Server {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
 	apiRoute := router.Group("/api")
 	di.CreateSingletons("test")
+	di.RaceRepositoryInstance.Upsert(&galaxy.Race{ID: "rex", Name: "Commander Rex", Role: galaxy.RolePlayer, Token: testToken})
 	di.RegisterRoutes(apiRoute)
 
 	return httptest.NewServer(router)
@@ -39,6 +42,7 @@ func makeRequest(method, url string, body interface{}) (*http.Response, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Authorization", "Bearer "+testToken)
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}

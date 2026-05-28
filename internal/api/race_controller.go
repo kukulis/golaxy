@@ -7,11 +7,28 @@ import (
 )
 
 type RaceController struct {
-	raceRepository *dao.RaceRepository
+	authenticationManager AuthenticationManager
+	raceRepository        *dao.RaceRepository
 }
 
-func NewRaceController(repository *dao.RaceRepository) *RaceController {
-	return &RaceController{raceRepository: repository}
+func NewRaceController(authenticationManager AuthenticationManager, repository *dao.RaceRepository) *RaceController {
+	return &RaceController{authenticationManager: authenticationManager, raceRepository: repository}
+}
+
+// GetCurrentRace godoc
+// @Summary Get the current logged-in race
+// @Tags races
+// @Produce json
+// @Success 200 {object} galaxy.Race
+// @Failure 401 {object} map[string]string
+// @Router /current-race [get]
+func (controller *RaceController) GetCurrentRace(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	c.JSON(http.StatusOK, race)
 }
 
 // GetAllRaces godoc
@@ -21,6 +38,11 @@ func NewRaceController(repository *dao.RaceRepository) *RaceController {
 // @Success 200 {array} galaxy.Race
 // @Router /races [get]
 func (controller *RaceController) GetAllRaces(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	c.JSON(http.StatusOK, controller.raceRepository.GetAll())
 }
 
@@ -33,11 +55,16 @@ func (controller *RaceController) GetAllRaces(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /races/{id} [get]
 func (controller *RaceController) GetRace(c *gin.Context) {
-	id := c.Param("id")
-	race := controller.raceRepository.Get(id)
+	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	id := c.Param("id")
+	found := controller.raceRepository.Get(id)
+	if found == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Race not found"})
 		return
 	}
-	c.JSON(http.StatusOK, race)
+	c.JSON(http.StatusOK, found)
 }

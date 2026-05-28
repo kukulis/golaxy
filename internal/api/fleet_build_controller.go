@@ -42,6 +42,11 @@ func NewFleetBuildController(
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id} [get]
 func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(id)
 	if fleetBuild == nil {
@@ -58,15 +63,13 @@ func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 // @Success 200 {array} galaxy.FleetBuild
 // @Router /fleet-builds [get]
 func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
-	divisionId := c.Query("division_id")
-
 	race := controller.authenticationManager.AuthenticateFromContext(c)
-	raceId := ""
-	if race != nil {
-		raceId = race.ID
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
 	}
-
-	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, raceId))
+	divisionId := c.Query("division_id")
+	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, race.ID))
 }
 
 // CreateFleetBuild godoc
@@ -79,6 +82,11 @@ func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /fleet-builds [post]
 func (controller *FleetBuildController) CreateFleetBuild(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	var fleetBuild galaxy.FleetBuild
 	if err := c.ShouldBindJSON(&fleetBuild); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -104,6 +112,11 @@ func (controller *FleetBuildController) CreateFleetBuild(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id} [put]
 func (controller *FleetBuildController) UpdateFleetBuild(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
 	if existing == nil {
@@ -131,6 +144,11 @@ func (controller *FleetBuildController) UpdateFleetBuild(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id} [delete]
 func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
 	if existing == nil {
@@ -151,6 +169,11 @@ func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/ship-models [get]
 func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(id)
 	if existing == nil {
@@ -175,6 +198,11 @@ func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/ship-models [post]
 func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	fleetBuildId := c.Param("id")
 	existing := controller.fleetBuildRepository.Get(fleetBuildId)
 	if existing == nil {
@@ -209,6 +237,11 @@ func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/ship-models/{shipModelId} [delete]
 func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	fleetBuildId := c.Param("id")
 	shipModelId := c.Param("shipModelId")
 
@@ -236,6 +269,11 @@ func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/statistics [get]
 func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	fleetBuildId := c.Param("id")
 
 	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -275,12 +313,11 @@ func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/build [post]
 func (controller *FleetBuildController) Build(c *gin.Context) {
-	token := bearerToken(c)
-	if !controller.authenticationManager.TokenValid(token) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	race := controller.authenticationManager.Authenticate(token)
 
 	fleetBuildId := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -334,12 +371,11 @@ func (controller *FleetBuildController) Build(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/fleet [get]
 func (controller *FleetBuildController) GetFleet(c *gin.Context) {
-	token := bearerToken(c)
-	if !controller.authenticationManager.TokenValid(token) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	race := controller.authenticationManager.Authenticate(token)
 
 	fleetBuildId := c.Param("id")
 	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
@@ -372,6 +408,11 @@ func (controller *FleetBuildController) GetFleet(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/technologies [get]
 func (controller *FleetBuildController) GetTechnologies(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	fleetBuild := controller.fleetBuildRepository.Get(c.Param("id"))
 	if fleetBuild == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
@@ -390,6 +431,11 @@ func (controller *FleetBuildController) GetTechnologies(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/ship-models/{shipModelId}/calculate-ship-tech [get]
 func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	fleetBuildId := c.Param("id")
 	shipModelId := c.Param("shipModelId")
 

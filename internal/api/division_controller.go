@@ -8,11 +8,12 @@ import (
 )
 
 type DivisionController struct {
-	divisionRepository *dao.DivisionRepository
+	authenticationManager AuthenticationManager
+	divisionRepository    *dao.DivisionRepository
 }
 
-func NewDivisionController(repository *dao.DivisionRepository) *DivisionController {
-	return &DivisionController{divisionRepository: repository}
+func NewDivisionController(authenticationManager AuthenticationManager, repository *dao.DivisionRepository) *DivisionController {
+	return &DivisionController{authenticationManager: authenticationManager, divisionRepository: repository}
 }
 
 // GetDivision godoc
@@ -24,6 +25,11 @@ func NewDivisionController(repository *dao.DivisionRepository) *DivisionControll
 // @Failure 404 {object} map[string]string
 // @Router /divisions/{id} [get]
 func (controller *DivisionController) GetDivision(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	division := controller.divisionRepository.Get(id)
 	if division == nil {
@@ -40,6 +46,11 @@ func (controller *DivisionController) GetDivision(c *gin.Context) {
 // @Success 200 {array} galaxy.Division
 // @Router /divisions [get]
 func (controller *DivisionController) GetAllDivisions(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	c.JSON(http.StatusOK, controller.divisionRepository.GetAll())
 }
 
@@ -53,6 +64,11 @@ func (controller *DivisionController) GetAllDivisions(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /divisions [post]
 func (controller *DivisionController) CreateDivision(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	var division galaxy.Division
 	if err := c.ShouldBindJSON(&division); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -74,6 +90,11 @@ func (controller *DivisionController) CreateDivision(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /divisions/{id} [put]
 func (controller *DivisionController) UpdateDivision(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.divisionRepository.Get(id)
 	if existing == nil {
@@ -101,6 +122,11 @@ func (controller *DivisionController) UpdateDivision(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /divisions/{id} [delete]
 func (controller *DivisionController) DeleteDivision(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 	id := c.Param("id")
 	existing := controller.divisionRepository.Get(id)
 	if existing == nil {

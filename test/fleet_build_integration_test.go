@@ -41,7 +41,7 @@ func TestFleetBuildEndpoints(t *testing.T) {
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
-				if string(body) != "null" {
+				if string(body) != "null" && string(body) != "[]" {
 					t.Errorf("Expected empty array or null, got: %s", string(body))
 				}
 			},
@@ -53,7 +53,7 @@ func TestFleetBuildEndpoints(t *testing.T) {
 			body: map[string]interface{}{
 				"id":                "fb1",
 				"division_id":       "div1",
-				"race_id":           "race1",
+				"race_id":           "rex",
 				"attack_resources":  100.5,
 				"defense_resources": 200.0,
 				"engine_resources":  150.0,
@@ -114,7 +114,7 @@ func TestFleetBuildEndpoints(t *testing.T) {
 			path:   "/fleet-builds/fb1",
 			body: map[string]interface{}{
 				"division_id":       "div2",
-				"race_id":           "race2",
+				"race_id":           "rex",
 				"attack_resources":  200.0,
 				"defense_resources": 300.0,
 				"engine_resources":  250.0,
@@ -237,9 +237,9 @@ func TestFleetBuildEndpoints_CreateMultiple(t *testing.T) {
 
 	// Create multiple fleet-builds
 	fleetBuilds := []map[string]interface{}{
-		{"id": "fb1", "division_id": "div1", "race_id": "race1", "attack_resources": 100.0, "defense_resources": 200.0, "engine_resources": 150.0, "cargo_resources": 50.0},
-		{"id": "fb2", "division_id": "div2", "race_id": "race2", "attack_resources": 150.0, "defense_resources": 250.0, "engine_resources": 200.0, "cargo_resources": 75.0},
-		{"id": "fb3", "division_id": "div3", "race_id": "race3", "attack_resources": 120.0, "defense_resources": 220.0, "engine_resources": 180.0, "cargo_resources": 60.0},
+		{"id": "fb1", "division_id": "div1", "race_id": "rex", "attack_resources": 100.0, "defense_resources": 200.0, "engine_resources": 150.0, "cargo_resources": 50.0},
+		{"id": "fb2", "division_id": "div2", "race_id": "rex", "attack_resources": 150.0, "defense_resources": 250.0, "engine_resources": 200.0, "cargo_resources": 75.0},
+		{"id": "fb3", "division_id": "div3", "race_id": "rex", "attack_resources": 120.0, "defense_resources": 220.0, "engine_resources": 180.0, "cargo_resources": 60.0},
 	}
 
 	for _, fb := range fleetBuilds {
@@ -295,7 +295,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 	fleetBuild := map[string]interface{}{
 		"id":                "fb1",
 		"division_id":       "div1",
-		"race_id":           "race1",
+		"race_id":           "rex",
 		"attack_resources":  100.0,
 		"defense_resources": 200.0,
 		"engine_resources":  150.0,
