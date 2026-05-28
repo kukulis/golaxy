@@ -78,8 +78,7 @@ export class ShipModelComponent {
                 const buttonDelete = NewE('button');
                 tdDelete.appendChild(buttonDelete);
                 buttonDelete.appendChild(NewT('Delete'));
-                const thisShipModel = this;
-                tdDelete.addEventListener('click', () =>  thisShipModel.deleteShipModel(m));
+                buttonDelete.addEventListener('click', () =>  this.deleteShipModel(m));
 
                 tr.appendChild(tdDelete);
 
@@ -105,8 +104,6 @@ export class ShipModelComponent {
     }
 
     addShipModel = async (e) =>  {
-        console.log("ShipModelComponent.addShipModel called, this: ", this);
-
         // generate ID, generate Name and other parameters
         const shipModel = new ShipModel();
         shipModel.id = crypto.randomUUID();
@@ -119,9 +116,7 @@ export class ShipModelComponent {
 
 
         try {
-            let response = await this.apiClient.createShipModel(shipModel);
-            console.log ( "Response of creating ship model ", response)
-
+            await this.apiClient.createShipModel(shipModel);
             this.dispatcher.dispatch( "reloadShipModelList", {});
         } catch (exc) {
             this.dispatcher.dispatch('displayError', [exc.message, true]);
@@ -135,8 +130,6 @@ export class ShipModelComponent {
      * @returns {Promise<void>}
      */
     deleteShipModel = async (shipModel) => {
-        console.log("ShipModelComponent.deleteShipModel id="+shipModel.id)
-
         let confirmDelete = confirm("Delete ship model? "+shipModel.id+" "+shipModel.name)
 
         if ( !confirmDelete ) {
@@ -144,8 +137,7 @@ export class ShipModelComponent {
         }
 
         try {
-            let response =  await this.apiClient.deleteShipModel(shipModel.id)
-            console.log ( "Response of deleting ship model ", response)
+            await this.apiClient.deleteShipModel(shipModel.id)
             this.dispatcher.dispatch( "reloadShipModelList", {});
         } catch (exc) {
             this.dispatcher.dispatch('displayError', [exc.message, true]);
