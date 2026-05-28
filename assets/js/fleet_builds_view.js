@@ -110,6 +110,13 @@ export default class FleetBuildsView {
             for (const b of builds) {
                 const tr = NewE('tr');
 
+                const tdEdit = NewE('td');
+                const editLink = NewE('a');
+                editLink.href = `/fleet-build/${b['id']}/edit.html`;
+                editLink.appendChild(NewT('✏ Edit'));
+                tdEdit.appendChild(editLink);
+                tr.appendChild(tdEdit);
+
                 const tdId = NewE('td');
                 const a = NewE('a');
                 a.href = `/fleet-build/${b.id}/main.html`;
@@ -126,6 +133,7 @@ export default class FleetBuildsView {
                 buttonDelete.appendChild(NewT('Delete'))
                 buttonDelete.addEventListener('click', () => this.deleteFleetBuild(b))
                 tdActions.appendChild(buttonDelete)
+
                 tr.appendChild(tdActions)
 
                 this.tBody.appendChild(tr);

@@ -19,6 +19,7 @@ func main() {
 		"./pages/division/main.gohtml",
 		"./pages/division/fleet-builds.gohtml",
 		"./pages/division/fleet-build/main.gohtml",
+		"./pages/division/fleet-build/edit.gohtml",
 		"./pages/ship-model/list.gohtml",
 		"./pages/ship-model/details.gohtml",
 		"./pages/ship-model/edit.gohtml",
@@ -32,6 +33,7 @@ func main() {
 	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderDivision(c) })
 	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuilds(c) })
 	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuild(c) })
+	router.GET("/fleet-build/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuildEdit(c) })
 	router.GET("/ship-model/list.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelList(c) })
 	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelDetails(c) })
 	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelEdit(c) })
