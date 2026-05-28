@@ -32,6 +32,10 @@ export class ApiClient {
 
     // Races
 
+    async getCurrentRace() {
+        return (new Race()).updateFromDTO(await this._request('GET', '/current-race'));
+    }
+
     async getRaces() {
         const data = await this._request('GET', '/races');
         return data.map(d => (new Race()).updateFromDTO(d));

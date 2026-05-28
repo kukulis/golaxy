@@ -38,11 +38,7 @@ func (controller *RaceController) GetCurrentRace(c *gin.Context) {
 // @Success 200 {array} galaxy.Race
 // @Router /races [get]
 func (controller *RaceController) GetAllRaces(c *gin.Context) {
-	race := controller.authenticationManager.AuthenticateFromContext(c)
-	if race == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+	// TODO: filter out Token field from response before returning
 	c.JSON(http.StatusOK, controller.raceRepository.GetAll())
 }
 
