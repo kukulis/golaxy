@@ -46,6 +46,9 @@ func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 	if race != nil {
 		ownerId = race.ID
 	}
+	// TODO remove after debug
+	//ownerId = ""
+
 	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll(ownerId))
 }
 
@@ -59,11 +62,21 @@ func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /ship-models [post]
 func (controller *ShipModelController) CreateShipModel(c *gin.Context) {
+	token := bearerToken(c)
+	if !controller.authenticationManager.TokenValid(token) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+	race := controller.authenticationManager.Authenticate(token)
+
 	var shipModel galaxy.ShipModel
 	if err := c.ShouldBindJSON(&shipModel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	shipModel.OwnerId = race.ID
+
 	controller.shipModelRepository.Upsert(&shipModel)
 	c.JSON(http.StatusCreated, shipModel)
 }

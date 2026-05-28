@@ -5,6 +5,7 @@ import {ShipModel} from './entities/ship_model.js';
 import {createFleetBuildStatisticsTable} from './fleet_build_table.js';
 import {createDivisionTable} from './division_table.js';
 
+
 export class ShipModelComponent {
 
     /**
@@ -78,7 +79,7 @@ export class ShipModelComponent {
                 tdDelete.appendChild(buttonDelete);
                 buttonDelete.appendChild(NewT('Delete'));
                 const thisShipModel = this;
-                tdDelete.addEventListener('click', () =>  thisShipModel.deleteShipModel(m['id']));
+                tdDelete.addEventListener('click', () =>  thisShipModel.deleteShipModel(m));
 
                 tr.appendChild(tdDelete);
 
@@ -103,20 +104,52 @@ export class ShipModelComponent {
         return wrapper;
     }
 
-    async addShipModel(e) {
-        console.log("ShipModelComponent.addShipModel called");
+    addShipModel = async (e) =>  {
+        console.log("ShipModelComponent.addShipModel called, this: ", this);
 
+        // generate ID, generate Name and other parameters
         const shipModel = new ShipModel();
+        shipModel.id = crypto.randomUUID();
+        shipModel.name = "Ship model"
+        shipModel.guns = 0
+        shipModel.one_gun_mass = 0
+        shipModel.engine_mass = 1
+        shipModel.cargo_mass = 0
+        shipModel.defense_mass = 0
 
-        // TODO generate ID, generate Name and other parameters
-        // send object to the backend through apiClient
+
+        try {
+            let response = await this.apiClient.createShipModel(shipModel);
+            console.log ( "Response of creating ship model ", response)
+
+            this.dispatcher.dispatch( "reloadShipModelList", {});
+        } catch (exc) {
+            this.dispatcher.dispatch('displayError', [exc.message, true]);
+        }
 
     }
 
-    async deleteShipModel(id) {
-        console.log("ShipModelComponent.deleteShipModel id="+id)
+    /**
+     *
+     * @param {ShipModel} shipModel
+     * @returns {Promise<void>}
+     */
+    deleteShipModel = async (shipModel) => {
+        console.log("ShipModelComponent.deleteShipModel id="+shipModel.id)
 
-        // TODO call apiClient
+        let confirmDelete = confirm("Delete ship model? "+shipModel.id+" "+shipModel.name)
+
+        if ( !confirmDelete ) {
+            return
+        }
+
+        try {
+            let response =  await this.apiClient.deleteShipModel(shipModel.id)
+            console.log ( "Response of deleting ship model ", response)
+            this.dispatcher.dispatch( "reloadShipModelList", {});
+        } catch (exc) {
+            this.dispatcher.dispatch('displayError', [exc.message, true]);
+        }
     }
 
     /**

@@ -28,6 +28,10 @@
     app.renderMenu();
 
     ClearE(GetE('container')).appendChild(await app.getShipModelComponent().renderList());
+
+    app.getDispatcher().addListener("reloadShipModelList", async ()=> {
+        ClearE(GetE('container')).appendChild(await app.getShipModelComponent().renderList())
+    })
 </script>
 </body>
 </html>
