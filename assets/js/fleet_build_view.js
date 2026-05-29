@@ -3,7 +3,6 @@ import {ApiClient} from './api.js'
 import {Dispatcher} from './dispatcher.js'
 import {createFleetBuildStatisticsTable} from './fleet_build_table.js'
 import {createDivisionTable} from './division_table.js'
-import {createFleetBuildShipModelTable} from './fleet_build_ship_model_table.js'
 
 export default class FleetBuildView {
 
@@ -87,7 +86,7 @@ export default class FleetBuildView {
             const shipModelsTitle = NewE('h2')
             shipModelsTitle.appendChild(NewT('Assigned Ship Models'))
             rightCol.appendChild(shipModelsTitle)
-            rightCol.appendChild(createFleetBuildShipModelTable(assignments))
+            rightCol.appendChild(this.createFleetBuildShipModelTable(assignments))
 
             container.className = 'two-col-layout'
             container.appendChild(leftCol)
@@ -192,5 +191,52 @@ export default class FleetBuildView {
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }
+    }
+
+    /**
+     * @param {FleetBuildShipModel[]} assignments
+     * @returns {HTMLTableElement}
+     */
+    createFleetBuildShipModelTable(assignments) {
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        ['', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass', 'Amount', 'Result Mass'].forEach(label => {
+            const th = document.createElement('th');
+            th.appendChild(document.createTextNode(label));
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+
+        const tbody = document.createElement('tbody');
+        for (const assignment of assignments) {
+            const tr = document.createElement('tr');
+            const editTd = document.createElement('td');
+            const editLink = document.createElement('a');
+            editLink.href = `/ship-model-assignment/${assignment.id}/main.html`;
+            editLink.appendChild(NewT('View/Edit'));
+            editTd.appendChild(editLink);
+            tr.appendChild(editTd);
+
+            [
+                assignment.shipModel.name,
+                assignment.shipModel.guns,
+                assignment.shipModel.one_gun_mass,
+                assignment.shipModel.defense_mass,
+                assignment.shipModel.engine_mass,
+                assignment.shipModel.cargo_mass,
+                assignment.amount,
+                assignment.result_mass,
+            ].forEach(value => {
+                const td = document.createElement('td');
+                td.appendChild(document.createTextNode(value));
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        }
+
+        const table = document.createElement('table');
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        return table;
     }
 }
