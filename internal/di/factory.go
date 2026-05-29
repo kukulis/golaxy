@@ -15,7 +15,26 @@ func NewFleetBuildRepository() *dao.FleetBuildRepository {
 
 	races := []string{"rex", "zyx", "keth"}
 	for i, divisionID := range []string{"alpha", "beta", "gamma"} {
-		r.Upsert(&galaxy.FleetBuild{ID: divisionID + "-build-1", DivisionId: divisionID, RaceId: races[i]})
+		// fleet build with assigned two ship models
+		fleetBuild := &galaxy.FleetBuild{ID: divisionID + "-build-1", DivisionId: divisionID, RaceId: races[i]}
+		r.Upsert(fleetBuild)
+		nullShipModelAssigned := &galaxy.FleetBuildToShipModel{
+			FleetBuildID: fleetBuild.ID,
+			ShipModel:    nil,
+			Amount:       0,
+			ResultMass:   0,
+		}
+		r.AssignShipModel(nullShipModelAssigned)
+
+		shipModelAssigned := &galaxy.FleetBuildToShipModel{
+			FleetBuildID: fleetBuild.ID,
+			ShipModelID:  races[i] + "-fighter",
+			Amount:       1,
+			ResultMass:   5,
+		}
+		r.AssignShipModel(shipModelAssigned)
+
+		// fleet build without assigned ship models
 		r.Upsert(&galaxy.FleetBuild{ID: divisionID + "-build-2", DivisionId: divisionID, RaceId: races[(i+1)%len(races)]})
 	}
 

@@ -9,7 +9,7 @@ type FleetBuildToShipModel struct {
 	ResultMass   float64 `json:"result_mass"`
 
 	// not stored to DB directly
-	ShipModel *ShipModel
+	ShipModel *ShipModel `json:"shipModel"`
 }
 
 func (c *FleetBuildToShipModel) CalculateResultMass() float64 {

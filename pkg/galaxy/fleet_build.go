@@ -8,6 +8,7 @@ type FleetBuild struct {
 	ID         string `json:"id"`
 	DivisionId string `json:"division_id"`
 	RaceId     string `json:"race_id"`
+	Name       string `json:"name"`
 
 	// Resources for research
 
@@ -23,6 +24,7 @@ type FleetBuild struct {
 }
 
 type ShipModelAssignment struct {
+	// I wonder why it is not a reference TODO
 	ShipModel ShipModel
 	Amount    int
 }

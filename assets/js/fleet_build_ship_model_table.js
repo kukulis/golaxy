@@ -16,6 +16,7 @@ export function createFleetBuildShipModelTable(assignments) {
 
     const tbody = document.createElement('tbody');
     for (const a of assignments) {
+        // TODO handle null a.ShipModel
         const tr = document.createElement('tr');
         [
             a.shipModel.name,

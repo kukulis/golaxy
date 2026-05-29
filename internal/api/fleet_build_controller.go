@@ -182,6 +182,9 @@ func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	}
 
 	assignedModels := controller.fleetBuildRepository.FindAssignedShipModels(id)
+	for _, a := range assignedModels {
+		a.ShipModel = controller.shipModelRepository.Get(a.ShipModelID)
+	}
 	c.JSON(http.StatusOK, assignedModels)
 }
 

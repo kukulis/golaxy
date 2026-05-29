@@ -66,19 +66,24 @@ func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId s
 // AssignShipModel assigns a ship model to a fleet build (upsert operation).
 // Returns true if a new assignment was created, false if an existing assignment was updated.
 func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.FleetBuildToShipModel) bool {
+
+	// search for existing shipModels assignments
 	for _, b2s := range r.fleetBuildToShipModels {
 		if b2s.ShipModelID == fleetBuild2ShipModel.ShipModelID && b2s.FleetBuildID == fleetBuild2ShipModel.FleetBuildID {
-			// Update existing assignment
 			b2s.Amount = fleetBuild2ShipModel.Amount
 			b2s.ResultMass = fleetBuild2ShipModel.ResultMass
 			b2s.ShipModel = fleetBuild2ShipModel.ShipModel
-			return false // Updated existing
+
+			// Updated existing
+			return false
 		}
 	}
 
 	// Create new assignment
 	r.fleetBuildToShipModels = append(r.fleetBuildToShipModels, fleetBuild2ShipModel)
-	return true // Created new
+
+	// Created new
+	return true
 }
 
 func (r *FleetBuildRepository) UnassignShipModel(fleetBuildId, shipModelId string) bool {

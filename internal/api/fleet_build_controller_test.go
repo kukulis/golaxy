@@ -17,6 +17,7 @@ func setupFleetBuildRouter(controller *FleetBuildController) *gin.Engine {
 	apiGroup := router.Group("/api")
 	apiGroup.GET("/fleet-builds/:id", controller.GetFleetBuild)
 	apiGroup.GET("/fleet-builds/:id/statistics", controller.GetStatistics)
+	apiGroup.GET("/fleet-builds/:id/ship-models", controller.GetAssignedShipModels)
 	return router
 }
 
@@ -242,6 +243,171 @@ func TestGetStatistics(t *testing.T) {
 					got.RemainingResources != tc.expectedStatistics.RemainingResources ||
 					got.ExceedingResources != tc.expectedStatistics.ExceedingResources {
 					t.Errorf("expected %+v, got %+v", tc.expectedStatistics, got)
+				}
+			}
+		})
+	}
+}
+
+// --- GetAssignedShipModels ---
+
+type getAssignedShipModelsTestCase struct {
+	name             string
+	fleetBuildId     string
+	storedFleetBuild *galaxy.FleetBuild
+	assignments      []*galaxy.FleetBuildToShipModel
+	authHeader       string
+	storedShipModels []*galaxy.ShipModel
+
+	// expected part
+	expectedStatus      int
+	expectedAssignments []*galaxy.FleetBuildToShipModel
+}
+
+func getAssignedShipModelsTestCases() []getAssignedShipModelsTestCase {
+	return []getAssignedShipModelsTestCase{
+		{
+			name:             "returns assigned ship models",
+			fleetBuildId:     "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
+			assignments: []*galaxy.FleetBuildToShipModel{
+				{FleetBuildID: "fb-1", ShipModelID: "sm-1", Amount: 3},
+				{FleetBuildID: "fb-1", ShipModelID: "sm-2", Amount: 5},
+			},
+			authHeader: "Bearer test-token",
+
+			storedShipModels: []*galaxy.ShipModel{
+				{
+					ID:          "sm-1",
+					Name:        "First Ship",
+					Guns:        1,
+					OneGunMass:  1,
+					DefenseMass: 0,
+					EngineMass:  0,
+					CargoMass:   0,
+					OwnerId:     "alpha",
+				},
+				{
+					ID:          "sm-2",
+					Name:        "Second Ship",
+					Guns:        1,
+					OneGunMass:  1,
+					DefenseMass: 1,
+					EngineMass:  0,
+					CargoMass:   0,
+					OwnerId:     "alpha",
+				},
+			},
+
+			expectedStatus: http.StatusOK,
+			expectedAssignments: []*galaxy.FleetBuildToShipModel{
+				{FleetBuildID: "fb-1", ShipModelID: "sm-1", Amount: 3,
+					ShipModel: &galaxy.ShipModel{
+						ID:   "sm-1",
+						Name: "First Ship",
+						//Guns:        0,
+						//OneGunMass:  0,
+						//DefenseMass: 0,
+						//EngineMass:  0,
+						//CargoMass:   0,
+						//OwnerId:     "",
+					}},
+				{FleetBuildID: "fb-1", ShipModelID: "sm-2", Amount: 5,
+					ShipModel: &galaxy.ShipModel{
+						ID:   "sm-2",
+						Name: "Second Ship",
+						//Guns:        0,
+						//OneGunMass:  0,
+						//DefenseMass: 0,
+						//EngineMass:  0,
+						//CargoMass:   0,
+						//OwnerId:     "",
+					}},
+			},
+		},
+		{
+			name:                "returns empty list when no assignments",
+			fleetBuildId:        "fb-1",
+			storedFleetBuild:    &galaxy.FleetBuild{ID: "fb-1"},
+			assignments:         nil,
+			authHeader:          "Bearer test-token",
+			expectedStatus:      http.StatusOK,
+			expectedAssignments: []*galaxy.FleetBuildToShipModel{},
+		},
+		{
+			name:             "returns 404 when fleet build not found",
+			fleetBuildId:     "missing",
+			storedFleetBuild: nil,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusNotFound,
+		},
+		{
+			name:             "returns 401 without authorization",
+			fleetBuildId:     "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
+			authHeader:       "",
+			expectedStatus:   http.StatusUnauthorized,
+		},
+	}
+}
+
+func TestGetAssignedShipModels(t *testing.T) {
+	raceRepo := dao.NewRaceRepository()
+	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token"})
+	auth := NewMemoryAuthenticationManager(raceRepo)
+
+	for _, tc := range getAssignedShipModelsTestCases() {
+		t.Run(tc.name, func(t *testing.T) {
+			shipModelRepository := dao.NewShipModelRepository()
+			for _, shipModel := range tc.storedShipModels {
+				shipModelRepository.Upsert(shipModel)
+			}
+			fleetBuildRepository := dao.NewFleetBuildRepository()
+			if tc.storedFleetBuild != nil {
+				fleetBuildRepository.Upsert(tc.storedFleetBuild)
+			}
+			for _, a := range tc.assignments {
+				fleetBuildRepository.AssignShipModel(a)
+			}
+
+			controller := NewFleetBuildController(auth, fleetBuildRepository, nil, shipModelRepository, nil)
+			router := setupFleetBuildRouter(controller)
+
+			req := httptest.NewRequest(http.MethodGet, "/api/fleet-builds/"+tc.fleetBuildId+"/ship-models", nil)
+			if tc.authHeader != "" {
+				req.Header.Set("Authorization", tc.authHeader)
+			}
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if tc.expectedAssignments != nil {
+				var got []*galaxy.FleetBuildToShipModel
+				if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
+					t.Fatalf("failed to unmarshal response: %v", err)
+				}
+				if len(got) != len(tc.expectedAssignments) {
+					t.Fatalf("expected %d assignments, got %d", len(tc.expectedAssignments), len(got))
+				}
+				for i, expected := range tc.expectedAssignments {
+					if got[i].FleetBuildID != expected.FleetBuildID ||
+						got[i].ShipModelID != expected.ShipModelID ||
+						got[i].Amount != expected.Amount {
+						t.Errorf("assignment %d: expected %+v, got %+v", i, expected, got[i])
+					}
+
+					// also asserting the ship model
+					if got[i].ShipModel == nil && expected.ShipModel != nil {
+						t.Fatalf("assignment %d: expected a ship model, but got nil", i)
+					}
+
+					if got[i].ShipModel.ID != expected.ShipModel.ID ||
+						got[i].ShipModel.Name != expected.ShipModel.Name {
+						t.Errorf("Assigned ship model %d: expected %+v, got %+v", i, expected.ShipModel, got[i].ShipModel)
+					}
 				}
 			}
 		})
