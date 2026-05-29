@@ -18,8 +18,15 @@ export function createFleetBuildShipModelTable(assignments) {
     for (const a of assignments) {
         // TODO handle null a.ShipModel
         const tr = document.createElement('tr');
+
+        const nameTd = document.createElement('td');
+        const nameLink = document.createElement('a');
+        nameLink.href = `/ship-model-assignment/${a.id}/main.html`;
+        nameLink.appendChild(document.createTextNode(a.shipModel.name));
+        nameTd.appendChild(nameLink);
+        tr.appendChild(nameTd);
+
         [
-            a.shipModel.name,
             a.shipModel.guns,
             a.shipModel.one_gun_mass,
             a.shipModel.defense_mass,

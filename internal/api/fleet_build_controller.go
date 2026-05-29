@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
+	"log"
 	"net/http"
 )
 
@@ -204,6 +205,8 @@ func (controller *FleetBuildController) GetShipModelAssignment(c *gin.Context) {
 		return
 	}
 	id := c.Param("id")
+
+	log.Printf("The ship model assignment id %s", id)
 
 	assignment := controller.fleetBuildRepository.FindShipModelAssignment(id)
 

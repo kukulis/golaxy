@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"glaktika.eu/galaktika/internal/dao"
+	"log"
 	"net/http"
 )
 
@@ -43,9 +44,9 @@ func (wc *WebController) RenderFleetBuildEdit(c *gin.Context) {
 	}
 	c.HTML(http.StatusOK, "fleet_build_edit", gin.H{"Id": id, "DivisionId": fleetBuild.DivisionId})
 }
-func (wc *WebController) RenderShipModelAssignment(c *gin.Context) {
 
-	id := c.Param("shipModelAssignmentId")
+func (wc *WebController) RenderShipModelAssignment(c *gin.Context) {
+	id := c.Param("id")
 
 	shipModelAssignment := wc.fleetBuildRepository.FindShipModelAssignment(id)
 	if shipModelAssignment == nil {
@@ -53,7 +54,17 @@ func (wc *WebController) RenderShipModelAssignment(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "fleet_build_edit", gin.H{"FleetBuildId": shipModelAssignment.FleetBuildID, "ShipModelAssignmentId": shipModelAssignment.ID})
+	fleetBuild := wc.fleetBuildRepository.Get(shipModelAssignment.FleetBuildID)
+	if fleetBuild == nil {
+		log.Printf("Error: the ship model assignment contains wrong fleet build id %s", shipModelAssignment.FleetBuildID)
+
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	log.Printf("RenderShipModelAssignment:fleetBuild.DivisionId: %s", fleetBuild.DivisionId)
+
+	c.HTML(http.StatusOK, "ship_model_assignment", gin.H{"DivisionId": fleetBuild.DivisionId, "FleetBuildId": fleetBuild.ID, "ShipModelAssignmentId": shipModelAssignment.ID})
 }
 
 func (wc *WebController) RenderShipModelList(c *gin.Context) {
