@@ -208,9 +208,9 @@ export class ShipModelComponent {
             let formCol = wrapper
 
             if (fleetBuild) {
-                const [division, technologies] = await Promise.all([
+                const [division, statistics] = await Promise.all([
                     this.apiClient.getDivision(fleetBuild.division_id),
-                    this.apiClient.getFleetBuildTechnologies(fleetBuildId),
+                    this.apiClient.getFleetBuildStatistics(fleetBuildId),
                 ])
 
                 const leftCol = NewE('div')
@@ -218,7 +218,7 @@ export class ShipModelComponent {
                 const fleetBuildTitle = NewE('h2')
                 fleetBuildTitle.appendChild(NewT('Fleet Build'))
                 leftCol.appendChild(fleetBuildTitle)
-                leftCol.appendChild(createFleetBuildStatisticsTable(fleetBuild, technologies))
+                leftCol.appendChild(createFleetBuildStatisticsTable(fleetBuild, statistics))
 
                 const divisionTitle = NewE('h2')
                 divisionTitle.appendChild(NewT('Division'))

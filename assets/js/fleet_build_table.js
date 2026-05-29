@@ -1,30 +1,28 @@
 import {NewE, NewT} from './helper.js';
 import {FleetBuild} from './entities/fleet_build.js';
+import {FleetBuildStatistics} from './entities/fleet_build_statistics.js';
 
 /**
  * @param {FleetBuild} b
- * @param {Object|null} technologies
+ * @param {FleetBuildStatistics} statistics
  * @returns {HTMLElement}
  */
-export function createFleetBuildStatisticsTable(b, technologies = null) {
-    if (technologies === null) {
-        technologies = {
-            attack: 1,
-            defense: 1,
-            engine: 1,
-            cargo: 1,
-        }
-    }
+export function createFleetBuildStatisticsTable(b, statistics = null ) {
     // const tech = (value, key) => technologies ? `${value} (${technologies[key]})` : value;
     const rows = [
         ['ID', b.id],
         ['Division', b.division_id],
         ['Race', b.race_id],
-        ['Used Attack Resources', b.attack_resources + ' (' + technologies.attack + ')'],
-        ['Used Defense Resources', b.defense_resources + ' (' + technologies.defense + ')'],
-        ['Used Engine Resources', b.engine_resources + ' (' + technologies.engine + ')'],
-        ['Used Cargo Resources', b.cargo_resources + ' (' + technologies.cargo + ')'],
-        ['Resources Used', b.usedResources],
+        ['Name', b.name],
+        ['Used Attack Resources', b.attack_resources + ' (' + statistics.technologies.attack + ')'],
+        ['Used Defense Resources', b.defense_resources + ' (' + statistics.technologies.defense + ')'],
+        ['Used Engine Resources', b.engine_resources + ' (' + statistics.technologies.engine + ')'],
+        ['Used Cargo Resources', b.cargo_resources + ' (' + statistics.technologies.cargo + ')'],
+        ['Resources Used', statistics.used_resources],
+        ['Resources Used for technologies', statistics.used_resources_for_technologies],
+        ['Resources Used for ships', statistics.used_resources_for_ships],
+        ['Max resources', statistics.max_resources],
+        ['Resources Remaining', statistics.remaining_resources],
     ];
 
     const tbody = NewE('tbody');

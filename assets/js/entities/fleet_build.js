@@ -39,7 +39,7 @@ export class FleetBuild {
         this.defense_resources = data.defense_resources ?? 0;
         this.engine_resources = data.engine_resources ?? 0;
         this.cargo_resources = data.cargo_resources ?? 0;
-        this.usedResources = data.usedResources ?? 0;
+        this.usedResources = data.used_resources ?? 0;
         return this;
     }
 }
