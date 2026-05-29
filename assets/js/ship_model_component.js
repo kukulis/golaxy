@@ -273,15 +273,7 @@ export class ShipModelComponent {
             form.appendChild(cancelLink);
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                try {
-                    const data = Object.fromEntries(new FormData(form));
-                    data.guns = parseInt(data.guns);
-                    ['one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(k => data[k] = parseFloat(data[k]));
-                    await this.apiClient.updateShipModel(shipModelId, data);
-                    this.dispatcher.dispatch('afterShipModelEdit', {shipModelId, fleetBuildId});
-                } catch (e) {
-                    this.dispatcher.dispatch('displayError', [e.message, true]);
-                }
+                await this.submitShipModelEdit(form, shipModelId, fleetBuildId);
             });
 
             formCol.appendChild(form)
@@ -289,6 +281,23 @@ export class ShipModelComponent {
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true]);
             return NewE('div');
+        }
+    }
+
+    /**
+     * @param {HTMLFormElement} form
+     * @param {string} shipModelId
+     * @param {string} fleetBuildId
+     */
+    async submitShipModelEdit(form, shipModelId, fleetBuildId) {
+        try {
+            const data = Object.fromEntries(new FormData(form));
+            data.guns = parseInt(data.guns);
+            ['one_gun_mass', 'defense_mass', 'engine_mass', 'cargo_mass'].forEach(k => data[k] = parseFloat(data[k]));
+            await this.apiClient.updateShipModel(shipModelId, data);
+            this.dispatcher.dispatch('afterShipModelEdit', {shipModelId, fleetBuildId});
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true]);
         }
     }
 }

@@ -8,6 +8,9 @@ export class FleetBuild {
     /** @type {string} */
     race_id = '';
 
+    /** @type {string} */
+    name = '';
+
     /** @type {number} */
     attack_resources = 0;
 
@@ -31,6 +34,7 @@ export class FleetBuild {
         this.id = data.id;
         this.division_id = data.division_id;
         this.race_id = data.race_id ?? '';
+        this.name = data.name ?? '';
         this.attack_resources = data.attack_resources ?? 0;
         this.defense_resources = data.defense_resources ?? 0;
         this.engine_resources = data.engine_resources ?? 0;

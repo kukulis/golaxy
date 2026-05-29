@@ -7,15 +7,24 @@ import {FleetBuild} from './entities/fleet_build.js';
  * @returns {HTMLElement}
  */
 export function createFleetBuildStatisticsTable(b, technologies = null) {
-    const tech = (value, key) => technologies ? `${value} (${technologies[key]})` : value;
+    if (technologies === null) {
+        technologies = {
+            attack: 1,
+            defense: 1,
+            engine: 1,
+            cargo: 1,
+        }
+    }
+    // const tech = (value, key) => technologies ? `${value} (${technologies[key]})` : value;
     const rows = [
-        ['ID',                    b.id],
-        ['Division',              b.division_id],
-        ['Race',                  b.race_id],
-        ['Used Attack Resources', tech(b.attack_resources, 'attack')],
-        ['Used Defense Resources',tech(b.defense_resources, 'defense')],
-        ['Used Engine Resources', tech(b.engine_resources, 'engine')],
-        ['Used Cargo Resources',  tech(b.cargo_resources, 'cargo')],
+        ['ID', b.id],
+        ['Division', b.division_id],
+        ['Race', b.race_id],
+        ['Used Attack Resources', b.attack_resources + ' (' + technologies.attack + ')'],
+        ['Used Defense Resources', b.defense_resources + ' (' + technologies.defense + ')'],
+        ['Used Engine Resources', b.engine_resources + ' (' + technologies.engine + ')'],
+        ['Used Cargo Resources', b.cargo_resources + ' (' + technologies.cargo + ')'],
+        ['Resources Used', b.usedResources],
     ];
 
     const tbody = NewE('tbody');
