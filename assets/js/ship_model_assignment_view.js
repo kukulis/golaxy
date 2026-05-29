@@ -1,6 +1,7 @@
 import {ClearE, NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from './api.js'
 import {Dispatcher} from './dispatcher.js'
+import {ShipModel} from "./entities/ship_model.js";
 
 export class ShipModelAssignmentView {
 
@@ -35,7 +36,7 @@ export class ShipModelAssignmentView {
     shipModelId = null
 
     /**
-     * @type {Object|null}
+     * @type {ShipModel|null}
      */
     shipModel = null
 
@@ -104,17 +105,24 @@ export class ShipModelAssignmentView {
             table.style.margin = '0 auto'
 
             const sm = this.shipModel ?? assignment.shipModel
+
+            const resultMassText = NewT(String(assignment.result_mass))
+            const recalcResultMass = () => {
+                resultMassText.textContent = String(sm.total_mass * (parseInt(amountInput.value) || 0))
+            }
+            amountInput.addEventListener('input', recalcResultMass)
+
             for (const [label, content] of [
                 ['Assignment ID', NewT(assignment.id)],
                 ['Fleet Build',   NewT(assignment.fleet_build_id)],
                 ['Ship Model ID', this._shipModelIdCell(assignment, selectionContainer)],
-                ['Amount',        amountInput],
-                ['Result Mass',   NewT(String(assignment.result_mass))],
                 ['Guns',          NewT(String(sm.guns))],
                 ['Gun Mass',      NewT(String(sm.one_gun_mass))],
                 ['Defense Mass',  NewT(String(sm.defense_mass))],
                 ['Engine Mass',   NewT(String(sm.engine_mass))],
                 ['Cargo Mass',    NewT(String(sm.cargo_mass))],
+                ['Amount',        amountInput],
+                ['Result Mass',   resultMassText],
             ]) {
                 const tr = NewE('tr')
                 const tdLabel = NewE('td')
@@ -146,7 +154,7 @@ export class ShipModelAssignmentView {
                 await this._save(
                     this.shipModelId ?? assignment.ship_model_id,
                     parseInt(amountInput.value) || 0,
-                    assignment.result_mass,
+                    sm.total_mass * (parseInt(amountInput.value) || 0),
                 )
             })
 
@@ -209,7 +217,7 @@ export class ShipModelAssignmentView {
             const table = NewE('table')
             const thead = NewE('thead')
             const headerRow = NewE('tr')
-            for (const label of ['ID', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass', '']) {
+            for (const label of ['ID', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass', 'Total Mass', '']) {
                 const th = NewE('th')
                 th.appendChild(NewT(label))
                 headerRow.appendChild(th)
@@ -232,7 +240,7 @@ export class ShipModelAssignmentView {
                     })
                     tr.appendChild(td)
                 }
-                for (const value of [sm.guns, sm.one_gun_mass, sm.defense_mass, sm.engine_mass, sm.cargo_mass]) {
+                for (const value of [sm.guns, sm.one_gun_mass, sm.defense_mass, sm.engine_mass, sm.cargo_mass, sm.total_mass]) {
                     const td = NewE('td')
                     td.appendChild(NewT(String(value)))
                     tr.appendChild(td)

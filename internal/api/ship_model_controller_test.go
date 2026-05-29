@@ -56,6 +56,7 @@ func getShipModelTestCases() []getShipModelTestCase {
 				EngineMass:  16,
 				CargoMass:   0,
 				OwnerId:     "race-1",
+				TotalMass:   32,
 			},
 		},
 		{

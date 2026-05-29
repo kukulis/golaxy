@@ -17,6 +17,8 @@ type ShipModel struct {
 	OwnerId     string  `json:"owner_id"`
 
 	validateError error
+	// not stored to DB
+	TotalMass float64 `json:"total_mass"`
 }
 
 func (shipModel *ShipModel) CalculateTotalMass() float64 {

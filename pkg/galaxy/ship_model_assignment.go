@@ -2,14 +2,13 @@ package galaxy
 
 type ShipModelAssignment struct {
 	// stored to db
-	ID           string  `json:"id"`
-	FleetBuildID string  `json:"fleet_build_id"`
-	ShipModelID  string  `json:"ship_model_id"`
-	Amount       int     `json:"amount"`
-	ResultMass   float64 `json:"result_mass"`
-
+	ID           string `json:"id"`
+	FleetBuildID string `json:"fleet_build_id"`
+	ShipModelID  string `json:"ship_model_id"`
+	Amount       int    `json:"amount"`
 	// not stored to DB directly
-	ShipModel *ShipModel `json:"shipModel"`
+	ResultMass float64    `json:"result_mass"`
+	ShipModel  *ShipModel `json:"shipModel"`
 }
 
 func (c *ShipModelAssignment) CalculateResultMass() float64 {

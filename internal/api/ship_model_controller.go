@@ -36,6 +36,7 @@ func (controller *ShipModelController) GetShipModel(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel not found"})
 		return
 	}
+	shipModel.TotalMass = shipModel.CalculateTotalMass()
 	c.JSON(http.StatusOK, shipModel)
 }
 
@@ -51,7 +52,11 @@ func (controller *ShipModelController) GetAllShipModels(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	c.JSON(http.StatusOK, controller.shipModelRepository.GetAll(race.ID))
+	shipModels := controller.shipModelRepository.GetAll(race.ID)
+	for _, sm := range shipModels {
+		sm.TotalMass = sm.CalculateTotalMass()
+	}
+	c.JSON(http.StatusOK, shipModels)
 }
 
 // CreateShipModel godoc

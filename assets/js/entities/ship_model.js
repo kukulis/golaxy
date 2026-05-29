@@ -23,6 +23,9 @@ export class ShipModel {
     /** @type {number} */
     cargo_mass = 0;
 
+    /** @type {number} */
+    total_mass = 0;
+
     /**
      * @param {Object} data
      * @returns {ShipModel}
@@ -36,6 +39,7 @@ export class ShipModel {
         this.defense_mass = data.defense_mass ?? 0;
         this.engine_mass = data.engine_mass ?? 0;
         this.cargo_mass = data.cargo_mass ?? 0;
+        this.total_mass = data.total_mass ?? 0;
         return this;
     }
 }

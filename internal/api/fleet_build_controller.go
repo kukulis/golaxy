@@ -185,6 +185,10 @@ func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	assignedModels := controller.fleetBuildRepository.FindAssignedShipModels(id)
 	for _, a := range assignedModels {
 		a.ShipModel = controller.shipModelRepository.Get(a.ShipModelID)
+		if a.ShipModel != nil {
+			a.ShipModel.TotalMass = a.ShipModel.CalculateTotalMass()
+			a.ResultMass = a.CalculateResultMass()
+		}
 	}
 	c.JSON(http.StatusOK, assignedModels)
 }
@@ -226,6 +230,12 @@ func (controller *FleetBuildController) GetShipModelAssignment(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "This ship model assignment does not belong to your race"})
 			return
 		}
+	}
+
+	assignment.ShipModel = controller.shipModelRepository.Get(assignment.ShipModelID)
+	if assignment.ShipModel != nil {
+		assignment.ShipModel.TotalMass = assignment.ShipModel.CalculateTotalMass()
+		assignment.ResultMass = assignment.CalculateResultMass()
 	}
 
 	c.JSON(http.StatusOK, assignment)
