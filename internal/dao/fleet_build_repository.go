@@ -11,7 +11,7 @@ import (
 type FleetBuildRepository struct {
 	fleetBuildMap map[string]*galaxy.FleetBuild
 	// not very effective way, but this repository is for DEV purposes only
-	fleetBuildToShipModels []*galaxy.FleetBuildToShipModel
+	fleetBuildToShipModels []*galaxy.ShipModelAssignment
 }
 
 func NewFleetBuildRepository() *FleetBuildRepository {
@@ -49,11 +49,21 @@ func (r *FleetBuildRepository) Delete(id string) {
 	delete(r.fleetBuildMap, id)
 }
 
-func (r *FleetBuildRepository) FindAssignedShipModels(fleetBuildId string) []*galaxy.FleetBuildToShipModel {
-	return util.ArrayFilter(r.fleetBuildToShipModels, func(b2s *galaxy.FleetBuildToShipModel) bool { return b2s.FleetBuildID == fleetBuildId })
+func (r *FleetBuildRepository) FindAssignedShipModels(fleetBuildId string) []*galaxy.ShipModelAssignment {
+	return util.ArrayFilter(r.fleetBuildToShipModels, func(b2s *galaxy.ShipModelAssignment) bool { return b2s.FleetBuildID == fleetBuildId })
 }
 
-func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId string) *galaxy.FleetBuildToShipModel {
+func (r *FleetBuildRepository) FindShipModelAssignment(shipModelAssignmentId string) *galaxy.ShipModelAssignment {
+	for _, b2m := range r.fleetBuildToShipModels {
+		if b2m.ID == shipModelAssignmentId {
+			return b2m
+		}
+	}
+
+	return nil
+}
+
+func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId string) *galaxy.ShipModelAssignment {
 	for _, b2m := range r.fleetBuildToShipModels {
 		if b2m.FleetBuildID == fleetBuildId && b2m.ShipModelID == shipModelId {
 			return b2m
@@ -65,7 +75,7 @@ func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId s
 
 // AssignShipModel assigns a ship model to a fleet build (upsert operation).
 // Returns true if a new assignment was created, false if an existing assignment was updated.
-func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.FleetBuildToShipModel) bool {
+func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.ShipModelAssignment) bool {
 
 	// search for existing shipModels assignments
 	for _, b2s := range r.fleetBuildToShipModels {

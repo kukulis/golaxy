@@ -285,7 +285,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 	createDivision(t, baseURL, "div1")
 
 	// First test: verify 404 when fleet-build doesn't exist
-	resp, _ := makeRequest("GET", baseURL+"/fleet-builds/fb1/ship-models", nil)
+	resp, _ := makeRequest("GET", baseURL+"/fleet-builds/fb1/ship-model-assignments", nil)
 	_ = resp.Body.Close()
 	if resp.StatusCode != 404 {
 		t.Errorf("Expected status 404 for non-existent fleet-build, got: %d", resp.StatusCode)
@@ -315,7 +315,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:           "GET assigned ship-models - empty",
 			method:         "GET",
-			path:           "/fleet-builds/fb1/ship-models",
+			path:           "/fleet-builds/fb1/ship-model-assignments",
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
@@ -327,15 +327,17 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:   "POST assign ship-model",
 			method: "POST",
-			path:   "/fleet-builds/fb1/ship-models",
+			path:   "/ship-model-assignment",
 			body: map[string]interface{}{
-				"ship_model_id": "sm1",
-				"amount":        5,
-				"result_mass":   500.0,
+				"id":             "asgn1",
+				"fleet_build_id": "fb1",
+				"ship_model_id":  "sm1",
+				"amount":         5,
+				"result_mass":    500.0,
 			},
 			expectedStatus: 201,
 			validateBody: func(t *testing.T, body []byte) {
-				var assignment galaxy.FleetBuildToShipModel
+				var assignment galaxy.ShipModelAssignment
 				if err := json.Unmarshal(body, &assignment); err != nil {
 					t.Fatalf("Failed to unmarshal response: %v", err)
 				}
@@ -353,11 +355,11 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:           "GET assigned ship-models - with data",
 			method:         "GET",
-			path:           "/fleet-builds/fb1/ship-models",
+			path:           "/fleet-builds/fb1/ship-model-assignments",
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
-				var assignments []galaxy.FleetBuildToShipModel
+				var assignments []galaxy.ShipModelAssignment
 				if err := json.Unmarshal(body, &assignments); err != nil {
 					t.Fatalf("Failed to unmarshal response: %v", err)
 				}
@@ -372,15 +374,16 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:   "POST assign same ship-model again - update (upsert)",
 			method: "POST",
-			path:   "/fleet-builds/fb1/ship-models",
+			path:   "/ship-model-assignment/asgn1",
 			body: map[string]interface{}{
-				"ship_model_id": "sm1",
-				"amount":        10,
-				"result_mass":   1000.0,
+				"fleet_build_id": "fb1",
+				"ship_model_id":  "sm1",
+				"amount":         10,
+				"result_mass":    1000.0,
 			},
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
-				var assignment galaxy.FleetBuildToShipModel
+				var assignment galaxy.ShipModelAssignment
 				if err := json.Unmarshal(body, &assignment); err != nil {
 					t.Fatalf("Failed to unmarshal response: %v", err)
 				}
@@ -395,11 +398,11 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:           "GET assigned ship-models - verify update persisted",
 			method:         "GET",
-			path:           "/fleet-builds/fb1/ship-models",
+			path:           "/fleet-builds/fb1/ship-model-assignments",
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
-				var assignments []galaxy.FleetBuildToShipModel
+				var assignments []galaxy.ShipModelAssignment
 				if err := json.Unmarshal(body, &assignments); err != nil {
 					t.Fatalf("Failed to unmarshal response: %v", err)
 				}
@@ -419,7 +422,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:           "DELETE unassign ship-model",
 			method:         "DELETE",
-			path:           "/fleet-builds/fb1/ship-models/sm1",
+			path:           "/ship-models-assignment/asgn1",
 			body:           nil,
 			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
@@ -435,7 +438,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:           "DELETE unassign non-existent assignment - 404",
 			method:         "DELETE",
-			path:           "/fleet-builds/fb1/ship-models/sm999",
+			path:           "/ship-models-assignment/nonexistent",
 			body:           nil,
 			expectedStatus: 404,
 			validateBody: func(t *testing.T, body []byte) {
@@ -451,10 +454,11 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 		{
 			name:   "POST assign to non-existent fleet-build - 404",
 			method: "POST",
-			path:   "/fleet-builds/nonexistent/ship-models",
+			path:   "/ship-model-assignment",
 			body: map[string]interface{}{
-				"ship_model_id": "sm1",
-				"amount":        5,
+				"fleet_build_id": "nonexistent",
+				"ship_model_id":  "sm1",
+				"amount":         5,
 			},
 			expectedStatus: 404,
 			validateBody: func(t *testing.T, body []byte) {

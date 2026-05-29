@@ -255,13 +255,13 @@ type getAssignedShipModelsTestCase struct {
 	name             string
 	fleetBuildId     string
 	storedFleetBuild *galaxy.FleetBuild
-	assignments      []*galaxy.FleetBuildToShipModel
+	assignments      []*galaxy.ShipModelAssignment
 	authHeader       string
 	storedShipModels []*galaxy.ShipModel
 
 	// expected part
 	expectedStatus      int
-	expectedAssignments []*galaxy.FleetBuildToShipModel
+	expectedAssignments []*galaxy.ShipModelAssignment
 }
 
 func getAssignedShipModelsTestCases() []getAssignedShipModelsTestCase {
@@ -270,7 +270,7 @@ func getAssignedShipModelsTestCases() []getAssignedShipModelsTestCase {
 			name:             "returns assigned ship models",
 			fleetBuildId:     "fb-1",
 			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
-			assignments: []*galaxy.FleetBuildToShipModel{
+			assignments: []*galaxy.ShipModelAssignment{
 				{FleetBuildID: "fb-1", ShipModelID: "sm-1", Amount: 3},
 				{FleetBuildID: "fb-1", ShipModelID: "sm-2", Amount: 5},
 			},
@@ -300,7 +300,7 @@ func getAssignedShipModelsTestCases() []getAssignedShipModelsTestCase {
 			},
 
 			expectedStatus: http.StatusOK,
-			expectedAssignments: []*galaxy.FleetBuildToShipModel{
+			expectedAssignments: []*galaxy.ShipModelAssignment{
 				{FleetBuildID: "fb-1", ShipModelID: "sm-1", Amount: 3,
 					ShipModel: &galaxy.ShipModel{
 						ID:   "sm-1",
@@ -332,7 +332,7 @@ func getAssignedShipModelsTestCases() []getAssignedShipModelsTestCase {
 			assignments:         nil,
 			authHeader:          "Bearer test-token",
 			expectedStatus:      http.StatusOK,
-			expectedAssignments: []*galaxy.FleetBuildToShipModel{},
+			expectedAssignments: []*galaxy.ShipModelAssignment{},
 		},
 		{
 			name:             "returns 404 when fleet build not found",
@@ -385,7 +385,7 @@ func TestGetAssignedShipModels(t *testing.T) {
 			}
 
 			if tc.expectedAssignments != nil {
-				var got []*galaxy.FleetBuildToShipModel
+				var got []*galaxy.ShipModelAssignment
 				if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
 					t.Fatalf("failed to unmarshal response: %v", err)
 				}

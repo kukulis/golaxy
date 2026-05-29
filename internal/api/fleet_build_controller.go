@@ -165,7 +165,7 @@ func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 // @Tags fleet-builds
 // @Produce json
 // @Param id path string true "FleetBuild ID"
-// @Success 200 {array} galaxy.FleetBuildToShipModel
+// @Success 200 {array} galaxy.ShipModelAssignment
 // @Failure 404 {object} map[string]string
 // @Router /fleet-builds/{id}/ship-models [get]
 func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
@@ -188,38 +188,81 @@ func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	c.JSON(http.StatusOK, assignedModels)
 }
 
-// AssignShipModel godoc
-// @Summary Assign a ship model to a fleet build
+// GetShipModelAssignment godoc
+// @Summary Get a ship model assignment by ID
 // @Tags fleet-builds
-// @Accept json
 // @Produce json
-// @Param id path string true "FleetBuild ID"
-// @Param assignment body galaxy.FleetBuildToShipModel true "Assignment data"
-// @Success 201 {object} galaxy.FleetBuildToShipModel
-// @Success 200 {object} galaxy.FleetBuildToShipModel
-// @Failure 400 {object} map[string]string
+// @Param id path string true "ShipModelAssignmentInner ID"
+// @Success 200 {object} galaxy.ShipModelAssignment
+// @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /fleet-builds/{id}/ship-models [post]
-func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
+// @Router /ship-model-assignment/{id} [get]
+func (controller *FleetBuildController) GetShipModelAssignment(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	fleetBuildId := c.Param("id")
-	existing := controller.fleetBuildRepository.Get(fleetBuildId)
-	if existing == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+	id := c.Param("id")
+
+	assignment := controller.fleetBuildRepository.FindShipModelAssignment(id)
+
+	if assignment == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ship Model Assignment not found"})
 		return
 	}
 
-	var assignment galaxy.FleetBuildToShipModel
+	fleetBuild := controller.fleetBuildRepository.Get(assignment.FleetBuildID)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Broken ship model assignment the fleet build id is wrong."})
+		return
+	}
+
+	if race.Role != galaxy.RoleAdmin {
+		if fleetBuild.RaceId != race.ID {
+			c.JSON(http.StatusNotFound, gin.H{"error": "This ship model assignment does not belong to your race"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, assignment)
+
+}
+
+// AddShipModelAssignment godoc
+// @Summary Assign a ship model to a fleet build
+// @Tags fleet-builds
+// @Accept json
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Param assignment body galaxy.ShipModelAssignment true "Assignment data"
+// @Success 201 {object} galaxy.ShipModelAssignment
+// @Success 200 {object} galaxy.ShipModelAssignment
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/ship-models [post]
+func (controller *FleetBuildController) AddShipModelAssignment(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var assignment galaxy.ShipModelAssignment
 	if err := c.ShouldBindJSON(&assignment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	assignment.FleetBuildID = fleetBuildId
+	fleetBuild := controller.fleetBuildRepository.Get(assignment.FleetBuildID)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+	if race.Role != galaxy.RoleAdmin && fleetBuild.RaceId != race.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "This fleet build does not belong to your race"})
+		return
+	}
 
 	wasCreated := controller.fleetBuildRepository.AssignShipModel(&assignment)
 
@@ -228,6 +271,49 @@ func (controller *FleetBuildController) AssignShipModel(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, assignment)
 	}
+}
+
+// UpdateShipModelAssignment godoc
+// @Summary Update a ship model assignment
+// @Tags fleet-builds
+// @Accept json
+// @Produce json
+// @Param id path string true "ShipModelAssignment ID"
+// @Param assignment body galaxy.ShipModelAssignment true "Assignment data"
+// @Success 200 {object} galaxy.ShipModelAssignment
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /ship-model-assignment/{id} [post]
+func (controller *FleetBuildController) UpdateShipModelAssignment(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	existing := controller.fleetBuildRepository.FindShipModelAssignment(c.Param("id"))
+	if existing == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ship Model Assignment not found"})
+		return
+	}
+
+	fleetBuild := controller.fleetBuildRepository.Get(existing.FleetBuildID)
+	if fleetBuild != nil && race.Role != galaxy.RoleAdmin && fleetBuild.RaceId != race.ID {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ship Model Assignment not found"})
+		return
+	}
+
+	var update galaxy.ShipModelAssignment
+	if err := c.ShouldBindJSON(&update); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	existing.ShipModelID = update.ShipModelID
+	existing.Amount = update.Amount
+	existing.ResultMass = update.ResultMass
+
+	c.JSON(http.StatusOK, existing)
 }
 
 // UnassignShipModel godoc
@@ -245,21 +331,22 @@ func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	fleetBuildId := c.Param("id")
-	shipModelId := c.Param("shipModelId")
 
-	existing := controller.fleetBuildRepository.Get(fleetBuildId)
-	if existing == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
-		return
-	}
-
-	success := controller.fleetBuildRepository.UnassignShipModel(fleetBuildId, shipModelId)
-	if !success {
+	assignment := controller.fleetBuildRepository.FindShipModelAssignment(c.Param("id"))
+	if assignment == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel assignment not found"})
 		return
 	}
 
+	if race.Role != galaxy.RoleAdmin {
+		fleetBuild := controller.fleetBuildRepository.Get(assignment.FleetBuildID)
+		if fleetBuild != nil && fleetBuild.RaceId != race.ID {
+			c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel assignment not found"})
+			return
+		}
+	}
+
+	controller.fleetBuildRepository.UnassignShipModel(assignment.FleetBuildID, assignment.ShipModelID)
 	c.JSON(http.StatusOK, gin.H{"message": "ShipModel unassigned successfully"})
 }
 
@@ -292,11 +379,11 @@ func (controller *FleetBuildController) GetStatistics(c *gin.Context) {
 	}
 
 	assignments := controller.fleetBuildRepository.FindAssignedShipModels(fleetBuildId)
-	fleetBuild.AssignedShipModels = make([]galaxy.ShipModelAssignment, 0, len(assignments))
+	fleetBuild.AssignedShipModels = make([]galaxy.ShipModelAssignmentInner, 0, len(assignments))
 	for _, a := range assignments {
 		shipModel := controller.shipModelRepository.Get(a.ShipModelID)
 		if shipModel != nil {
-			fleetBuild.AssignedShipModels = append(fleetBuild.AssignedShipModels, galaxy.ShipModelAssignment{
+			fleetBuild.AssignedShipModels = append(fleetBuild.AssignedShipModels, galaxy.ShipModelAssignmentInner{
 				ShipModel: *shipModel,
 				Amount:    a.Amount,
 			})

@@ -107,16 +107,24 @@ export class ApiClient {
     }
 
     async getFleetBuildShipModels(id) {
-        const data = await this._request('GET', `/fleet-builds/${id}/ship-models`);
+        const data = await this._request('GET', `/fleet-builds/${id}/ship-model-assignments`);
         return data.map(d => (new FleetBuildShipModel()).updateFromDTO(d));
     }
 
-    async assignShipModel(id, assignment) {
-        return this._request('POST', `/fleet-builds/${id}/ship-models`, assignment);
+    async getShipModelAssignment(assignmentId) {
+        return (new FleetBuildShipModel()).updateFromDTO(await this._request('GET', `/ship-model-assignment/${assignmentId}`));
     }
 
-    async unassignShipModel(id, shipModelId) {
-        return this._request('DELETE', `/fleet-builds/${id}/ship-models/${shipModelId}`);
+    async addShipModelAssignment(assignment) {
+        return this._request('POST', `/ship-model-assignment`, assignment);
+    }
+
+    async updateShipModelAssignment(assignmentId, assignment) {
+        return this._request('POST', `/ship-model-assignment/${assignmentId}`, assignment);
+    }
+
+    async unassignShipModel(assignmentId) {
+        return this._request('DELETE', `/ship-models-assignment/${assignmentId}`);
     }
 
     async getFleetBuildStatistics(fleetBuildId) {

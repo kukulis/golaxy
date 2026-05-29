@@ -285,7 +285,7 @@ func TestCalculateShipTech_GlassPerfo(t *testing.T) {
 
 func TestCalculateAllShipTech_Simple(t *testing.T) {
 	fleetBuild := &FleetBuild{
-		AssignedShipModels: []ShipModelAssignment{
+		AssignedShipModels: []ShipModelAssignmentInner{
 			{
 				ShipModel: ShipModel{
 					Guns:        1,

@@ -19,11 +19,11 @@ type FleetBuild struct {
 
 	// not stored to DB directly
 
-	AssignedShipModels []ShipModelAssignment
+	AssignedShipModels []ShipModelAssignmentInner
 	UsedResources      float64
 }
 
-type ShipModelAssignment struct {
+type ShipModelAssignmentInner struct {
 	// I wonder why it is not a reference TODO
 	ShipModel ShipModel
 	Amount    int
