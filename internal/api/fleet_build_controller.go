@@ -70,7 +70,15 @@ func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
 		return
 	}
 	divisionId := c.Query("division_id")
-	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, race.ID))
+	raceId := race.ID
+	if c.Query("all") == "true" {
+		if explicit := c.Query("race_id"); explicit != "" {
+			raceId = explicit
+		} else {
+			raceId = ""
+		}
+	}
+	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, raceId))
 }
 
 // CreateFleetBuild godoc

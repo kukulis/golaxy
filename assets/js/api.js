@@ -94,9 +94,13 @@ export class ApiClient {
 
     // Fleet Builds
 
-    async getFleetBuilds(divisionId) {
-        const query = divisionId ? `?division_id=${encodeURIComponent(divisionId)}` : '';
-        return this._request('GET', `/fleet-builds${query}`);
+    async getFleetBuilds(divisionId, all = false, raceId = '') {
+        const params = new URLSearchParams()
+        if (divisionId) params.set('division_id', divisionId)
+        if (all) params.set('all', 'true')
+        if (raceId) params.set('race_id', raceId)
+        const query = params.size > 0 ? '?' + params.toString() : ''
+        return this._request('GET', `/fleet-builds${query}`)
     }
 
     async getFleetBuild(id) {

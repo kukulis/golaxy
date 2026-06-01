@@ -23,10 +23,19 @@ export default class FleetBuildsView {
     divisionId = null;
 
     /**
-     *
      * @type {HTMLElement}
      */
     tBody = null;
+
+    /**
+     * @type {boolean}
+     */
+    showAll = false;
+
+    /**
+     * @type {string}
+     */
+    filterRaceId = '';
 
     /**
      *
@@ -50,6 +59,52 @@ export default class FleetBuildsView {
      */
     async generateView() {
         let viewDiv = NewE('div')
+
+        const filterDiv = NewE('div')
+
+        const allCheckbox = NewE('input')
+        allCheckbox.type = 'checkbox'
+        allCheckbox.id = 'filter-all'
+        const allLabel = NewE('label')
+        allLabel.htmlFor = 'filter-all'
+        allLabel.appendChild(NewT('All'))
+        filterDiv.appendChild(allCheckbox)
+        filterDiv.appendChild(allLabel)
+
+        const raceSelect = NewE('select')
+        raceSelect.disabled = true
+        const defaultOption = NewE('option')
+        defaultOption.value = ''
+        defaultOption.appendChild(NewT('All races'))
+        raceSelect.appendChild(defaultOption)
+        try {
+            const races = await this.apiClient.getRaces()
+            for (const r of races) {
+                const option = NewE('option')
+                option.value = r.id
+                option.appendChild(NewT(r.name || r.id))
+                raceSelect.appendChild(option)
+            }
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true])
+        }
+        filterDiv.appendChild(raceSelect)
+
+        allCheckbox.addEventListener('change', async () => {
+            this.showAll = allCheckbox.checked
+            raceSelect.disabled = !this.showAll
+            if (!this.showAll) {
+                this.filterRaceId = ''
+                raceSelect.value = ''
+            }
+            await this.reloadTableBody()
+        })
+        raceSelect.addEventListener('change', async () => {
+            this.filterRaceId = raceSelect.value
+            await this.reloadTableBody()
+        })
+
+        viewDiv.appendChild(filterDiv)
 
         let table = NewE('table')
 
@@ -106,7 +161,7 @@ export default class FleetBuildsView {
         ClearE(this.tBody)
 
         try {
-            const builds = await this.apiClient.getFleetBuilds(this.divisionId);
+            const builds = await this.apiClient.getFleetBuilds(this.divisionId, this.showAll, this.filterRaceId);
             for (const b of builds) {
                 const tr = NewE('tr');
 
