@@ -18,6 +18,7 @@ func setupFleetBuildRouter(controller *FleetBuildController) *gin.Engine {
 	apiGroup.GET("/fleet-builds/:id", controller.GetFleetBuild)
 	apiGroup.GET("/fleet-builds/:id/statistics", controller.GetStatistics)
 	apiGroup.GET("/fleet-builds/:id/ship-models", controller.GetAssignedShipModels)
+	apiGroup.GET("/ship-models-assignment/:id/calculate-ship-tech", controller.CalculateShipTech)
 	return router
 }
 
@@ -408,6 +409,154 @@ func TestGetAssignedShipModels(t *testing.T) {
 						got[i].ShipModel.Name != expected.ShipModel.Name {
 						t.Errorf("Assigned ship model %d: expected %+v, got %+v", i, expected.ShipModel, got[i].ShipModel)
 					}
+				}
+			}
+		})
+	}
+}
+
+// --- CalculateShipTech ---
+
+type calculateShipTechTestCase struct {
+	name             string
+	assignmentId     string
+	assignment       *galaxy.ShipModelAssignment
+	storedFleetBuild *galaxy.FleetBuild
+	storedShipModel  *galaxy.ShipModel
+	authHeader       string
+	expectedStatus   int
+	expectedShipTech *galaxy.ShipTech
+}
+
+func calculateShipTechTestCases() []calculateShipTechTestCase {
+	return []calculateShipTechTestCase{
+		{
+			name:         "returns ship tech for assignment",
+			assignmentId: "asgn-1",
+			assignment: &galaxy.ShipModelAssignment{
+				ID:           "asgn-1",
+				FleetBuildID: "fb-1",
+				ShipModelID:  "sm-1",
+				Amount:       2,
+			},
+			storedFleetBuild: &galaxy.FleetBuild{
+				ID:               "fb-1",
+				RaceId:           "race-1",
+				AttackResources:  0,
+				DefenseResources: 0,
+				EngineResources:  0,
+				CargoResources:   0,
+			},
+			storedShipModel: &galaxy.ShipModel{
+				ID:          "sm-1",
+				Guns:        0,
+				OneGunMass:  0,
+				DefenseMass: 0,
+				EngineMass:  1,
+				CargoMass:   0,
+			},
+			authHeader:     "Bearer test-token",
+			expectedStatus: http.StatusOK,
+			expectedShipTech: &galaxy.ShipTech{
+				Guns:    0,
+				Attack:  0,
+				Defense: 0,
+				Speed:   1,
+				Mass:    1,
+			},
+		},
+		{
+			name:             "returns 404 when assignment not found",
+			assignmentId:     "missing",
+			assignment:       nil,
+			storedFleetBuild: nil,
+			storedShipModel:  nil,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusNotFound,
+		},
+		{
+			name:         "returns 404 when fleet build not found",
+			assignmentId: "asgn-1",
+			assignment: &galaxy.ShipModelAssignment{
+				ID:           "asgn-1",
+				FleetBuildID: "missing-fb",
+				ShipModelID:  "sm-1",
+			},
+			storedFleetBuild: nil,
+			storedShipModel:  nil,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusNotFound,
+		},
+		{
+			name:         "returns 404 when ship model not found",
+			assignmentId: "asgn-1",
+			assignment: &galaxy.ShipModelAssignment{
+				ID:           "asgn-1",
+				FleetBuildID: "fb-1",
+				ShipModelID:  "missing-sm",
+			},
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
+			storedShipModel:  nil,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusNotFound,
+		},
+		{
+			name:         "returns 401 without authorization",
+			assignmentId: "asgn-1",
+			assignment: &galaxy.ShipModelAssignment{
+				ID:           "asgn-1",
+				FleetBuildID: "fb-1",
+				ShipModelID:  "sm-1",
+			},
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
+			storedShipModel:  &galaxy.ShipModel{ID: "sm-1"},
+			authHeader:       "",
+			expectedStatus:   http.StatusUnauthorized,
+		},
+	}
+}
+
+func TestCalculateShipTech(t *testing.T) {
+	raceRepo := dao.NewRaceRepository()
+	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token"})
+	auth := NewMemoryAuthenticationManager(raceRepo)
+
+	for _, tc := range calculateShipTechTestCases() {
+		t.Run(tc.name, func(t *testing.T) {
+			fleetBuildRepo := dao.NewFleetBuildRepository()
+			if tc.storedFleetBuild != nil {
+				fleetBuildRepo.Upsert(tc.storedFleetBuild)
+			}
+			if tc.assignment != nil {
+				fleetBuildRepo.AssignShipModel(tc.assignment)
+			}
+
+			shipModelRepo := dao.NewShipModelRepository()
+			if tc.storedShipModel != nil {
+				shipModelRepo.Upsert(tc.storedShipModel)
+			}
+
+			controller := NewFleetBuildController(auth, fleetBuildRepo, nil, shipModelRepo, nil)
+			router := setupFleetBuildRouter(controller)
+
+			req := httptest.NewRequest(http.MethodGet, "/api/ship-models-assignment/"+tc.assignmentId+"/calculate-ship-tech", nil)
+			if tc.authHeader != "" {
+				req.Header.Set("Authorization", tc.authHeader)
+			}
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if tc.expectedShipTech != nil {
+				var got galaxy.ShipTech
+				if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
+					t.Fatalf("failed to unmarshal response: %v", err)
+				}
+				if got != *tc.expectedShipTech {
+					t.Errorf("expected %+v, got %+v", *tc.expectedShipTech, got)
 				}
 			}
 		})

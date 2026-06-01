@@ -539,24 +539,24 @@ func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
-	fleetBuildId := c.Param("id")
-	shipModelId := c.Param("shipModelId")
 
-	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	assignmentId := c.Param("id")
+
+	assignment := controller.fleetBuildRepository.FindShipModelAssignment(assignmentId)
+	if assignment == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild assignment not found"})
+		return
+	}
+
+	fleetBuild := controller.fleetBuildRepository.Get(assignment.FleetBuildID)
 	if fleetBuild == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
 		return
 	}
 
-	assignment := controller.fleetBuildRepository.FindAssignedShipModel(fleetBuildId, shipModelId)
-	if assignment == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel is not assigned to this FleetBuild"})
-		return
-	}
-
-	shipModel := controller.shipModelRepository.Get(shipModelId)
+	shipModel := controller.shipModelRepository.Get(assignment.ShipModelID)
 	if shipModel == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "ShipModel not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("ShipModel by id %s not found", assignment.ShipModelID)})
 		return
 	}
 
