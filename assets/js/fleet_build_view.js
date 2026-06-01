@@ -100,6 +100,7 @@ export default class FleetBuildView {
                     let challengeToCreate = new Challenge()
                     challengeToCreate.id = crypto.randomUUID();
                     challengeToCreate.fleet_build_b_id = b.id;
+                    challengeToCreate.division_id = b.division_id;
 
                     let resultChallenge = await this.apiClient.createChallenge(challengeToCreate);
 

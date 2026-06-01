@@ -3,6 +3,9 @@ export class Challenge {
     id = '';
 
     /** @type {string} */
+    division_id = '';
+
+    /** @type {string} */
     challenger_race_id = '';
 
     /** @type {string} */
@@ -20,6 +23,7 @@ export class Challenge {
      */
     updateFromDTO(data) {
         this.id                 = data.id                  ?? '';
+        this.division_id        = data.division_id         ?? '';
         this.challenger_race_id = data.challenger_race_id  ?? '';
         this.fleet_build_a_id   = data.fleet_build_a_id    ?? '';
         this.fleet_build_b_id   = data.fleet_build_b_id    ?? '';

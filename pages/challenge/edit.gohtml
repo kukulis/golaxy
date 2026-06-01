@@ -1,0 +1,41 @@
+{{define "challenge_edit"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaktika - Edit Challenge</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
+    <style>
+        #container { width: 100%; max-width: 600px; }
+        select { background-color: #0a0a0a; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 6px 8px; width: 100%; box-sizing: border-box; font-size: 14px; }
+        button { margin-top: 16px; }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <div id="user-menu"></div>
+    <h1 id="page-title"></h1>
+    <p id="error-msg" style="display:none"></p>
+    <div id="container">
+        <!-- generated with JS -->
+    </div>
+</div>
+<script type="module">
+    import {ClearE, GetE} from '/assets/js/helper.js';
+    import {App} from '/assets/js/app.js';
+
+    const challengeId = '{{.Id}}';
+    document.getElementById('page-title').textContent = `Edit Challenge: ${challengeId}`;
+
+    const app = new App();
+    app.renderMenu();
+
+    const challengeView = app.getChallengeView();
+    const view = await challengeView.generateEditView(challengeId);
+    ClearE(GetE('container')).appendChild(view);
+</script>
+</body>
+</html>
+{{end}}

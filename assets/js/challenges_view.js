@@ -50,7 +50,7 @@ export default class ChallengesView {
 
         const thead = NewE('thead')
         const headerRow = NewE('tr')
-        for (const label of ['ID', 'Challenger Race', 'Fleet Build A', 'Fleet Build B', 'Battle Report', '']) {
+        for (const label of ['', 'ID', 'Challenger Race', 'Fleet Build A', 'Fleet Build B', 'Battle Report', '']) {
             const th = NewE('th')
             th.appendChild(NewT(label))
             headerRow.appendChild(th)
@@ -74,6 +74,15 @@ export default class ChallengesView {
             const challenges = await this.apiClient.getChallenges()
             for (const ch of challenges) {
                 const tr = NewE('tr')
+
+                const tdEdit = NewE('td')
+                if (ch.challenger_race_id === this.currentRaceId) {
+                    const editLink = NewE('a')
+                    editLink.href = `/challenge/${ch.id}/edit.html`
+                    editLink.appendChild(NewT('✏ Edit'))
+                    tdEdit.appendChild(editLink)
+                }
+                tr.appendChild(tdEdit)
 
                 for (const val of [ch.id, ch.challenger_race_id, ch.fleet_build_a_id, ch.fleet_build_b_id, ch.battle_report_id]) {
                     const td = NewE('td')

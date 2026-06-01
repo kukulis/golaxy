@@ -95,3 +95,7 @@ func (wc *WebController) shipModelData(c *gin.Context) gin.H {
 func (wc *WebController) RenderChallenges(c *gin.Context) {
 	c.HTML(http.StatusOK, "challenges", nil)
 }
+
+func (wc *WebController) RenderChallengeEdit(c *gin.Context) {
+	c.HTML(http.StatusOK, "challenge_edit", gin.H{"Id": c.Param("id")})
+}

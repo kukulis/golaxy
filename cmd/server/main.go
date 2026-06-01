@@ -25,6 +25,7 @@ func main() {
 		"./pages/ship-model/edit.gohtml",
 		"./pages/division/fleet-build/ship-model-assignment/main.gohtml",
 		"./pages/challenges.gohtml",
+		"./pages/challenge/edit.gohtml",
 	)
 
 	router.Static("/assets", "./assets")
@@ -38,6 +39,7 @@ func main() {
 	router.GET("/fleet-build/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuildEdit(c) })
 	router.GET("/ship-model-assignment/:id/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelAssignment(c) })
 	router.GET("/challenges.html", func(c *gin.Context) { di.WebControllerInstance.RenderChallenges(c) })
+	router.GET("/challenge/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderChallengeEdit(c) })
 	router.GET("/ship-model/list.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelList(c) })
 	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelDetails(c) })
 	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelEdit(c) })
