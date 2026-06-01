@@ -56,13 +56,15 @@ func (shipModel *ShipModel) CalculateShipTech(t *Technologies) ShipTech {
 	speed := shipModel.EngineMass * t.Engine / mass
 	defense := shipModel.DefenseMass * t.Defense / math.Sqrt(mass)
 	attack := shipModel.OneGunMass * t.Attack
+	cargoCapacity := shipModel.CargoMass * t.Cargo
 
 	return ShipTech{
-		Guns:    shipModel.Guns,
-		Speed:   speed,
-		Defense: defense,
-		Attack:  attack,
-		Mass:    mass,
+		Guns:          shipModel.Guns,
+		Speed:         speed,
+		Defense:       defense,
+		Attack:        attack,
+		CargoCapacity: cargoCapacity,
+		Mass:          mass,
 	}
 }
 

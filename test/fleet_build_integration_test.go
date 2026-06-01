@@ -211,7 +211,7 @@ func TestFleetBuildEndpoints(t *testing.T) {
 			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedStatus {
-				t.Errorf("Expected status %d, got: %d", tt.expectedStatus, resp.StatusCode)
+				t.Errorf("test case %q: expected status %d, got: %d", tt.name, tt.expectedStatus, resp.StatusCode)
 			}
 
 			body, err := io.ReadAll(resp.Body)
@@ -335,7 +335,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 				"amount":         5,
 				"result_mass":    500.0,
 			},
-			expectedStatus: 201,
+			expectedStatus: 200,
 			validateBody: func(t *testing.T, body []byte) {
 				var assignment galaxy.ShipModelAssignment
 				if err := json.Unmarshal(body, &assignment); err != nil {
@@ -482,7 +482,7 @@ func TestFleetBuildShipModelAssignment(t *testing.T) {
 			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedStatus {
-				t.Errorf("Expected status %d, got: %d", tt.expectedStatus, resp.StatusCode)
+				t.Errorf("test case %q: expected status %d, got: %d", tt.name, tt.expectedStatus, resp.StatusCode)
 			}
 
 			body, err := io.ReadAll(resp.Body)

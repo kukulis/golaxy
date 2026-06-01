@@ -260,15 +260,16 @@ export default class FleetBuildView {
             techByAssignmentId.set(entry.assignment_id, entry.ship_tech)
         }
 
+
         const tbody = document.createElement('tbody');
         for (const assignment of assignments) {
             const rawTech = techByAssignmentId.get(assignment.id) ?? {}
             const tech = {
-                attack:         rawTech.attack         ?? '',
-                defense:        rawTech.defense        ?? '',
-                speed:          rawTech.speed          ?? '',
-                cargo_capacity: rawTech.cargo_capacity ?? '',
-                mass:           rawTech.mass           ?? '',
+                attack:         rawTech.attack         ?? 0,
+                defense:        rawTech.defense        ?? 0,
+                speed:          rawTech.speed          ?? 0,
+                cargo_capacity: rawTech.cargo_capacity ?? 0,
+                mass:           rawTech.mass           ?? 0,
             }
             const tr = document.createElement('tr');
             const editTd = document.createElement('td');
@@ -278,16 +279,21 @@ export default class FleetBuildView {
             editTd.appendChild(editLink);
             tr.appendChild(editTd);
 
+            const displayTech = (v) => ' (' + v.toFixed(2) + ')';
+
+           let displayedData =
             [
                 assignment.shipModel.name,
                 assignment.shipModel.guns,
-                '' + assignment.shipModel.one_gun_mass + ' (' + tech.attack + ')',
-                '' + assignment.shipModel.defense_mass + ' (' + tech.defense + ')',
-                '' + assignment.shipModel.engine_mass + ' (' + tech.speed + ')',
-                '' + assignment.shipModel.cargo_mass + ' (' + tech.cargo_capacity + ')',
+                '' + assignment.shipModel.one_gun_mass + displayTech(tech.attack),
+                '' + assignment.shipModel.defense_mass + displayTech(tech.defense),
+                '' + assignment.shipModel.engine_mass + displayTech(tech.speed),
+                '' + assignment.shipModel.cargo_mass + displayTech(tech.cargo_capacity),
                 assignment.amount,
-                '' + assignment.result_mass + ' (' + tech.mass + ')',
-            ].forEach(value => {
+                '' + assignment.result_mass + displayTech(tech.mass),
+            ];
+
+            displayedData.forEach(value => {
                 const td = document.createElement('td');
                 td.appendChild(document.createTextNode(value));
                 tr.appendChild(td);
