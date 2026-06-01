@@ -240,6 +240,18 @@ export default class FleetBuildView {
         }
     }
 
+    async _deleteAssignment(assignmentId) {
+        if (!confirm('Delete this assignment?')) {
+            return
+        }
+        try {
+            await this.apiClient.unassignShipModel(assignmentId)
+            await this.reloadAssignmentsTable()
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true])
+        }
+    }
+
     /**
      * @param {FleetBuildShipModel[]} assignments
      * @param {{assignment_id: string, ship_tech: ShipTech}[]} shipTechs
@@ -248,7 +260,7 @@ export default class FleetBuildView {
     createFleetBuildShipModelTable(assignments, shipTechs) {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
-        ['', 'Name', 'Guns', 'Gun Mass (Attack)', 'Defense Mass (Defense)', 'Engine Mass (Speed)', 'Cargo Mass (Cargo Cap.)', 'Amount', 'Result Mass (Ship Mass)'].forEach(label => {
+        ['', 'Name', 'Guns', 'Gun Mass (Attack)', 'Defense Mass (Defense)', 'Engine Mass (Speed)', 'Cargo Mass (Cargo Cap.)', 'Amount', 'Result Mass (Ship Mass)', ''].forEach(label => {
             const th = document.createElement('th');
             th.appendChild(document.createTextNode(label));
             headerRow.appendChild(th);
@@ -298,6 +310,14 @@ export default class FleetBuildView {
                 td.appendChild(document.createTextNode(value));
                 tr.appendChild(td);
             });
+
+            const deleteTd = document.createElement('td');
+            const deleteBtn = NewE('button');
+            deleteBtn.appendChild(NewT('Delete'));
+            deleteBtn.addEventListener('click', async () => { await this._deleteAssignment(assignment.id) });
+            deleteTd.appendChild(deleteBtn);
+            tr.appendChild(deleteTd);
+
             tbody.appendChild(tr);
         }
 
