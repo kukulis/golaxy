@@ -3,6 +3,7 @@ import {ApiClient} from './api.js'
 import {Dispatcher} from './dispatcher.js'
 import {createFleetBuildStatisticsTable} from './fleet_build_table.js'
 import {createDivisionTable} from './division_table.js'
+import {ShipTech} from './entities/ship_tech.js'
 
 export default class FleetBuildView {
 
@@ -56,11 +57,12 @@ export default class FleetBuildView {
         const container = NewE('div')
 
         try {
-            const [b, division, assignments, statistics] = await Promise.all([
+            const [b, division, assignments, statistics, shipTechs] = await Promise.all([
                 this.apiClient.getFleetBuild(this.buildId),
                 this.apiClient.getDivision(this.divisionId),
                 this.apiClient.getFleetBuildShipModels(this.buildId),
                 this.apiClient.getFleetBuildStatistics(this.buildId),
+                this.apiClient.calculateAssignmentsShipTechs(this.buildId),
             ])
 
             const leftCol = NewE('div')
@@ -86,7 +88,7 @@ export default class FleetBuildView {
             const shipModelsTitle = NewE('h2')
             shipModelsTitle.appendChild(NewT('Assigned Ship Models'))
             rightCol.appendChild(shipModelsTitle)
-            rightCol.appendChild(this.createFleetBuildShipModelTable(assignments))
+            rightCol.appendChild(this.createFleetBuildShipModelTable(assignments, shipTechs))
 
             container.className = 'two-col-layout'
             container.appendChild(leftCol)
@@ -195,20 +197,34 @@ export default class FleetBuildView {
 
     /**
      * @param {FleetBuildShipModel[]} assignments
+     * @param {{assignment_id: string, ship_tech: ShipTech}[]} shipTechs
      * @returns {HTMLTableElement}
      */
-    createFleetBuildShipModelTable(assignments) {
+    createFleetBuildShipModelTable(assignments, shipTechs) {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
-        ['', 'Name', 'Guns', 'Gun Mass', 'Defense Mass', 'Engine Mass', 'Cargo Mass', 'Amount', 'Result Mass'].forEach(label => {
+        ['', 'Name', 'Guns', 'Gun Mass (Attack)', 'Defense Mass (Defense)', 'Engine Mass (Speed)', 'Cargo Mass (Cargo Cap.)', 'Amount', 'Result Mass (Ship Mass)'].forEach(label => {
             const th = document.createElement('th');
             th.appendChild(document.createTextNode(label));
             headerRow.appendChild(th);
         });
         thead.appendChild(headerRow);
 
+        const techByAssignmentId = new Map()
+        for (const entry of shipTechs) {
+            techByAssignmentId.set(entry.assignment_id, entry.ship_tech)
+        }
+
         const tbody = document.createElement('tbody');
         for (const assignment of assignments) {
+            const rawTech = techByAssignmentId.get(assignment.id) ?? {}
+            const tech = {
+                attack:         rawTech.attack         ?? '',
+                defense:        rawTech.defense        ?? '',
+                speed:          rawTech.speed          ?? '',
+                cargo_capacity: rawTech.cargo_capacity ?? '',
+                mass:           rawTech.mass           ?? '',
+            }
             const tr = document.createElement('tr');
             const editTd = document.createElement('td');
             const editLink = document.createElement('a');
@@ -220,12 +236,12 @@ export default class FleetBuildView {
             [
                 assignment.shipModel.name,
                 assignment.shipModel.guns,
-                assignment.shipModel.one_gun_mass,
-                assignment.shipModel.defense_mass,
-                assignment.shipModel.engine_mass,
-                assignment.shipModel.cargo_mass,
+                '' + assignment.shipModel.one_gun_mass + ' (' + tech.attack + ')',
+                '' + assignment.shipModel.defense_mass + ' (' + tech.defense + ')',
+                '' + assignment.shipModel.engine_mass + ' (' + tech.speed + ')',
+                '' + assignment.shipModel.cargo_mass + ' (' + tech.cargo_capacity + ')',
                 assignment.amount,
-                assignment.result_mass,
+                '' + assignment.result_mass + ' (' + tech.mass + ')',
             ].forEach(value => {
                 const td = document.createElement('td');
                 td.appendChild(document.createTextNode(value));

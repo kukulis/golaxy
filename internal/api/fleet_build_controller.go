@@ -168,7 +168,7 @@ func (controller *FleetBuildController) DeleteFleetBuild(c *gin.Context) {
 // @Param id path string true "FleetBuild ID"
 // @Success 200 {array} galaxy.ShipModelAssignment
 // @Failure 404 {object} map[string]string
-// @Router /fleet-builds/{id}/ship-models [get]
+// @Router /fleet-builds/{id}/ship-model-assignments [get]
 func (controller *FleetBuildController) GetAssignedShipModels(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
@@ -247,13 +247,12 @@ func (controller *FleetBuildController) GetShipModelAssignment(c *gin.Context) {
 // @Tags fleet-builds
 // @Accept json
 // @Produce json
-// @Param id path string true "FleetBuild ID"
 // @Param assignment body galaxy.ShipModelAssignment true "Assignment data"
 // @Success 201 {object} galaxy.ShipModelAssignment
 // @Success 200 {object} galaxy.ShipModelAssignment
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /fleet-builds/{id}/ship-models [post]
+// @Router /ship-model-assignment [post]
 func (controller *FleetBuildController) AddShipModelAssignment(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
@@ -333,11 +332,10 @@ func (controller *FleetBuildController) UpdateShipModelAssignment(c *gin.Context
 // @Summary Unassign a ship model from a fleet build
 // @Tags fleet-builds
 // @Produce json
-// @Param id path string true "FleetBuild ID"
-// @Param shipModelId path string true "ShipModel ID"
+// @Param id path string true "ShipModelAssignment ID"
 // @Success 200 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /fleet-builds/{id}/ship-models/{shipModelId} [delete]
+// @Router /ship-models-assignment/{id} [delete]
 func (controller *FleetBuildController) UnassignShipModel(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
@@ -528,11 +526,10 @@ func (controller *FleetBuildController) GetTechnologies(c *gin.Context) {
 // @Summary Calculate ship tech for a ship model assigned to a fleet build
 // @Tags fleet-builds
 // @Produce json
-// @Param id path string true "FleetBuild ID"
-// @Param shipModelId path string true "ShipModel ID"
+// @Param id path string true "ShipModelAssignment ID"
 // @Success 200 {object} galaxy.ShipTech
 // @Failure 404 {object} map[string]string
-// @Router /fleet-builds/{id}/ship-models/{shipModelId}/calculate-ship-tech [get]
+// @Router /ship-models-assignment/{id}/calculate-ship-tech [get]
 func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
@@ -562,4 +559,46 @@ func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 
 	shipTech := fleetBuild.CalculateShipTech(shipModel)
 	c.JSON(http.StatusOK, shipTech)
+}
+
+type AssignmentShipTech struct {
+	AssignmentID string         `json:"assignment_id"`
+	ShipTech     galaxy.ShipTech `json:"ship_tech"`
+}
+
+// CalculateAssignmentsShipTechs godoc
+// @Summary Calculate ship tech for all assignments of a fleet build
+// @Tags fleet-builds
+// @Produce json
+// @Param id path string true "FleetBuild ID"
+// @Success 200 {array} AssignmentShipTech
+// @Failure 404 {object} map[string]string
+// @Router /fleet-builds/{id}/calculate-assignments-ship-techs [get]
+func (controller *FleetBuildController) CalculateAssignmentsShipTechs(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	fleetBuildId := c.Param("id")
+	fleetBuild := controller.fleetBuildRepository.Get(fleetBuildId)
+	if fleetBuild == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "FleetBuild not found"})
+		return
+	}
+
+	assignments := controller.fleetBuildRepository.FindAssignedShipModels(fleetBuildId)
+	result := make([]AssignmentShipTech, 0, len(assignments))
+	for _, a := range assignments {
+		shipModel := controller.shipModelRepository.Get(a.ShipModelID)
+		if shipModel == nil {
+			continue
+		}
+		result = append(result, AssignmentShipTech{
+			AssignmentID: a.ID,
+			ShipTech:     fleetBuild.CalculateShipTech(shipModel),
+		})
+	}
+	c.JSON(http.StatusOK, result)
 }

@@ -4,6 +4,7 @@ import { Division } from './entities/division.js';
 import { FleetBuild } from './entities/fleet_build.js';
 import { FleetBuildShipModel } from './entities/fleet_build_ship_model.js';
 import { ShipModel } from './entities/ship_model.js';
+import { ShipTech } from './entities/ship_tech.js';
 
 export class ApiClient {
     token = '';
@@ -137,6 +138,11 @@ export class ApiClient {
 
     async calculateShipTech(fleetBuildId, shipModelId) {
         return this._request('GET', `/fleet-builds/${fleetBuildId}/ship-models/${shipModelId}/calculate-ship-tech`);
+    }
+
+    async calculateAssignmentsShipTechs(fleetBuildId) {
+        const data = await this._request('GET', `/fleet-builds/${fleetBuildId}/calculate-assignments-ship-techs`);
+        return data.map(d => ({ assignment_id: d.assignment_id, ship_tech: (new ShipTech()).updateFromDTO(d.ship_tech) }));
     }
 
     // Ship Models
