@@ -35,6 +35,7 @@ export default class UserMenuView {
             divisionsItem,
             new MenuItem('Races', '/races.html'),
             shipModelsItem,
+            new MenuItem('Challenges', '/challenges.html'),
         ]
 
         return this.#buildDom(items)

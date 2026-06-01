@@ -1,5 +1,6 @@
 import {Dispatcher} from "./dispatcher.js";
 import {ClearE, GetE, NewT} from "./helper.js";
+import ChallengesView from "./challenges_view.js";
 import DivisionsView from "./divisions_view.js";
 import FleetBuildsView from "./fleet_builds_view.js";
 import FleetBuildView from "./fleet_build_view.js";
@@ -16,6 +17,11 @@ export class App {
      * @type {Dispatcher}
      */
     dispatcher = null;
+
+    /**
+     * @type {ChallengesView}
+     */
+    challengesView = null;
 
     /**
      *
@@ -106,6 +112,16 @@ export class App {
         return this.dispatcher
     }
 
+
+    /**
+     * @returns {ChallengesView}
+     */
+    getChallengesView() {
+        if (this.challengesView == null) {
+            this.challengesView = new ChallengesView(this.getApiClient(), this.getDispatcher())
+        }
+        return this.challengesView
+    }
 
     /**
      * @returns {DivisionsView}

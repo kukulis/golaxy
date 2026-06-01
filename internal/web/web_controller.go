@@ -91,3 +91,7 @@ func (wc *WebController) shipModelData(c *gin.Context) gin.H {
 	}
 	return data
 }
+
+func (wc *WebController) RenderChallenges(c *gin.Context) {
+	c.HTML(http.StatusOK, "challenges", nil)
+}

@@ -88,6 +88,38 @@ export default class FleetBuildView {
             leftCol.appendChild(fleetBuildTitle)
             leftCol.appendChild(createFleetBuildStatisticsTable(b, statistics))
 
+            const readyCheckbox = NewE('input')
+            readyCheckbox.type = 'checkbox'
+            readyCheckbox.checked = b.ready_for_battle
+            readyCheckbox.id = 'ready-for-battle'
+            readyCheckbox.addEventListener('change', async () => {
+                try {
+                    await this.apiClient.updateFleetBuild(b.id, {...b, ready_for_battle: readyCheckbox.checked})
+                    challengeBtn.style.display = readyCheckbox.checked ? '' : 'none'
+                } catch (e) {
+                    this.dispatcher.dispatch('displayError', [e.message, true])
+                }
+            })
+            const readyLabel = NewE('label')
+            readyLabel.htmlFor = 'ready-for-battle'
+            readyLabel.appendChild(NewT('Ready for battle'))
+            const readyWrapper = NewE('div')
+            readyWrapper.appendChild(readyCheckbox)
+            readyWrapper.appendChild(readyLabel)
+            leftCol.appendChild(readyWrapper)
+
+            const challengeBtn = NewE('button')
+            challengeBtn.appendChild(NewT('Challenge'))
+            challengeBtn.style.display = b.ready_for_battle ? '' : 'none'
+            challengeBtn.addEventListener('click', async () => {
+                try {
+                    await this.apiClient.createChallenge({id: crypto.randomUUID(), fleet_build_a_id: b.id})
+                } catch (e) {
+                    this.dispatcher.dispatch('displayError', [e.message, true])
+                }
+            })
+            leftCol.appendChild(challengeBtn)
+
             const divisionTitle = NewE('h2')
             divisionTitle.appendChild(NewT('Division'))
             leftCol.appendChild(divisionTitle)
