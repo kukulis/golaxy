@@ -88,26 +88,6 @@ export default class FleetBuildView {
             leftCol.appendChild(fleetBuildTitle)
             leftCol.appendChild(createFleetBuildStatisticsTable(b, statistics))
 
-            const readyCheckbox = NewE('input')
-            readyCheckbox.type = 'checkbox'
-            readyCheckbox.checked = b.ready_for_battle
-            readyCheckbox.id = 'ready-for-battle'
-            readyCheckbox.addEventListener('change', async () => {
-                try {
-                    await this.apiClient.updateFleetBuild(b.id, {...b, ready_for_battle: readyCheckbox.checked})
-                    challengeBtn.style.display = readyCheckbox.checked ? '' : 'none'
-                } catch (e) {
-                    this.dispatcher.dispatch('displayError', [e.message, true])
-                }
-            })
-            const readyLabel = NewE('label')
-            readyLabel.htmlFor = 'ready-for-battle'
-            readyLabel.appendChild(NewT('Ready for battle'))
-            const readyWrapper = NewE('div')
-            readyWrapper.appendChild(readyCheckbox)
-            readyWrapper.appendChild(readyLabel)
-            leftCol.appendChild(readyWrapper)
-
             const challengeBtn = NewE('button')
             challengeBtn.appendChild(NewT('Challenge'))
             challengeBtn.style.display = b.ready_for_battle ? '' : 'none'
@@ -212,6 +192,19 @@ export default class FleetBuildView {
                 tr.appendChild(tdInput)
                 editTable.appendChild(tr)
             }
+
+            const readyTr = NewE('tr')
+            const readyTdLabel = NewE('td')
+            readyTdLabel.appendChild(NewT('Ready for battle'))
+            readyTr.appendChild(readyTdLabel)
+            const readyTdInput = NewE('td')
+            const readyCheckbox = NewE('input')
+            readyCheckbox.type = 'checkbox'
+            readyCheckbox.name = 'ready_for_battle'
+            readyCheckbox.checked = b.ready_for_battle
+            readyTdInput.appendChild(readyCheckbox)
+            readyTr.appendChild(readyTdInput)
+            editTable.appendChild(readyTr)
             const saveBtn = NewE('button')
             saveBtn.type = 'submit'
             saveBtn.appendChild(NewT('Save'))
@@ -250,6 +243,7 @@ export default class FleetBuildView {
             data.defense_resources = parseFloat(data.defense_resources) || 0
             data.engine_resources = parseFloat(data.engine_resources) || 0
             data.cargo_resources = parseFloat(data.cargo_resources) || 0
+            data.ready_for_battle = 'ready_for_battle' in data
             await this.apiClient.updateFleetBuild(buildId, {...b, ...data})
             this.dispatcher.dispatch('redirect', `/fleet-build/${buildId}/main.html`)
         } catch (e) {

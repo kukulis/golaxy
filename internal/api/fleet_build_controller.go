@@ -133,6 +133,11 @@ func (controller *FleetBuildController) UpdateFleetBuild(c *gin.Context) {
 		return
 	}
 
+	if race.Role != galaxy.RoleAdmin && existing.RaceId != race.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "This fleet build does not belong to your race"})
+		return
+	}
+
 	var fleetBuild galaxy.FleetBuild
 	if err := c.ShouldBindJSON(&fleetBuild); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
