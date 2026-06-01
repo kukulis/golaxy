@@ -100,7 +100,7 @@ func TestGetFleetBuild(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedStatus {
-				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, tc.expectedStatus, w.Code)
 			}
 
 			if tc.expectedFleetBuild != nil {
@@ -229,7 +229,7 @@ func TestGetStatistics(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedStatus {
-				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, tc.expectedStatus, w.Code)
 			}
 
 			if tc.expectedStatistics != nil {
@@ -382,7 +382,7 @@ func TestGetAssignedShipModels(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedStatus {
-				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, tc.expectedStatus, w.Code)
 			}
 
 			if tc.expectedAssignments != nil {
@@ -547,7 +547,7 @@ func TestCalculateShipTech(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedStatus {
-				t.Errorf("expected status %d, got %d", tc.expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, tc.expectedStatus, w.Code)
 			}
 
 			if tc.expectedShipTech != nil {

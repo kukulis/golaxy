@@ -92,7 +92,7 @@ func TestGetShipModel(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != expectedStatus {
-				t.Errorf("expected status %d, got %d", expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, expectedStatus, w.Code)
 			}
 
 			if expectedModel != nil {
@@ -111,11 +111,11 @@ func TestGetShipModel(t *testing.T) {
 // --- UpdateShipModel ---
 
 type updateShipModelTestCase struct {
-	name            string
-	id              string
-	storedShipModel *galaxy.ShipModel
-	body            string
-	headers         map[string]string
+	name              string
+	id                string
+	storedShipModel   *galaxy.ShipModel
+	body              string
+	headers           map[string]string
 	expectedStatus    int
 	expectedShipModel *galaxy.ShipModel
 }
@@ -214,7 +214,7 @@ func TestUpdateShipModel(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != expectedStatus {
-				t.Errorf("expected status %d, got %d", expectedStatus, w.Code)
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, expectedStatus, w.Code)
 			}
 
 			if expectedModel != nil {

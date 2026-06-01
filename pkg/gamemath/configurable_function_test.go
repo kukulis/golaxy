@@ -97,19 +97,19 @@ func TestNewConfigurableFunctionValidation(t *testing.T) {
 
 			if tt.wantError {
 				if err == nil {
-					t.Errorf("Expected error but got nil")
+					t.Errorf("test case %q: expected error but got nil", tt.name)
 				} else {
 					t.Logf("Got expected error: %v", err)
 				}
 				if cf != nil {
-					t.Errorf("Expected nil ConfigurableFunction when error occurs, got %v", cf)
+					t.Errorf("test case %q: expected nil ConfigurableFunction when error occurs, got %v", tt.name, cf)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("Expected no error but got: %v", err)
+					t.Errorf("test case %q: expected no error but got: %v", tt.name, err)
 				}
 				if cf == nil {
-					t.Errorf("Expected valid ConfigurableFunction but got nil")
+					t.Errorf("test case %q: expected valid ConfigurableFunction but got nil", tt.name)
 				}
 			}
 		})
@@ -175,9 +175,9 @@ func TestCalculateRatio(t *testing.T) {
 			result := cf.CalculateRatio(tt.numerator, tt.denominator)
 
 			if math.IsNaN(result) {
-				t.Errorf("Result is NaN (unexpected)")
+				t.Errorf("test case %q: result is NaN (unexpected)", tt.name)
 			} else if math.Abs(result-tt.expected) > 1e-10 {
-				t.Errorf("got %v, want %v", result, tt.expected)
+				t.Errorf("test case %q: got %v, want %v", tt.name, result, tt.expected)
 			}
 		})
 	}

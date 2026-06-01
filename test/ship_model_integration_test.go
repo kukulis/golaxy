@@ -199,7 +199,7 @@ func TestShipModelEndpoints(t *testing.T) {
 			defer func() { _ = resp.Body.Close() }()
 
 			if resp.StatusCode != tt.expectedStatus {
-				t.Errorf("Expected status %d, got: %d", tt.expectedStatus, resp.StatusCode)
+				t.Errorf("test case %q: expected status %d, got: %d", tt.name, tt.expectedStatus, resp.StatusCode)
 			}
 
 			body, err := io.ReadAll(resp.Body)
