@@ -4,6 +4,7 @@ import {Dispatcher} from './dispatcher.js'
 import {createFleetBuildStatisticsTable} from './fleet_build_table.js'
 import {createDivisionTable} from './division_table.js'
 import {ShipTech} from './entities/ship_tech.js'
+import {Challenge} from "./entities/challenge.js";
 
 export default class FleetBuildView {
 
@@ -92,8 +93,17 @@ export default class FleetBuildView {
             challengeBtn.appendChild(NewT('Challenge'))
             challengeBtn.style.display = b.ready_for_battle ? '' : 'none'
             challengeBtn.addEventListener('click', async () => {
+                if (!confirm("Do you really want make the challenge")) {
+                    return
+                }
                 try {
-                    await this.apiClient.createChallenge({id: crypto.randomUUID(), fleet_build_a_id: b.id})
+                    let challengeToCreate = new Challenge()
+                    challengeToCreate.id = crypto.randomUUID();
+                    challengeToCreate.fleet_build_b_id = b.id;
+
+                    let resultChallenge = await this.apiClient.createChallenge(challengeToCreate);
+
+                    alert("Challenge created " + resultChallenge.id)
                 } catch (e) {
                     this.dispatcher.dispatch('displayError', [e.message, true])
                 }
@@ -113,7 +123,9 @@ export default class FleetBuildView {
 
             const addBtn = NewE('button')
             addBtn.appendChild(NewT('+ Add'))
-            addBtn.addEventListener('click', async () => { await this._addAssignment() })
+            addBtn.addEventListener('click', async () => {
+                await this._addAssignment()
+            })
             rightCol.appendChild(addBtn)
 
             this.assignmentsWrapper = NewE('div')
@@ -245,7 +257,7 @@ export default class FleetBuildView {
             data.cargo_resources = parseFloat(data.cargo_resources) || 0
             data.ready_for_battle = 'ready_for_battle' in data
 
-            console.log ( "fleet_build_view.js [248] data: ", data )
+            console.log("fleet_build_view.js [248] data: ", data)
             await this.apiClient.updateFleetBuild(buildId, {...b, ...data})
             this.dispatcher.dispatch('redirect', `/fleet-build/${buildId}/main.html`)
             // alert("fleet build saved")
@@ -258,10 +270,10 @@ export default class FleetBuildView {
         try {
             const id = crypto.randomUUID()
             await this.apiClient.addShipModelAssignment({
-                id:            id,
+                id: id,
                 fleet_build_id: this.buildId,
                 ship_model_id: '',
-                amount:        1,
+                amount: 1,
             })
             await this.reloadAssignmentsTable()
         } catch (e) {
@@ -306,11 +318,11 @@ export default class FleetBuildView {
         for (const assignment of assignments) {
             const rawTech = techByAssignmentId.get(assignment.id) ?? {}
             const tech = {
-                attack:         rawTech.attack         ?? 0,
-                defense:        rawTech.defense        ?? 0,
-                speed:          rawTech.speed          ?? 0,
+                attack: rawTech.attack ?? 0,
+                defense: rawTech.defense ?? 0,
+                speed: rawTech.speed ?? 0,
                 cargo_capacity: rawTech.cargo_capacity ?? 0,
-                mass:           rawTech.mass           ?? 0,
+                mass: rawTech.mass ?? 0,
             }
             const tr = document.createElement('tr');
             const editTd = document.createElement('td');
@@ -322,17 +334,17 @@ export default class FleetBuildView {
 
             const displayTech = (v) => ' (' + v.toFixed(2) + ')';
 
-           let displayedData =
-            [
-                assignment.shipModel.name,
-                assignment.shipModel.guns,
-                '' + assignment.shipModel.one_gun_mass + displayTech(tech.attack),
-                '' + assignment.shipModel.defense_mass + displayTech(tech.defense),
-                '' + assignment.shipModel.engine_mass + displayTech(tech.speed),
-                '' + assignment.shipModel.cargo_mass + displayTech(tech.cargo_capacity),
-                assignment.amount,
-                '' + assignment.result_mass + displayTech(tech.mass),
-            ];
+            let displayedData =
+                [
+                    assignment.shipModel.name,
+                    assignment.shipModel.guns,
+                    '' + assignment.shipModel.one_gun_mass + displayTech(tech.attack),
+                    '' + assignment.shipModel.defense_mass + displayTech(tech.defense),
+                    '' + assignment.shipModel.engine_mass + displayTech(tech.speed),
+                    '' + assignment.shipModel.cargo_mass + displayTech(tech.cargo_capacity),
+                    assignment.amount,
+                    '' + assignment.result_mass + displayTech(tech.mass),
+                ];
 
             displayedData.forEach(value => {
                 const td = document.createElement('td');
@@ -343,7 +355,9 @@ export default class FleetBuildView {
             const deleteTd = document.createElement('td');
             const deleteBtn = NewE('button');
             deleteBtn.appendChild(NewT('Delete'));
-            deleteBtn.addEventListener('click', async () => { await this._deleteAssignment(assignment.id) });
+            deleteBtn.addEventListener('click', async () => {
+                await this._deleteAssignment(assignment.id)
+            });
             deleteTd.appendChild(deleteBtn);
             tr.appendChild(deleteTd);
 

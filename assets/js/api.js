@@ -168,6 +168,11 @@ export class ApiClient {
         return (new Challenge()).updateFromDTO(await this._request('GET', `/challenges/${id}`));
     }
 
+    /**
+     *
+     * @param {Challenge} challenge
+     * @returns {Promise<Challenge>}
+     */
     async createChallenge(challenge) {
         return (new Challenge()).updateFromDTO(await this._request('POST', '/challenges', challenge));
     }
