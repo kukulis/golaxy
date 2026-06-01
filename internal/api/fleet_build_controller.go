@@ -276,13 +276,21 @@ func (controller *FleetBuildController) AddShipModelAssignment(c *gin.Context) {
 		return
 	}
 
-	wasCreated := controller.fleetBuildRepository.AssignShipModel(&assignment)
+	existingAssignment := controller.fleetBuildRepository.FindAssignedShipModel(assignment.FleetBuildID, assignment.ShipModelID)
 
-	if wasCreated {
-		c.JSON(http.StatusCreated, assignment)
-	} else {
-		c.JSON(http.StatusOK, assignment)
+	if existingAssignment != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("This ship model assignment already exists (%s, %s)", assignment.FleetBuildID, assignment.ShipModelID)})
+		return
 	}
+
+	err := controller.fleetBuildRepository.AssignShipModel(&assignment)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, assignment)
 }
 
 // UpdateShipModelAssignment godoc
@@ -303,29 +311,37 @@ func (controller *FleetBuildController) UpdateShipModelAssignment(c *gin.Context
 		return
 	}
 
-	existing := controller.fleetBuildRepository.FindShipModelAssignment(c.Param("id"))
-	if existing == nil {
+	assignmentId := c.Param("id")
+
+	existingAssignment := controller.fleetBuildRepository.FindShipModelAssignment(assignmentId)
+	if existingAssignment == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Ship Model Assignment not found"})
 		return
 	}
 
-	fleetBuild := controller.fleetBuildRepository.Get(existing.FleetBuildID)
+	fleetBuild := controller.fleetBuildRepository.Get(existingAssignment.FleetBuildID)
 	if fleetBuild != nil && race.Role != galaxy.RoleAdmin && fleetBuild.RaceId != race.ID {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Ship Model Assignment not found"})
 		return
 	}
 
-	var update galaxy.ShipModelAssignment
-	if err := c.ShouldBindJSON(&update); err != nil {
+	var updatedAssignment galaxy.ShipModelAssignment
+	if err := c.ShouldBindJSON(&updatedAssignment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	existing.ShipModelID = update.ShipModelID
-	existing.Amount = update.Amount
-	existing.ResultMass = update.ResultMass
+	existingAssignment.ShipModelID = updatedAssignment.ShipModelID
+	existingAssignment.Amount = updatedAssignment.Amount
+	existingAssignment.ResultMass = updatedAssignment.ResultMass
 
-	c.JSON(http.StatusOK, existing)
+	err := controller.fleetBuildRepository.UpdateShipModelAssignment(existingAssignment)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, existingAssignment)
 }
 
 // UnassignShipModel godoc
@@ -562,7 +578,7 @@ func (controller *FleetBuildController) CalculateShipTech(c *gin.Context) {
 }
 
 type AssignmentShipTech struct {
-	AssignmentID string         `json:"assignment_id"`
+	AssignmentID string          `json:"assignment_id"`
 	ShipTech     galaxy.ShipTech `json:"ship_tech"`
 }
 

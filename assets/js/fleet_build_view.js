@@ -1,4 +1,4 @@
-import {NewE, NewT} from '/assets/js/helper.js'
+import {ClearE, NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from './api.js'
 import {Dispatcher} from './dispatcher.js'
 import {createFleetBuildStatisticsTable} from './fleet_build_table.js'
@@ -26,6 +26,18 @@ export default class FleetBuildView {
      * @type {string}
      */
     divisionId = null
+
+    // /**
+    //  *
+    //  * @type {HTMLElement}
+    //  */
+    // rightCold = null;
+
+    /**
+     *
+     * @type {HTMLElement}
+     */
+    assignmentsWrapper = null;
 
     /**
      * @param {ApiClient} apiClient
@@ -57,12 +69,10 @@ export default class FleetBuildView {
         const container = NewE('div')
 
         try {
-            const [b, division, assignments, statistics, shipTechs] = await Promise.all([
+            const [b, division, statistics] = await Promise.all([
                 this.apiClient.getFleetBuild(this.buildId),
                 this.apiClient.getDivision(this.divisionId),
-                this.apiClient.getFleetBuildShipModels(this.buildId),
                 this.apiClient.getFleetBuildStatistics(this.buildId),
-                this.apiClient.calculateAssignmentsShipTechs(this.buildId),
             ])
 
             const leftCol = NewE('div')
@@ -88,7 +98,17 @@ export default class FleetBuildView {
             const shipModelsTitle = NewE('h2')
             shipModelsTitle.appendChild(NewT('Assigned Ship Models'))
             rightCol.appendChild(shipModelsTitle)
-            rightCol.appendChild(this.createFleetBuildShipModelTable(assignments, shipTechs))
+
+            const addBtn = NewE('button')
+            addBtn.appendChild(NewT('+ Add'))
+            addBtn.addEventListener('click', async () => { await this._addAssignment() })
+            rightCol.appendChild(addBtn)
+
+            this.assignmentsWrapper = NewE('div')
+            rightCol.appendChild(this.assignmentsWrapper)
+
+            await this.reloadAssignmentsTable()
+
 
             container.className = 'two-col-layout'
             container.appendChild(leftCol)
@@ -98,6 +118,16 @@ export default class FleetBuildView {
         }
 
         return container
+    }
+
+    async reloadAssignmentsTable() {
+        const [assignments, shipsTechs] = await Promise.all([
+            this.apiClient.getFleetBuildShipModelsAssignments(this.buildId),
+            this.apiClient.calculateAssignmentsShipTechs(this.buildId),
+        ])
+
+        ClearE(this.assignmentsWrapper)
+        this.assignmentsWrapper.appendChild(this.createFleetBuildShipModelTable(assignments, shipsTechs))
     }
 
     /**
@@ -190,6 +220,21 @@ export default class FleetBuildView {
             data.cargo_resources = parseFloat(data.cargo_resources) || 0
             await this.apiClient.updateFleetBuild(buildId, {...b, ...data})
             this.dispatcher.dispatch('redirect', `/fleet-build/${buildId}/main.html`)
+        } catch (e) {
+            this.dispatcher.dispatch('displayError', [e.message, true])
+        }
+    }
+
+    async _addAssignment() {
+        try {
+            const id = crypto.randomUUID()
+            await this.apiClient.addShipModelAssignment({
+                id:            id,
+                fleet_build_id: this.buildId,
+                ship_model_id: '',
+                amount:        1,
+            })
+            await this.reloadAssignmentsTable()
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }

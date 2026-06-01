@@ -22,7 +22,14 @@ export class ApiClient {
         }
         const response = await fetch('/api' + path, options);
         if (!response.ok) {
-            throw new Error(`${method} ${path} failed: ${response.statusText}`);
+            let message = method + ' ' + path + ' failed: ' + response.statusText;
+            try {
+                const data = await response.json();
+                if (data.error) {
+                    message = message + ': ' + data.error;
+                }
+            } catch (_) {}
+            throw new Error(message);
         }
         return response.json();
     }
@@ -107,7 +114,7 @@ export class ApiClient {
         return this._request('DELETE', `/fleet-builds/${id}`);
     }
 
-    async getFleetBuildShipModels(id) {
+    async getFleetBuildShipModelsAssignments(id) {
         const data = await this._request('GET', `/fleet-builds/${id}/ship-model-assignments`);
         return data.map(d => (new FleetBuildShipModel()).updateFromDTO(d));
     }

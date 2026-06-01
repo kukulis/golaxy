@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"errors"
 	"glaktika.eu/galaktika/pkg/galaxy"
 	"glaktika.eu/galaktika/pkg/util"
 	"maps"
@@ -75,25 +76,24 @@ func (r *FleetBuildRepository) FindAssignedShipModel(fleetBuildId, shipModelId s
 
 // AssignShipModel assigns a ship model to a fleet build (upsert operation).
 // Returns true if a new assignment was created, false if an existing assignment was updated.
-func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.ShipModelAssignment) bool {
+func (r *FleetBuildRepository) AssignShipModel(fleetBuild2ShipModel *galaxy.ShipModelAssignment) error {
+	r.fleetBuildToShipModels = append(r.fleetBuildToShipModels, fleetBuild2ShipModel)
 
-	// search for existing shipModels assignments
-	for _, b2s := range r.fleetBuildToShipModels {
-		if b2s.ShipModelID == fleetBuild2ShipModel.ShipModelID && b2s.FleetBuildID == fleetBuild2ShipModel.FleetBuildID {
-			b2s.Amount = fleetBuild2ShipModel.Amount
-			b2s.ResultMass = fleetBuild2ShipModel.ResultMass
-			b2s.ShipModel = fleetBuild2ShipModel.ShipModel
+	return nil
+}
 
-			// Updated existing
-			return false
+func (r *FleetBuildRepository) UpdateShipModelAssignment(updatedAssignment *galaxy.ShipModelAssignment) error {
+	for _, existingAssignment := range r.fleetBuildToShipModels {
+		if existingAssignment.ID == updatedAssignment.ID {
+			existingAssignment.ShipModelID = updatedAssignment.ShipModelID
+			existingAssignment.Amount = updatedAssignment.Amount
+			existingAssignment.ResultMass = updatedAssignment.ResultMass
+
+			return nil
 		}
 	}
 
-	// Create new assignment
-	r.fleetBuildToShipModels = append(r.fleetBuildToShipModels, fleetBuild2ShipModel)
-
-	// Created new
-	return true
+	return errors.New("Could not updatedAssignment assignment with id " + updatedAssignment.ID)
 }
 
 func (r *FleetBuildRepository) UnassignShipModel(fleetBuildId, shipModelId string) bool {
