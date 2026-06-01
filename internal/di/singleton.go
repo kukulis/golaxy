@@ -8,6 +8,8 @@ import (
 
 var AuthenticationManagerInstance api.AuthenticationManager
 var BattleRepositoryInstance *dao.BattleRepository
+var ChallengeRepositoryInstance *dao.ChallengeRepository
+var ChallengeControllerInstance *api.ChallengeController
 var BattleControllerInstance *api.BattleController
 var DivisionRepositoryInstance *dao.DivisionRepository
 var DivisionControllerInstance *api.DivisionController
@@ -28,6 +30,7 @@ func CreateSingletons(env string) {
 		RaceRepositoryInstance = dao.NewRaceRepository()
 		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
 		BattleRepositoryInstance = dao.NewBattleRepository()
+		ChallengeRepositoryInstance = dao.NewChallengeRepository()
 		DivisionRepositoryInstance = dao.NewDivisionRepository()
 		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
@@ -37,6 +40,7 @@ func CreateSingletons(env string) {
 		RaceRepositoryInstance = NewRaceRepository()
 		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
 		BattleRepositoryInstance = dao.NewBattleRepository()
+		ChallengeRepositoryInstance = dao.NewChallengeRepository()
 		DivisionRepositoryInstance = NewDivisionRepository()
 		FleetBuildRepositoryInstance = NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
@@ -52,6 +56,7 @@ func CreateSingletons(env string) {
 
 	// Controllers are environment-agnostic
 	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
+	ChallengeControllerInstance = api.NewChallengeController(AuthenticationManagerInstance, ChallengeRepositoryInstance)
 	RaceControllerInstance = api.NewRaceController(AuthenticationManagerInstance, RaceRepositoryInstance)
 	BattleControllerInstance = api.NewBattleController(AuthenticationManagerInstance, BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(AuthenticationManagerInstance, DivisionRepositoryInstance)
@@ -65,6 +70,9 @@ func CreateSingletons(env string) {
 // between tests to ensure data isolation.
 func ResetTestData() {
 	// TODO: Add BattleRepositoryInstance.ResetData() when implemented
+	if ChallengeRepositoryInstance != nil {
+		ChallengeRepositoryInstance.ResetData()
+	}
 	if DivisionRepositoryInstance != nil {
 		DivisionRepositoryInstance.ResetData()
 	}

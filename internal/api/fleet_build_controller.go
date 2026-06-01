@@ -618,3 +618,9 @@ func (controller *FleetBuildController) CalculateAssignmentsShipTechs(c *gin.Con
 	}
 	c.JSON(http.StatusOK, result)
 }
+
+// ready fleet build
+
+func (controller *FleetBuildController) DivisionGetReadyFleetBuilds(c *gin.Context) {
+	// TODO return list of fleet builds that are from all races in this division
+}

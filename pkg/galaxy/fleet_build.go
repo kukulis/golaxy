@@ -37,6 +37,7 @@ type FleetBuildStatistics struct {
 	RemainingResources           int           `json:"remaining_resources"`
 	ExceedingResources           int           `json:"exceeding_resources"`
 	Technologies                 *Technologies `json:"technologies"`
+	ReadyForBattle               bool          `json:"ready_for_battle"`
 }
 
 func (fleetBuild *FleetBuild) CalculateStatistics(maxResources int) FleetBuildStatistics {

@@ -27,6 +27,12 @@ export class FleetBuild {
     usedResources = 0;
 
     /**
+     *
+     * @type {boolean}
+     */
+    ready_for_battle = false;
+
+    /**
      * @param {Object} data
      * @returns {FleetBuild}
      */
@@ -40,6 +46,7 @@ export class FleetBuild {
         this.engine_resources = data.engine_resources ?? 0;
         this.cargo_resources = data.cargo_resources ?? 0;
         this.usedResources = data.used_resources ?? 0;
+        this.ready_for_battle = data.ready_for_battle ?? false;
         return this;
     }
 }

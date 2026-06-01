@@ -1,5 +1,6 @@
 package galaxy
 
+// Battle this is actually a battle report
 type Battle struct {
 	ID    string `json:"id"`
 	SideA *Fleet `json:"side_a"`

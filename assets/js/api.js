@@ -1,4 +1,5 @@
 import { Battle } from './entities/battle.js';
+import { Challenge } from './entities/challenge.js';
 import { Race } from './entities/race.js';
 import { Division } from './entities/division.js';
 import { FleetBuild } from './entities/fleet_build.js';
@@ -150,6 +151,29 @@ export class ApiClient {
     async calculateAssignmentsShipTechs(fleetBuildId) {
         const data = await this._request('GET', `/fleet-builds/${fleetBuildId}/calculate-assignments-ship-techs`);
         return data.map(d => ({ assignment_id: d.assignment_id, ship_tech: (new ShipTech()).updateFromDTO(d.ship_tech) }));
+    }
+
+    // Challenges
+
+    async getChallenges() {
+        const data = await this._request('GET', '/challenges');
+        return data.map(d => (new Challenge()).updateFromDTO(d));
+    }
+
+    async getChallenge(id) {
+        return (new Challenge()).updateFromDTO(await this._request('GET', `/challenges/${id}`));
+    }
+
+    async createChallenge(challenge) {
+        return (new Challenge()).updateFromDTO(await this._request('POST', '/challenges', challenge));
+    }
+
+    async updateChallenge(id, challenge) {
+        return (new Challenge()).updateFromDTO(await this._request('PUT', `/challenges/${id}`, challenge));
+    }
+
+    async deleteChallenge(id) {
+        return this._request('DELETE', `/challenges/${id}`);
     }
 
     // Ship Models
