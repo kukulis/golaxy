@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ func setupFleetBuildRouter(controller *FleetBuildController) *gin.Engine {
 	router := gin.New()
 	apiGroup := router.Group("/api")
 	apiGroup.GET("/fleet-builds/:id", controller.GetFleetBuild)
+	apiGroup.PUT("/fleet-builds/:id", controller.UpdateFleetBuild)
 	apiGroup.GET("/fleet-builds/:id/statistics", controller.GetStatistics)
 	apiGroup.GET("/fleet-builds/:id/ship-models", controller.GetAssignedShipModels)
 	apiGroup.GET("/ship-models-assignment/:id/calculate-ship-tech", controller.CalculateShipTech)
@@ -44,6 +46,7 @@ func getFleetBuildTestCases() []getFleetBuildTestCase {
 				DefenseResources: 20,
 				EngineResources:  30,
 				CargoResources:   40,
+				ReadyForBattle:   true,
 			},
 			authHeader:     "Bearer test-token",
 			expectedStatus: http.StatusOK,
@@ -56,6 +59,7 @@ func getFleetBuildTestCases() []getFleetBuildTestCase {
 				EngineResources:  30,
 				CargoResources:   40,
 				UsedResources:    100,
+				ReadyForBattle:   true,
 			},
 		},
 		{
@@ -108,20 +112,135 @@ func TestGetFleetBuild(t *testing.T) {
 				if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
 					t.Fatalf("failed to unmarshal response: %v", err)
 				}
+
 				if got.ID != tc.expectedFleetBuild.ID ||
 					got.DivisionId != tc.expectedFleetBuild.DivisionId ||
 					got.RaceId != tc.expectedFleetBuild.RaceId ||
 					got.AttackResources != tc.expectedFleetBuild.AttackResources ||
 					got.DefenseResources != tc.expectedFleetBuild.DefenseResources ||
 					got.EngineResources != tc.expectedFleetBuild.EngineResources ||
-					got.CargoResources != tc.expectedFleetBuild.CargoResources {
-					t.Errorf("expected %+v, got %+v", tc.expectedFleetBuild, got)
+					got.CargoResources != tc.expectedFleetBuild.CargoResources ||
+					got.ReadyForBattle != tc.expectedFleetBuild.ReadyForBattle {
+					t.Errorf("test case %q: expected %+v, got %+v", tc.name, tc.expectedFleetBuild, got)
 				}
 
 				// TODO later
 				//if got.UsedResources != tc.expectedFleetBuild.UsedResources {
 				//	t.Errorf("expected fleet build used resources %+v, got %+v", tc.expectedFleetBuild.UsedResources, got.UsedResources)
 				//}
+			}
+		})
+	}
+}
+
+// --- UpdateFleetBuild ---
+
+func TestUpdateFleetBuild(t *testing.T) {
+	raceRepo := dao.NewRaceRepository()
+	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token"})
+	raceRepo.Upsert(&galaxy.Race{ID: "race-2", Name: "Race Two", Token: "other-token"})
+	auth := NewMemoryAuthenticationManager(raceRepo)
+
+	tests := []struct {
+		name             string
+		id               string
+		storedFleetBuild *galaxy.FleetBuild
+		body             string
+		authHeader       string
+		expectedStatus   int
+		expectedBuild    *galaxy.FleetBuild
+	}{
+		{
+			name: "updates fleet build",
+			id:   "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{
+				ID:     "fb-1",
+				RaceId: "race-1",
+				Name:   "Old Name",
+			},
+			body:           `{"name":"New Name","attack_resources":10,"defense_resources":20,"engine_resources":30,"cargo_resources":40,"ready_for_battle":true}`,
+			authHeader:     "Bearer test-token",
+			expectedStatus: http.StatusOK,
+			expectedBuild: &galaxy.FleetBuild{
+				ID:               "fb-1",
+				Name:             "New Name",
+				AttackResources:  10,
+				DefenseResources: 20,
+				EngineResources:  30,
+				CargoResources:   40,
+				ReadyForBattle:   true,
+			},
+		},
+		{
+			name:             "returns 404 when not found",
+			id:               "missing",
+			storedFleetBuild: nil,
+			body:             `{"name":"X"}`,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusNotFound,
+		},
+		{
+			name:             "returns 403 when not owner",
+			id:               "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1", RaceId: "race-2"},
+			body:             `{"name":"X"}`,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusForbidden,
+		},
+		{
+			name:             "returns 400 on invalid body",
+			id:               "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1", RaceId: "race-1"},
+			body:             `not json`,
+			authHeader:       "Bearer test-token",
+			expectedStatus:   http.StatusBadRequest,
+		},
+		{
+			name:             "returns 401 without authorization",
+			id:               "fb-1",
+			storedFleetBuild: &galaxy.FleetBuild{ID: "fb-1"},
+			body:             `{"name":"X"}`,
+			authHeader:       "",
+			expectedStatus:   http.StatusUnauthorized,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := dao.NewFleetBuildRepository()
+			if tc.storedFleetBuild != nil {
+				repo.Upsert(tc.storedFleetBuild)
+			}
+
+			controller := NewFleetBuildController(auth, repo, nil, nil, nil)
+			router := setupFleetBuildRouter(controller)
+
+			req := httptest.NewRequest(http.MethodPut, "/api/fleet-builds/"+tc.id, strings.NewReader(tc.body))
+			req.Header.Set("Content-Type", "application/json")
+			if tc.authHeader != "" {
+				req.Header.Set("Authorization", tc.authHeader)
+			}
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("test case %q: expected status %d, got %d", tc.name, tc.expectedStatus, w.Code)
+			}
+
+			if tc.expectedBuild != nil {
+				var got galaxy.FleetBuild
+				if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
+					t.Fatalf("test case %q: failed to unmarshal: %v", tc.name, err)
+				}
+				if got.ID != tc.expectedBuild.ID ||
+					got.Name != tc.expectedBuild.Name ||
+					got.AttackResources != tc.expectedBuild.AttackResources ||
+					got.DefenseResources != tc.expectedBuild.DefenseResources ||
+					got.EngineResources != tc.expectedBuild.EngineResources ||
+					got.CargoResources != tc.expectedBuild.CargoResources ||
+					got.ReadyForBattle != tc.expectedBuild.ReadyForBattle {
+					t.Errorf("test case %q: expected %+v, got %+v", tc.name, tc.expectedBuild, got)
+				}
 			}
 		})
 	}

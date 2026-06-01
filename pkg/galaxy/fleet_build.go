@@ -16,6 +16,7 @@ type FleetBuild struct {
 	DefenseResources float64 `json:"defense_resources"`
 	EngineResources  float64 `json:"engine_resources"`
 	CargoResources   float64 `json:"cargo_resources"`
+	ReadyForBattle   bool    `json:"ready_for_battle"`
 
 	// not stored to DB directly
 

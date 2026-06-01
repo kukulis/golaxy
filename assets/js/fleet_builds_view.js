@@ -110,7 +110,7 @@ export default class FleetBuildsView {
 
         let thead = NewE('thead')
         let tr = NewE('tr')
-        for (const header of ['ID', 'Race', '']) {
+        for (const header of ['ID', 'Name', 'Race', '']) {
             let th = NewE('th')
             th.appendChild(NewT(header))
             tr.appendChild(th)
@@ -178,6 +178,10 @@ export default class FleetBuildsView {
                 a.appendChild(NewT(b.id));
                 tdId.appendChild(a);
                 tr.appendChild(tdId);
+
+                const tdName = NewE('td');
+                tdName.appendChild(NewT(b.name ?? ''));
+                tr.appendChild(tdName);
 
                 const tdRace = NewE('td');
                 tdRace.appendChild(NewT(b.race_id ?? ''));

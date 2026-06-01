@@ -84,7 +84,7 @@ export default class FleetBuildView {
             leftCol.appendChild(editLink)
 
             const fleetBuildTitle = NewE('h2')
-            fleetBuildTitle.appendChild(NewT('Fleet Build'))
+            fleetBuildTitle.appendChild(NewT(b.name || 'Fleet Build'))
             leftCol.appendChild(fleetBuildTitle)
             leftCol.appendChild(createFleetBuildStatisticsTable(b, statistics))
 
@@ -244,8 +244,11 @@ export default class FleetBuildView {
             data.engine_resources = parseFloat(data.engine_resources) || 0
             data.cargo_resources = parseFloat(data.cargo_resources) || 0
             data.ready_for_battle = 'ready_for_battle' in data
+
+            console.log ( "fleet_build_view.js [248] data: ", data )
             await this.apiClient.updateFleetBuild(buildId, {...b, ...data})
             this.dispatcher.dispatch('redirect', `/fleet-build/${buildId}/main.html`)
+            // alert("fleet build saved")
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }
