@@ -46,3 +46,26 @@ func NewChallenge(
 		Status:           ChallengeStatusPending,
 	}
 }
+
+type ChallengesFilter struct {
+	ChallengerId string
+	ChallengeeId string
+	AcceptedA    bool
+	AcceptedB    bool
+}
+
+func (f *ChallengesFilter) Match(c *Challenge) bool {
+	if f.ChallengerId != "" && c.ChallengerRaceId != f.ChallengerId {
+		return false
+	}
+	if f.ChallengeeId != "" && c.ChallengeeRaceId != f.ChallengeeId {
+		return false
+	}
+	if f.AcceptedA && c.AcceptedAAt == nil {
+		return false
+	}
+	if f.AcceptedB && c.AcceptedBAt == nil {
+		return false
+	}
+	return true
+}

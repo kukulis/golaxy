@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"glaktika.eu/galaktika/pkg/galaxy"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
 type ChallengeRepository struct {
@@ -21,8 +22,8 @@ func (r *ChallengeRepository) Get(id string) *galaxy.Challenge {
 	return r.challengesMap[id]
 }
 
-func (r *ChallengeRepository) GetAll() []*galaxy.Challenge {
-	return slices.Collect(maps.Values(r.challengesMap))
+func (r *ChallengeRepository) GetAll(filter galaxy.ChallengesFilter) []*galaxy.Challenge {
+	return util.ArrayFilter(slices.Collect(maps.Values(r.challengesMap)), filter.Match)
 }
 
 func (r *ChallengeRepository) Upsert(challenge *galaxy.Challenge) {

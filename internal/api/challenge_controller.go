@@ -97,12 +97,79 @@ func (controller *ChallengeController) CreateChallenge(c *gin.Context) {
 	c.JSON(http.StatusCreated, challenge)
 }
 
+// GetChallenges godoc
+// @Summary List challenges
+// @Tags challenges
+// @Produce json
+// @Param challenger_id query string false "Filter by challenger race ID"
+// @Param challengee_id query string false "Filter by challengee race ID"
+// @Param accepted_a query string false "Filter by accepted A (1=true)"
+// @Param accepted_b query string false "Filter by accepted B (1=true)"
+// @Success 200 {array} galaxy.Challenge
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Router /challenges [get]
 func (controller *ChallengeController) GetChallenges(c *gin.Context) {
-	panic("unimplemented")
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	filter := galaxy.ChallengesFilter{
+		ChallengerId: c.Query("challenger_id"),
+		ChallengeeId: c.Query("challengee_id"),
+		AcceptedA:    c.Query("accepted_a") == "1",
+		AcceptedB:    c.Query("accepted_b") == "1",
+	}
+
+	if race.Role != galaxy.RoleAdmin {
+		if filter.ChallengerId == "" && filter.ChallengeeId == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+		if filter.ChallengerId != "" && filter.ChallengerId != race.ID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+		if filter.ChallengeeId != "" && filter.ChallengeeId != race.ID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, controller.challengeRepository.GetAll(filter))
 }
 
+// GetChallenge godoc
+// @Summary Get a challenge by ID
+// @Tags challenges
+// @Produce json
+// @Param id path string true "Challenge ID"
+// @Success 200 {object} galaxy.Challenge
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /challenges/{id} [get]
 func (controller *ChallengeController) GetChallenge(c *gin.Context) {
-	panic("unimplemented")
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	challenge := controller.challengeRepository.Get(c.Param("id"))
+	if challenge == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Challenge not found"})
+		return
+	}
+
+	if race.Role != galaxy.RoleAdmin && race.ID != challenge.ChallengerRaceId && race.ID != challenge.ChallengeeRaceId {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	c.JSON(http.StatusOK, challenge)
 }
 
 func (controller *ChallengeController) UpdateChallenge(c *gin.Context) {
