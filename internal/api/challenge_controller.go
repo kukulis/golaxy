@@ -10,11 +10,13 @@ import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
+
 type ChallengeController struct {
 	authenticationManager AuthenticationManager
 	challengeRepository   *dao.ChallengeRepository
 	divisionRepository    *dao.DivisionRepository
 	raceRepository        *dao.RaceRepository
+	fleetBuildRepository  *dao.FleetBuildRepository
 }
 
 func NewChallengeController(
@@ -22,12 +24,14 @@ func NewChallengeController(
 	challengeRepository *dao.ChallengeRepository,
 	divisionRepository *dao.DivisionRepository,
 	raceRepository *dao.RaceRepository,
+	fleetBuildRepository *dao.FleetBuildRepository,
 ) *ChallengeController {
 	return &ChallengeController{
 		authenticationManager: authenticationManager,
 		challengeRepository:   challengeRepository,
 		divisionRepository:    divisionRepository,
 		raceRepository:        raceRepository,
+		fleetBuildRepository:  fleetBuildRepository,
 	}
 }
 
@@ -172,10 +176,140 @@ func (controller *ChallengeController) GetChallenge(c *gin.Context) {
 	c.JSON(http.StatusOK, challenge)
 }
 
-func (controller *ChallengeController) UpdateChallenge(c *gin.Context) {
-	panic("unimplemented")
+type challengeUpdateRequest struct {
+	ReadyA         bool       `json:"ready_a"`
+	ReadyB         bool       `json:"ready_b"`
+	FleetBuildAId  string     `json:"fleet_build_a_id"`
+	FleetBuildBId  string     `json:"fleet_build_b_id"`
+	AcceptedAAt    *time.Time `json:"accepted_a_at"`
+	AcceptedBAt    *time.Time `json:"accepted_b_at"`
+	Status         string     `json:"status"`
+	ExecutedAt     *time.Time `json:"executed_at"`
+	BattleReportId string     `json:"battle_report_id"`
 }
 
+// UpdateChallenge godoc
+// @Summary Update a challenge
+// @Tags challenges
+// @Accept json
+// @Produce json
+// @Param id path string true "Challenge ID"
+// @Param challenge body challengeUpdateRequest true "Update data"
+// @Success 200 {object} galaxy.Challenge
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /challenges/{id} [put]
+func (controller *ChallengeController) UpdateChallenge(c *gin.Context) {
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	challenge := controller.challengeRepository.Get(c.Param("id"))
+	if challenge == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Challenge not found"})
+		return
+	}
+
+	isChallenger := race.ID == challenge.ChallengerRaceId
+	isChallengee := race.ID == challenge.ChallengeeRaceId
+	isAdmin := race.Role == galaxy.RoleAdmin
+
+	if !isAdmin && !isChallenger && !isChallengee {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	var req challengeUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if (isChallenger || isAdmin) && req.FleetBuildAId != "" {
+		fb := controller.fleetBuildRepository.Get(req.FleetBuildAId)
+		if fb == nil || fb.DivisionId != challenge.DivisionId {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "fleet_build_a_id must belong to the challenge division"})
+			return
+		}
+	}
+	if (isChallengee || isAdmin) && req.FleetBuildBId != "" {
+		fb := controller.fleetBuildRepository.Get(req.FleetBuildBId)
+		if fb == nil || fb.DivisionId != challenge.DivisionId {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "fleet_build_b_id must belong to the challenge division"})
+			return
+		}
+	}
+
+	if isChallenger || isAdmin {
+		challenge.ReadyA = req.ReadyA
+		if req.FleetBuildAId != "" {
+			challenge.FleetBuildAId = req.FleetBuildAId
+		}
+	}
+	if isChallengee || isAdmin {
+		challenge.ReadyB = req.ReadyB
+		if req.FleetBuildBId != "" {
+			challenge.FleetBuildBId = req.FleetBuildBId
+		}
+		if req.Status != "" {
+			challenge.Status = req.Status
+		}
+	}
+	if isAdmin {
+		challenge.AcceptedAAt = req.AcceptedAAt
+		challenge.AcceptedBAt = req.AcceptedBAt
+		if req.ExecutedAt != nil {
+			challenge.ExecutedAt = req.ExecutedAt
+		}
+		if req.BattleReportId != "" {
+			challenge.BattleReportId = req.BattleReportId
+		}
+	}
+
+	controller.challengeRepository.Upsert(challenge)
+	c.JSON(http.StatusOK, challenge)
+}
+
+// DeleteChallenge godoc
+// @Summary Delete a challenge
+// @Tags challenges
+// @Produce json
+// @Param id path string true "Challenge ID"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Router /challenges/{id} [delete]
 func (controller *ChallengeController) DeleteChallenge(c *gin.Context) {
-	panic("unimplemented")
+	race := controller.authenticationManager.AuthenticateFromContext(c)
+	if race == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	challenge := controller.challengeRepository.Get(c.Param("id"))
+	if challenge == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Challenge not found"})
+		return
+	}
+
+	isAdmin := race.Role == galaxy.RoleAdmin
+
+	if !isAdmin && race.ID != challenge.ChallengerRaceId {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+		return
+	}
+
+	if !isAdmin && challenge.Status == galaxy.ChallengeStatusExecuted {
+		c.JSON(http.StatusConflict, gin.H{"error": "Cannot delete an executed challenge"})
+		return
+	}
+
+	controller.challengeRepository.Delete(challenge.ID)
+	c.JSON(http.StatusOK, gin.H{"message": "Challenge deleted successfully"})
 }
