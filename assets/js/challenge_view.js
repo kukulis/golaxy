@@ -1,6 +1,7 @@
 import {NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from './api.js'
 import {Dispatcher} from './dispatcher.js'
+import {formatDateTime} from './date_format.js'
 
 export default class ChallengeView {
 
@@ -31,16 +32,34 @@ export default class ChallengeView {
         const container = NewE('div')
 
         try {
-            const ch = await this.apiClient.getChallenge(challengeId)
-            const [ownBuilds, allBuilds] = await Promise.all([
-                this.apiClient.getFleetBuilds(ch.division_id, false),
-                this.apiClient.getFleetBuilds(ch.division_id, true),
+            const [ch, race] = await Promise.all([
+                this.apiClient.getChallenge(challengeId),
+                this.apiClient.getCurrentRace(),
             ])
 
-            const readOnlyTable = NewE('table')
+            const isChallenger = race.id === ch.challenger_race_id
+            const isChallengee = race.id === ch.challengee_race_id
+            const isAdmin = race.role === 'admin'
+
+            const canEditA = isChallenger || isAdmin
+            const canEditB = isChallengee || isAdmin
+
+            const [buildsA, buildsB, fleetBuildA, fleetBuildB] = await Promise.all([
+                canEditA ? this.apiClient.getFleetBuilds(ch.division_id, false, isAdmin ? ch.challenger_race_id : '') : Promise.resolve([]),
+                canEditB ? this.apiClient.getFleetBuilds(ch.division_id, false, isAdmin ? ch.challengee_race_id : '') : Promise.resolve([]),
+                !canEditA && ch.fleet_build_a_id ? this.apiClient.getFleetBuild(ch.fleet_build_a_id) : Promise.resolve(null),
+                !canEditB && ch.fleet_build_b_id ? this.apiClient.getFleetBuild(ch.fleet_build_b_id) : Promise.resolve(null),
+            ])
+
+            // Read-only info
+            const infoTable = NewE('table')
             for (const [label, value] of [
-                ['ID', ch.id],
-                ['Challenger Race', ch.challenger_race_id],
+                ['ID',         ch.id],
+                ['Division',   ch.division_id],
+                ['Challenger', ch.challenger_race_id],
+                ['Challengee', ch.challengee_race_id],
+                ['Status',     ch.status],
+                ['Created At', formatDateTime(ch.created_at)],
             ]) {
                 const tr = NewE('tr')
                 const tdLabel = NewE('td')
@@ -49,38 +68,115 @@ export default class ChallengeView {
                 const tdValue = NewE('td')
                 tdValue.appendChild(NewT(value))
                 tr.appendChild(tdValue)
-                readOnlyTable.appendChild(tr)
+                infoTable.appendChild(tr)
             }
-            container.appendChild(readOnlyTable)
+            container.appendChild(infoTable)
+
+            // Editable form
+            let selectA = null
+            let checkboxA = null
+            let selectB = null
+            let checkboxB = null
 
             const editTable = NewE('table')
 
-            for (const [label, name, builds, currentId] of [
-                ['Fleet Build A', 'fleet_build_a_id', ownBuilds,  ch.fleet_build_a_id],
-                ['Fleet Build B', 'fleet_build_b_id', allBuilds,  ch.fleet_build_b_id],
-            ]) {
-                const tr = NewE('tr')
-                const tdLabel = NewE('td')
-                tdLabel.appendChild(NewT(label))
-                tr.appendChild(tdLabel)
-                const tdInput = NewE('td')
-                const select = NewE('select')
-                select.name = name
-                const emptyOption = NewE('option')
-                emptyOption.value = ''
-                emptyOption.appendChild(NewT('— select —'))
-                select.appendChild(emptyOption)
-                for (const b of builds) {
-                    const option = NewE('option')
-                    option.value = b.id
-                    option.appendChild(NewT(b.name || b.id))
-                    if (b.id === currentId) option.selected = true
-                    select.appendChild(option)
+            // Fleet Build A
+            const trFbA = NewE('tr')
+            const tdFbALabel = NewE('td')
+            tdFbALabel.appendChild(NewT('Fleet Build A'))
+            trFbA.appendChild(tdFbALabel)
+            const tdFbA = NewE('td')
+            if (canEditA) {
+                selectA = NewE('select')
+                selectA.name = 'fleet_build_a_id'
+                const emptyOpt = NewE('option')
+                emptyOpt.value = ''
+                emptyOpt.appendChild(NewT('— select —'))
+                selectA.appendChild(emptyOpt)
+                for (const b of buildsA) {
+                    const opt = NewE('option')
+                    opt.value = b.id
+                    opt.appendChild(NewT(b.name || b.id))
+                    if (b.id === ch.fleet_build_a_id) opt.selected = true
+                    selectA.appendChild(opt)
                 }
-                tdInput.appendChild(select)
-                tr.appendChild(tdInput)
-                editTable.appendChild(tr)
+                tdFbA.appendChild(selectA)
+            } else {
+                const input = NewE('input')
+                input.type = 'text'
+                input.readOnly = true
+                input.value = fleetBuildA ? (fleetBuildA.name || fleetBuildA.id) : ch.fleet_build_a_id
+                tdFbA.appendChild(input)
             }
+            trFbA.appendChild(tdFbA)
+            editTable.appendChild(trFbA)
+
+            // Ready A
+            const trReadyA = NewE('tr')
+            const tdReadyALabel = NewE('td')
+            tdReadyALabel.appendChild(NewT('Ready A'))
+            trReadyA.appendChild(tdReadyALabel)
+            const tdReadyA = NewE('td')
+            if (canEditA) {
+                checkboxA = NewE('input')
+                checkboxA.type = 'checkbox'
+                checkboxA.name = 'ready_a'
+                checkboxA.checked = ch.ready_a
+                tdReadyA.appendChild(checkboxA)
+            } else {
+                tdReadyA.appendChild(NewT(ch.ready_a ? '✓' : '✗'))
+            }
+            trReadyA.appendChild(tdReadyA)
+            editTable.appendChild(trReadyA)
+
+            // Fleet Build B
+            const trFbB = NewE('tr')
+            const tdFbBLabel = NewE('td')
+            tdFbBLabel.appendChild(NewT('Fleet Build B'))
+            trFbB.appendChild(tdFbBLabel)
+            const tdFbB = NewE('td')
+            if (canEditB) {
+                selectB = NewE('select')
+                selectB.name = 'fleet_build_b_id'
+                const emptyOpt = NewE('option')
+                emptyOpt.value = ''
+                emptyOpt.appendChild(NewT('— select —'))
+                selectB.appendChild(emptyOpt)
+                for (const b of buildsB) {
+                    const opt = NewE('option')
+                    opt.value = b.id
+                    opt.appendChild(NewT(b.name || b.id))
+                    if (b.id === ch.fleet_build_b_id) opt.selected = true
+                    selectB.appendChild(opt)
+                }
+                tdFbB.appendChild(selectB)
+            } else {
+                const input = NewE('input')
+                input.type = 'text'
+                input.readOnly = true
+                input.value = fleetBuildB ? (fleetBuildB.name || fleetBuildB.id) : ch.fleet_build_b_id
+                tdFbB.appendChild(input)
+            }
+            trFbB.appendChild(tdFbB)
+            editTable.appendChild(trFbB)
+
+            // Ready B
+            const trReadyB = NewE('tr')
+            const tdReadyBLabel = NewE('td')
+            tdReadyBLabel.appendChild(NewT('Ready B'))
+            trReadyB.appendChild(tdReadyBLabel)
+            const tdReadyB = NewE('td')
+            if (canEditB) {
+                checkboxB = NewE('input')
+                checkboxB.type = 'checkbox'
+                checkboxB.name = 'ready_b'
+                checkboxB.checked = ch.ready_b
+                tdReadyB.appendChild(checkboxB)
+            } else {
+                tdReadyB.appendChild(NewT(ch.ready_b ? '✓' : '✗'))
+            }
+            trReadyB.appendChild(tdReadyB)
+            editTable.appendChild(trReadyB)
 
             const saveBtn = NewE('button')
             saveBtn.type = 'submit'
@@ -98,15 +194,24 @@ export default class ChallengeView {
             form.appendChild(cancelLink)
             form.addEventListener('submit', async (e) => {
                 e.preventDefault()
+                const payload = {...ch}
+                if (canEditA) {
+                    payload.fleet_build_a_id = selectA.value
+                    payload.ready_a = checkboxA.checked
+                }
+                if (canEditB) {
+                    payload.fleet_build_b_id = selectB.value
+                    payload.ready_b = checkboxB.checked
+                }
                 try {
-                    const data = Object.fromEntries(new FormData(form))
-                    await this.apiClient.updateChallenge(challengeId, {...ch, ...data})
+                    await this.apiClient.updateChallenge(challengeId, payload)
                     this.dispatcher.dispatch('redirect', '/challenges.html')
-                } catch (e) {
-                    this.dispatcher.dispatch('displayError', [e.message, true])
+                } catch (err) {
+                    this.dispatcher.dispatch('displayError', [err.message, true])
                 }
             })
             container.appendChild(form)
+
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }

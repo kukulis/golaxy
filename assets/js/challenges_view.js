@@ -84,7 +84,7 @@ export default class ChallengesView {
                 const tr = NewE('tr')
 
                 const tdEdit = NewE('td')
-                if (ch.challenger_race_id === this.currentRaceId) {
+                if (ch.challenger_race_id === this.currentRaceId || ch.challengee_race_id === this.currentRaceId) {
                     const editLink = NewE('a')
                     editLink.href = `/challenge/${ch.id}/edit.html`
                     editLink.appendChild(NewT('✏ Edit'))
