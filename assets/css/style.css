@@ -6,6 +6,14 @@ body {
     color: #ffffff;
 }
 
+input[readonly] {
+    background-color: #1e1e1e;
+    color: #888;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 6px 8px;
+}
+
 #game-container {
     display: flex;
     flex-direction: column;

@@ -84,7 +84,7 @@ export default class ChallengesView {
                 const tr = NewE('tr')
 
                 const tdEdit = NewE('td')
-                if (ch.challenger_race_id === this.currentRaceId || ch.challengee_race_id === this.currentRaceId) {
+                if (ch.status !== 'rejected' && (ch.challenger_race_id === this.currentRaceId || ch.challengee_race_id === this.currentRaceId)) {
                     const editLink = NewE('a')
                     editLink.href = `/challenge/${ch.id}/edit.html`
                     editLink.appendChild(NewT('✏ Edit'))
@@ -126,6 +126,20 @@ export default class ChallengesView {
                         }
                     })
                     tdActions.appendChild(deleteBtn)
+                }
+                if (ch.challengee_race_id === this.currentRaceId && ch.status === 'pending') {
+                    const rejectBtn = NewE('button')
+                    rejectBtn.appendChild(NewT('Reject'))
+                    rejectBtn.addEventListener('click', async () => {
+                        if (!confirm(`Reject challenge ${ch.id}?`)) return
+                        try {
+                            await this.apiClient.updateChallenge(ch.id, {...ch, status: 'rejected'})
+                            await this.reloadTableBody()
+                        } catch (e) {
+                            this.dispatcher.dispatch('displayError', [e.message, true])
+                        }
+                    })
+                    tdActions.appendChild(rejectBtn)
                 }
                 tr.appendChild(tdActions)
 
