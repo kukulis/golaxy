@@ -56,7 +56,7 @@ func CreateSingletons(env string) {
 
 	// Controllers are environment-agnostic
 	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
-	ChallengeControllerInstance = api.NewChallengeController(AuthenticationManagerInstance, ChallengeRepositoryInstance)
+	ChallengeControllerInstance = api.NewChallengeController(AuthenticationManagerInstance, ChallengeRepositoryInstance, DivisionRepositoryInstance, RaceRepositoryInstance)
 	RaceControllerInstance = api.NewRaceController(AuthenticationManagerInstance, RaceRepositoryInstance)
 	BattleControllerInstance = api.NewBattleController(AuthenticationManagerInstance, BattleRepositoryInstance)
 	DivisionControllerInstance = api.NewDivisionController(AuthenticationManagerInstance, DivisionRepositoryInstance)

@@ -34,7 +34,7 @@ func RegisterRoutes(apiRoute *gin.RouterGroup) {
 	apiRoute.POST("/fleet-builds/:id/build", func(c *gin.Context) { FleetBuildControllerInstance.Build(c) })
 	apiRoute.GET("/fleet-builds/:id/fleet", func(c *gin.Context) { FleetBuildControllerInstance.GetFleet(c) })
 
-	apiRoute.GET("/challenges", func(c *gin.Context) { ChallengeControllerInstance.GetAllChallenges(c) })
+	apiRoute.GET("/challenges", func(c *gin.Context) { ChallengeControllerInstance.GetChallenges(c) })
 	apiRoute.GET("/challenges/:id", func(c *gin.Context) { ChallengeControllerInstance.GetChallenge(c) })
 	apiRoute.POST("/challenges", func(c *gin.Context) { ChallengeControllerInstance.CreateChallenge(c) })
 	apiRoute.PUT("/challenges/:id", func(c *gin.Context) { ChallengeControllerInstance.UpdateChallenge(c) })
