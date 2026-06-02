@@ -10,7 +10,6 @@ import (
 	"glaktika.eu/galaktika/pkg/galaxy"
 )
 
-
 type ChallengeController struct {
 	authenticationManager AuthenticationManager
 	challengeRepository   *dao.ChallengeRepository
@@ -176,25 +175,14 @@ func (controller *ChallengeController) GetChallenge(c *gin.Context) {
 	c.JSON(http.StatusOK, challenge)
 }
 
-type challengeUpdateRequest struct {
-	ReadyA         bool       `json:"ready_a"`
-	ReadyB         bool       `json:"ready_b"`
-	FleetBuildAId  string     `json:"fleet_build_a_id"`
-	FleetBuildBId  string     `json:"fleet_build_b_id"`
-	AcceptedAAt    *time.Time `json:"accepted_a_at"`
-	AcceptedBAt    *time.Time `json:"accepted_b_at"`
-	Status         string     `json:"status"`
-	ExecutedAt     *time.Time `json:"executed_at"`
-	BattleReportId string     `json:"battle_report_id"`
-}
-
+// TODO explain why
 // UpdateChallenge godoc
 // @Summary Update a challenge
 // @Tags challenges
 // @Accept json
 // @Produce json
 // @Param id path string true "Challenge ID"
-// @Param challenge body challengeUpdateRequest true "Update data"
+// @Param challenge body galaxy.Challenge true "Update data"
 // @Success 200 {object} galaxy.Challenge
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -223,7 +211,7 @@ func (controller *ChallengeController) UpdateChallenge(c *gin.Context) {
 		return
 	}
 
-	var req challengeUpdateRequest
+	var req galaxy.Challenge
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

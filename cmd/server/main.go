@@ -15,39 +15,8 @@ import (
 // @BasePath /api
 func main() {
 	router := gin.Default()
-	router.LoadHTMLFiles(
-		"./pages/division/main.gohtml",
-		"./pages/division/fleet-builds.gohtml",
-		"./pages/division/fleet-build/main.gohtml",
-		"./pages/division/fleet-build/edit.gohtml",
-		"./pages/ship-model/list.gohtml",
-		"./pages/ship-model/details.gohtml",
-		"./pages/ship-model/edit.gohtml",
-		"./pages/division/fleet-build/ship-model-assignment/main.gohtml",
-		"./pages/challenges.gohtml",
-		"./pages/challenge/edit.gohtml",
-	)
 
-	router.Static("/assets", "./assets")
-	router.StaticFile("/", "./pages/index.html")
-	router.StaticFile("/dummy_login.html", "./pages/dummy_login.html")
-	router.StaticFile("/divisions.html", "./pages/divisions.html")
-	router.StaticFile("/races.html", "./pages/races.html")
-	router.GET("/division/:divisionId/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderDivision(c) })
-	router.GET("/division/:divisionId/fleet-builds.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuilds(c) })
-	router.GET("/fleet-build/:id/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuild(c) })
-	router.GET("/fleet-build/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderFleetBuildEdit(c) })
-	router.GET("/ship-model-assignment/:id/main.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelAssignment(c) })
-	router.GET("/challenges.html", func(c *gin.Context) { di.WebControllerInstance.RenderChallenges(c) })
-	router.GET("/challenge/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderChallengeEdit(c) })
-	router.GET("/ship-model/list.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelList(c) })
-	router.GET("/ship-model/:id/details.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelDetails(c) })
-	router.GET("/ship-model/:id/edit.html", func(c *gin.Context) { di.WebControllerInstance.RenderShipModelEdit(c) })
-	router.StaticFile("/test-ship-designs", "./pages/test_ship_designs.html")
-	router.StaticFile("/test-ship-group-designs", "./pages/test_ship_group_designs.html")
-
-	//router.LoadHTMLGlob("pages/**/*")
-	//router.GET("/test", func(c *gin.Context) { c.File("./pages/test.html") })
+	di.RegisterWebRoutes(router)
 
 	// Swagger UI
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -56,7 +25,7 @@ func main() {
 	apiRoute := router.Group("/api")
 
 	di.CreateSingletons("dev")
-	di.RegisterRoutes(apiRoute)
+	di.RegisterApiRoutes(apiRoute)
 
 	_ = router.Run(":8080")
 }
