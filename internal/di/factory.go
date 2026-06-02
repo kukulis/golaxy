@@ -1,6 +1,8 @@
 package di
 
 import (
+	"time"
+
 	"glaktika.eu/galaktika/internal/api"
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/pkg/galaxy"
@@ -62,6 +64,30 @@ func NewRaceRepository() *dao.RaceRepository {
 	r.Upsert(&galaxy.Race{ID: "zyx", Name: "Admiral Zyx", Role: galaxy.RolePlayer, Token: "token-zyx-002"})
 	r.Upsert(&galaxy.Race{ID: "keth", Name: "Warlord Keth", Role: galaxy.RolePlayer, Token: "token-keth-003"})
 	r.Upsert(&galaxy.Race{ID: "admin", Name: "Administrator", Role: galaxy.RoleAdmin, Token: "token-admin-000"})
+
+	return r
+}
+
+func NewChallengeRepository() *dao.ChallengeRepository {
+	r := dao.NewChallengeRepository()
+
+	// rex challenges zyx in alpha — both sides ready with fleet builds assigned
+	c1 := galaxy.NewChallenge("challenge-1", "rex", "zyx", "alpha", time.Now().Add(-48*time.Hour))
+	c1.FleetBuildAId = "alpha-build-1"
+	c1.FleetBuildBId = "alpha-build-2"
+	c1.ReadyA = true
+	c1.ReadyB = true
+	r.Upsert(c1)
+
+	// zyx challenges keth in beta — pending, only challenger has selected a fleet build
+	c2 := galaxy.NewChallenge("challenge-2", "zyx", "keth", "beta", time.Now().Add(-24*time.Hour))
+	c2.FleetBuildAId = "beta-build-1"
+	r.Upsert(c2)
+
+	// keth challenges rex in gamma — rejected by rex
+	c3 := galaxy.NewChallenge("challenge-3", "keth", "rex", "gamma", time.Now().Add(-72*time.Hour))
+	c3.Status = galaxy.ChallengeStatusRejected
+	r.Upsert(c3)
 
 	return r
 }

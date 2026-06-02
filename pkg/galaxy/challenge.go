@@ -65,6 +65,8 @@ type ChallengesFilter struct {
 	ChallengeeId string
 	AcceptedA    bool
 	AcceptedB    bool
+
+	// TODO filter by status
 }
 
 func (f *ChallengesFilter) Match(c *Challenge) bool {

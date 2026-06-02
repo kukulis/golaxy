@@ -1,5 +1,6 @@
 import { Battle } from './entities/battle.js';
 import { Challenge } from './entities/challenge.js';
+import { ChallengesFilter } from './challenges_filter.js';
 import { Race } from './entities/race.js';
 import { Division } from './entities/division.js';
 import { FleetBuild } from './entities/fleet_build.js';
@@ -159,28 +160,48 @@ export class ApiClient {
 
     // Challenges
 
-    async getChallenges() {
-        const data = await this._request('GET', '/challenges');
+    /**
+     * @param {ChallengesFilter} filter
+     * @returns {Promise<Challenge[]>}
+     */
+    async getChallenges(filter = new ChallengesFilter()) {
+        const data = await this._request('GET', `/challenges${filter.toQueryString()}`);
         return data.map(d => (new Challenge()).updateFromDTO(d));
     }
 
+    /**
+     * @param {string} id
+     * @returns {Promise<Challenge>}
+     */
     async getChallenge(id) {
         return (new Challenge()).updateFromDTO(await this._request('GET', `/challenges/${id}`));
     }
 
     /**
-     *
+     * @param {string} id
+     * @param {string} challengerRaceId
+     * @param {string} challengeeRaceId
+     * @param {string} divisionId
+     * @returns {Promise<Challenge>}
+     */
+    async createChallenge(id, challengerRaceId, challengeeRaceId, divisionId) {
+        const params = new URLSearchParams({ id, challenger_race_id: challengerRaceId, challengee_race_id: challengeeRaceId, division_id: divisionId });
+        return (new Challenge()).updateFromDTO(await this._request('POST', `/challenges?${params}`));
+    }
+
+    /**
+     * @param {string} id
      * @param {Challenge} challenge
      * @returns {Promise<Challenge>}
      */
-    async createChallenge(challenge) {
-        return (new Challenge()).updateFromDTO(await this._request('POST', '/challenges', challenge));
-    }
-
     async updateChallenge(id, challenge) {
         return (new Challenge()).updateFromDTO(await this._request('PUT', `/challenges/${id}`, challenge));
     }
 
+    /**
+     * @param {string} id
+     * @returns {Promise<void>}
+     */
     async deleteChallenge(id) {
         return this._request('DELETE', `/challenges/${id}`);
     }

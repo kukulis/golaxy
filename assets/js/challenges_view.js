@@ -1,6 +1,8 @@
 import {ClearE, NewE, NewT} from '/assets/js/helper.js'
 import {ApiClient} from './api.js'
+import {ChallengesFilter} from './challenges_filter.js'
 import {Dispatcher} from './dispatcher.js'
+import {formatDateTime} from './date_format.js'
 
 export default class ChallengesView {
 
@@ -25,6 +27,11 @@ export default class ChallengesView {
     currentRaceId = ''
 
     /**
+     * @type {string}
+     */
+    currentRaceRole = ''
+
+    /**
      * @param {ApiClient} apiClient
      * @param {Dispatcher} dispatcher
      */
@@ -42,6 +49,7 @@ export default class ChallengesView {
         try {
             const race = await this.apiClient.getCurrentRace()
             this.currentRaceId = race.id
+            this.currentRaceRole = race.role
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }
@@ -50,7 +58,7 @@ export default class ChallengesView {
 
         const thead = NewE('thead')
         const headerRow = NewE('tr')
-        for (const label of ['', 'ID', 'Challenger Race', 'Fleet Build A', 'Fleet Build B', 'Battle Report', '']) {
+        for (const label of ['', 'ID', 'Status', 'Division', 'Challenger', 'Challengee', 'Fleet Build A', 'Ready A', 'Fleet Build B', 'Ready B', 'Created At', 'Battle Report', '']) {
             const th = NewE('th')
             th.appendChild(NewT(label))
             headerRow.appendChild(th)
@@ -71,7 +79,7 @@ export default class ChallengesView {
         ClearE(this.tBody)
 
         try {
-            const challenges = await this.apiClient.getChallenges()
+            const challenges = await this.loadChallenges()
             for (const ch of challenges) {
                 const tr = NewE('tr')
 
@@ -84,7 +92,21 @@ export default class ChallengesView {
                 }
                 tr.appendChild(tdEdit)
 
-                for (const val of [ch.id, ch.challenger_race_id, ch.fleet_build_a_id, ch.fleet_build_b_id, ch.battle_report_id]) {
+                const columns = [
+                    ch.id,
+                    ch.status,
+                    ch.division_id,
+                    ch.challenger_race_id,
+                    ch.challengee_race_id,
+                    ch.fleet_build_a_id,
+                    ch.ready_a ? '✓' : '✗',
+                    ch.fleet_build_b_id,
+                    ch.ready_b ? '✓' : '✗',
+                    formatDateTime(ch.created_at),
+                    // ch.created_at ?? '',
+                    ch.battle_report_id
+                ]
+                for (const val of columns) {
                     const td = NewE('td')
                     td.appendChild(NewT(val))
                     tr.appendChild(td)
@@ -112,5 +134,28 @@ export default class ChallengesView {
         } catch (e) {
             this.dispatcher.dispatch('displayError', [e.message, true])
         }
+    }
+
+    async loadChallenges() {
+        if (this.currentRaceRole === 'admin') {
+            return this.apiClient.getChallenges(new ChallengesFilter())
+        }
+
+        const asChallenger = new ChallengesFilter()
+        asChallenger.challenger_id = this.currentRaceId
+
+        const asChallengee = new ChallengesFilter()
+        asChallengee.challengee_id = this.currentRaceId
+
+        const [sent, received] = await Promise.all([
+            this.apiClient.getChallenges(asChallenger),
+            this.apiClient.getChallenges(asChallengee),
+        ])
+
+        const merged = new Map()
+        for (const ch of [...sent, ...received]) {
+            merged.set(ch.id, ch)
+        }
+        return [...merged.values()]
     }
 }

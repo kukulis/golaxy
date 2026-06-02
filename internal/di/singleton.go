@@ -40,7 +40,7 @@ func CreateSingletons(env string) {
 		RaceRepositoryInstance = NewRaceRepository()
 		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
 		BattleRepositoryInstance = dao.NewBattleRepository()
-		ChallengeRepositoryInstance = dao.NewChallengeRepository()
+		ChallengeRepositoryInstance = NewChallengeRepository()
 		DivisionRepositoryInstance = NewDivisionRepository()
 		FleetBuildRepositoryInstance = NewFleetBuildRepository()
 		FleetRepositoryInstance = dao.NewFleetRepository()
