@@ -73,6 +73,7 @@ func NewChallengesFilter() *ChallengesFilter {
 	return &ChallengesFilter{}
 }
 
+// Match returns true if the given challenge matches the filter parameters
 func (f *ChallengesFilter) Match(c *Challenge) bool {
 	if f.ChallengerId != "" && c.ChallengerRaceId != f.ChallengerId {
 		return false
