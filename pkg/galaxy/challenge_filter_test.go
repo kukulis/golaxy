@@ -33,8 +33,27 @@ func prepareTestCasesForChallengeFilterFromQuery() []filterFromQueryTestCase {
 			expectedFilter: &ChallengesFilter{
 				ChallengerId: "",
 				ChallengeeId: "",
-				AcceptedA:    false,
-				AcceptedB:    false,
+				ReadyA:       false,
+				ReadyB:       false,
+			},
+		},
+		{
+			name: "wrong parameters",
+			query: map[string][]string{
+				"challenger_id": {"123123"},
+				"challengee_id": {"123124"},
+				"ready_a":       {"1"},
+				"ready_b":       {"0"},
+				"division_id":   {"111"},
+				"status":        {"executed"},
+			},
+			expectedFilter: &ChallengesFilter{
+				ChallengerId: "123123",
+				ChallengeeId: "123124",
+				ReadyA:       true,
+				ReadyB:       false,
+				DivisionId:   "111",
+				Status:       "executed",
 			},
 		},
 	}

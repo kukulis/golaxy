@@ -106,8 +106,10 @@ func (controller *ChallengeController) CreateChallenge(c *gin.Context) {
 // @Produce json
 // @Param challenger_id query string false "Filter by challenger race ID"
 // @Param challengee_id query string false "Filter by challengee race ID"
-// @Param accepted_a query string false "Filter by accepted A (1=true)"
-// @Param accepted_b query string false "Filter by accepted B (1=true)"
+// @Param ready_a query string false "Filter by ready A (1=true)"
+// @Param ready_b query string false "Filter by ready B (1=true)"
+// @Param status query string false "Filter by status"
+// @Param divisions_id query string false "Filter division ID"
 // @Success 200 {array} galaxy.Challenge
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -119,14 +121,14 @@ func (controller *ChallengeController) GetChallenges(c *gin.Context) {
 		return
 	}
 
-	//queryValues := c.Request.URL.Query()
+	filter := galaxy.NewChallengesFilter().FromQuery(c.Request.URL.Query())
 
-	filter := galaxy.ChallengesFilter{
-		ChallengerId: c.Query("challenger_id"),
-		ChallengeeId: c.Query("challengee_id"),
-		AcceptedA:    c.Query("accepted_a") == "1",
-		AcceptedB:    c.Query("accepted_b") == "1",
-	}
+	//filter := galaxy.ChallengesFilter{
+	//	ChallengerId: c.Query("challenger_id"),
+	//	ChallengeeId: c.Query("challengee_id"),
+	//	ReadyA:       c.Query("accepted_a") == "1",
+	//	ReadyB:       c.Query("accepted_b") == "1",
+	//}
 
 	if race.Role != galaxy.RoleAdmin {
 		if filter.ChallengerId == "" && filter.ChallengeeId == "" {
