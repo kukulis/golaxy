@@ -67,6 +67,7 @@ type ChallengesFilter struct {
 	AcceptedB    bool
 
 	// TODO filter by status
+
 }
 
 func (f *ChallengesFilter) Match(c *Challenge) bool {
@@ -76,11 +77,17 @@ func (f *ChallengesFilter) Match(c *Challenge) bool {
 	if f.ChallengeeId != "" && c.ChallengeeRaceId != f.ChallengeeId {
 		return false
 	}
-	if f.AcceptedA && c.AcceptedAAt == nil {
+	if f.AcceptedA && !c.ReadyA {
 		return false
 	}
-	if f.AcceptedB && c.AcceptedBAt == nil {
+	if f.AcceptedB && !c.ReadyB {
 		return false
 	}
 	return true
+}
+
+// FromQuery fluent query parser
+func (f *ChallengesFilter) FromQuery(query map[string][]string) *ChallengesFilter {
+
+	return f
 }

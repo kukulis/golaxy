@@ -119,6 +119,8 @@ func (controller *ChallengeController) GetChallenges(c *gin.Context) {
 		return
 	}
 
+	//queryValues := c.Request.URL.Query()
+
 	filter := galaxy.ChallengesFilter{
 		ChallengerId: c.Query("challenger_id"),
 		ChallengeeId: c.Query("challengee_id"),
