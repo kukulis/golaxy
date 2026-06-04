@@ -87,9 +87,12 @@ func (f *ChallengesFilter) Match(c *Challenge) bool {
 	if f.ReadyB && !c.ReadyB {
 		return false
 	}
-
-	// TODO status
-	// TODO divisionId
+	if f.Status != "" && c.Status != f.Status {
+		return false
+	}
+	if f.DivisionId != "" && c.DivisionId != f.DivisionId {
+		return false
+	}
 
 	return true
 }
