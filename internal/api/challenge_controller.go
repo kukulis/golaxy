@@ -123,13 +123,6 @@ func (controller *ChallengeController) GetChallenges(c *gin.Context) {
 
 	filter := galaxy.NewChallengesFilter().FromQuery(c.Request.URL.Query())
 
-	//filter := galaxy.ChallengesFilter{
-	//	ChallengerId: c.Query("challenger_id"),
-	//	ChallengeeId: c.Query("challengee_id"),
-	//	ReadyA:       c.Query("accepted_a") == "1",
-	//	ReadyB:       c.Query("accepted_b") == "1",
-	//}
-
 	if race.Role != galaxy.RoleAdmin {
 		if filter.ChallengerId == "" && filter.ChallengeeId == "" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
@@ -179,7 +172,6 @@ func (controller *ChallengeController) GetChallenge(c *gin.Context) {
 	c.JSON(http.StatusOK, challenge)
 }
 
-// TODO explain why
 // UpdateChallenge godoc
 // @Summary Update a challenge
 // @Tags challenges

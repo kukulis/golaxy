@@ -71,9 +71,12 @@ func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
 	}
 	divisionId := c.Query("division_id")
 	raceId := race.ID
+
+	// TODO filter structure instead
+	// TODO remove parameter "all"
 	if c.Query("all") == "true" {
-		if explicit := c.Query("race_id"); explicit != "" {
-			raceId = explicit
+		if queryRaceId := c.Query("race_id"); queryRaceId != "" {
+			raceId = queryRaceId
 		} else {
 			raceId = ""
 		}

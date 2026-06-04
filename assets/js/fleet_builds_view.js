@@ -62,6 +62,7 @@ export default class FleetBuildsView {
 
         const filterDiv = NewE('div')
 
+        // TODO remove, use 'all' as one of the race selector values
         const allCheckbox = NewE('input')
         allCheckbox.type = 'checkbox'
         allCheckbox.id = 'filter-all'

@@ -22,7 +22,7 @@ func (r *ChallengeRepository) Get(id string) *galaxy.Challenge {
 	return r.challengesMap[id]
 }
 
-func (r *ChallengeRepository) GetAll(filter galaxy.ChallengesFilter) []*galaxy.Challenge {
+func (r *ChallengeRepository) GetAll(filter *galaxy.ChallengesFilter) []*galaxy.Challenge {
 	return util.ArrayFilter(slices.Collect(maps.Values(r.challengesMap)), filter.Match)
 }
 
