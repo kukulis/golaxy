@@ -25,6 +25,17 @@ func (f *FleetBuildFilter) SetDivisionId(id string) *FleetBuildFilter {
 }
 
 func (f *FleetBuildFilter) FromQuery(query map[string][]string) *FleetBuildFilter {
-	// TODO
+
+	raceIds, ok := query["race_id"]
+
+	if ok && len(raceIds) > 0 {
+		f.RaceId = raceIds[0]
+	}
+
+	divisionIds, ok := query["division_id"]
+	if ok && len(divisionIds) > 0 {
+		f.DivisionId = divisionIds[0]
+	}
+
 	return f
 }
