@@ -44,9 +44,10 @@ export default class ChallengeView {
             const canEditA = isChallenger || isAdmin
             const canEditB = isChallengee || isAdmin
 
+            // TODO refactor this block, to a better readability
             const [buildsA, buildsB, fleetBuildA, fleetBuildB] = await Promise.all([
-                canEditA ? this.apiClient.getFleetBuilds(ch.division_id, false, isAdmin ? ch.challenger_race_id : '') : Promise.resolve([]),
-                canEditB ? this.apiClient.getFleetBuilds(ch.division_id, false, isAdmin ? ch.challengee_race_id : '') : Promise.resolve([]),
+                canEditA ? this.apiClient.getFleetBuilds(ch.division_id,  isAdmin ? ch.challenger_race_id : '') : Promise.resolve([]),
+                canEditB ? this.apiClient.getFleetBuilds(ch.division_id, isAdmin ? ch.challengee_race_id : '') : Promise.resolve([]),
                 !canEditA && ch.fleet_build_a_id ? this.apiClient.getFleetBuild(ch.fleet_build_a_id) : Promise.resolve(null),
                 !canEditB && ch.fleet_build_b_id ? this.apiClient.getFleetBuild(ch.fleet_build_b_id) : Promise.resolve(null),
             ])

@@ -95,10 +95,10 @@ export class ApiClient {
 
     // Fleet Builds
     // TODO remove 'all' parameter
-    async getFleetBuilds(divisionId, all = false, raceId = '') {
+    async getFleetBuilds(divisionId, raceId = '') {
         const params = new URLSearchParams()
         if (divisionId) params.set('division_id', divisionId)
-        if (all) params.set('all', 'true')
+        // if (all) params.set('all', 'true')
         if (raceId) params.set('race_id', raceId)
         const query = params.size > 0 ? '?' + params.toString() : ''
 
