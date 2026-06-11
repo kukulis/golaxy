@@ -320,11 +320,3 @@ func TestCalculateAllShipTech_Simple(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expectedShipTech, techs[0])
 	}
 }
-
-func TestCalculateAllShipTech_Amount2(t *testing.T) {
-	// TODO
-}
-
-func TestCalculateAllShipTech_Combined(t *testing.T) {
-	// TODO
-}

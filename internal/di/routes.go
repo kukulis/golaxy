@@ -51,7 +51,7 @@ func RegisterApiRoutes(apiRoute *gin.RouterGroup) {
 	apiRoute.PUT("/divisions/:id", func(c *gin.Context) { DivisionControllerInstance.UpdateDivision(c) })
 	apiRoute.DELETE("/divisions/:id", func(c *gin.Context) { DivisionControllerInstance.DeleteDivision(c) })
 
-	apiRoute.GET("/fleet-builds", func(c *gin.Context) { FleetBuildControllerInstance.GetAllFleetBuilds(c) })
+	apiRoute.GET("/fleet-builds", func(c *gin.Context) { FleetBuildControllerInstance.GetFleetBuilds(c) })
 	apiRoute.GET("/fleet-builds/:id", func(c *gin.Context) { FleetBuildControllerInstance.GetFleetBuild(c) })
 	apiRoute.POST("/fleet-builds", func(c *gin.Context) { FleetBuildControllerInstance.CreateFleetBuild(c) })
 	apiRoute.PUT("/fleet-builds/:id", func(c *gin.Context) { FleetBuildControllerInstance.UpdateFleetBuild(c) })

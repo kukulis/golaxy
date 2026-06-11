@@ -57,31 +57,37 @@ func (controller *FleetBuildController) GetFleetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, fleetBuild)
 }
 
-// GetAllFleetBuilds godoc
+// GetFleetBuilds godoc
 // @Summary List all fleet builds
 // @Tags fleet-builds
 // @Produce json
 // @Success 200 {array} galaxy.FleetBuild
 // @Router /fleet-builds [get]
-func (controller *FleetBuildController) GetAllFleetBuilds(c *gin.Context) {
+func (controller *FleetBuildController) GetFleetBuilds(c *gin.Context) {
 	race := controller.authenticationManager.AuthenticateFromContext(c)
 	if race == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+
 		return
 	}
-	divisionId := c.Query("division_id")
-	raceId := race.ID
 
-	// TODO filter structure instead
-	// TODO remove parameter "all"
-	if c.Query("all") == "true" {
-		if queryRaceId := c.Query("race_id"); queryRaceId != "" {
-			raceId = queryRaceId
-		} else {
-			raceId = ""
-		}
+	fleetBuildFilter := galaxy.NewFleetBuildFilter().FromQuery(c.Request.URL.Query())
+
+	if race.Role != galaxy.RoleAdmin && race.ID != fleetBuildFilter.RaceId {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Only admin may look other race's fleet builds"})
+
+		return
 	}
-	c.JSON(http.StatusOK, controller.fleetBuildRepository.GetAll(divisionId, raceId))
+
+	fleetBuilds, err := controller.fleetBuildRepository.GetList(fleetBuildFilter.DivisionId, fleetBuildFilter.RaceId)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		
+		return
+	}
+
+	c.JSON(http.StatusOK, fleetBuilds)
 }
 
 // CreateFleetBuild godoc

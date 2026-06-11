@@ -16,6 +16,7 @@ func setupFleetBuildRouter(controller *FleetBuildController) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	apiGroup := router.Group("/api")
+	apiGroup.GET("/fleet-builds", controller.GetFleetBuilds)
 	apiGroup.GET("/fleet-builds/:id", controller.GetFleetBuild)
 	apiGroup.PUT("/fleet-builds/:id", controller.UpdateFleetBuild)
 	apiGroup.GET("/fleet-builds/:id/statistics", controller.GetStatistics)
@@ -88,12 +89,12 @@ func TestGetFleetBuild(t *testing.T) {
 
 	for _, tc := range getFleetBuildTestCases() {
 		t.Run(tc.name, func(t *testing.T) {
-			repo := dao.NewFleetBuildRepository()
+			fleetBuildRepository := dao.NewFleetBuildRepository()
 			if tc.storedFleetBuild != nil {
-				repo.Upsert(tc.storedFleetBuild)
+				fleetBuildRepository.Upsert(tc.storedFleetBuild)
 			}
 
-			controller := NewFleetBuildController(auth, repo, nil, nil, nil)
+			controller := NewFleetBuildController(auth, fleetBuildRepository, nil, nil, nil)
 			router := setupFleetBuildRouter(controller)
 
 			req := httptest.NewRequest(http.MethodGet, "/api/fleet-builds/"+tc.id, nil)

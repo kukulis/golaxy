@@ -25,7 +25,6 @@ type FleetBuild struct {
 }
 
 type ShipModelAssignmentInner struct {
-	// I wonder why it is not a reference TODO
 	ShipModel ShipModel
 	Amount    int
 }

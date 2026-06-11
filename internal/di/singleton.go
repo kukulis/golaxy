@@ -69,7 +69,6 @@ func CreateSingletons(env string) {
 // is shared across multiple test cases and repositories need to be reset
 // between tests to ensure data isolation.
 func ResetTestData() {
-	// TODO: Add BattleRepositoryInstance.ResetData() when implemented
 	if ChallengeRepositoryInstance != nil {
 		ChallengeRepositoryInstance.ResetData()
 	}
