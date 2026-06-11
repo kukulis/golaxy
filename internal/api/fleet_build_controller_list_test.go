@@ -2,22 +2,27 @@ package api
 
 import (
 	"encoding/json"
-	"glaktika.eu/galaktika/internal/dao"
-	"glaktika.eu/galaktika/pkg/galaxy"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"glaktika.eu/galaktika/internal/dao"
+	"glaktika.eu/galaktika/pkg/galaxy"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
 func TestGetFleetBuildsList(t *testing.T) {
 	raceRepo := dao.NewRaceRepository()
 	raceRepo.Upsert(&galaxy.Race{ID: "race-1", Name: "Race One", Token: "test-token", Role: galaxy.RolePlayer})
-	raceRepo.Upsert(&galaxy.Race{ID: "race-a", Name: "Race A", Token: "test2-token", Role: galaxy.RoleAdmin})
+	raceRepo.Upsert(&galaxy.Race{ID: "race-a", Name: "Race A", Token: "admin-token", Role: galaxy.RoleAdmin})
 	auth := NewMemoryAuthenticationManager(raceRepo)
 	fleetBuildRepository := dao.NewFleetBuildRepository()
 
-	// TODO put more data to repository
+	fleetBuildRepository.Upsert(&galaxy.FleetBuild{ID: "fb-1", DivisionId: "div-1", RaceId: "race-1"})
+	fleetBuildRepository.Upsert(&galaxy.FleetBuild{ID: "fb-2", DivisionId: "div-1", RaceId: "race-1"})
+	fleetBuildRepository.Upsert(&galaxy.FleetBuild{ID: "fb-3", DivisionId: "div-1", RaceId: "race-a"})
+
 	controller := NewFleetBuildController(auth, fleetBuildRepository, nil, nil, nil)
 	router := setupFleetBuildRouter(controller)
 
@@ -40,13 +45,17 @@ func TestGetFleetBuildsList(t *testing.T) {
 
 			if testCase.expectedFleetBuilds != nil {
 				var gotFleetBuilds []*galaxy.FleetBuild
-				if err := json.Unmarshal(w.Body.Bytes(), &gotFleetBuilds); err != nil {
+				body := w.Body.String()
+				if err := json.Unmarshal([]byte(body), &gotFleetBuilds); err != nil {
 					t.Fatalf("test case %s failed to unmarshal response: %v", testCase.name, err)
 					return
 				}
 
 				if !reflect.DeepEqual(gotFleetBuilds, testCase.expectedFleetBuilds) {
-					t.Fatalf("test case %s expected results: %v gotFleetBuilds %v", testCase.name, testCase.expectedFleetBuilds, gotFleetBuilds)
+					t.Errorf("test case [%s] expected results: %v got FleetBuilds %v", testCase.name, testCase.expectedFleetBuilds, gotFleetBuilds)
+
+					diff := util.DiffStruct(testCase.expectedFleetBuilds, gotFleetBuilds)
+					t.Errorf("test case [%s] diff:\n%v", testCase.name, diff)
 				}
 			}
 		})
@@ -70,6 +79,16 @@ func provideFleetBuildListTestCases() []fleetBuildListTestCase {
 			expectedFleetBuilds:  nil,
 		},
 
+		{name: "all",
+			query:                "",
+			authHeader:           "Bearer admin-token",
+			expectedResponseCode: http.StatusOK,
+			expectedFleetBuilds: []*galaxy.FleetBuild{
+				{ID: "fb-1", DivisionId: "div-1", RaceId: "race-1"},
+				{ID: "fb-2", DivisionId: "div-1", RaceId: "race-1"},
+				{ID: "fb-3", DivisionId: "div-1", RaceId: "race-a"},
+			},
+		},
 		// TODO more test cases
 	}
 }

@@ -2,11 +2,12 @@ package dao
 
 import (
 	"errors"
-	"glaktika.eu/galaktika/pkg/galaxy"
-	"glaktika.eu/galaktika/pkg/util"
 	"maps"
 	"slices"
 	"strings"
+
+	"glaktika.eu/galaktika/pkg/galaxy"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
 type FleetBuildRepository struct {
@@ -17,7 +18,7 @@ type FleetBuildRepository struct {
 
 func NewFleetBuildRepository() *FleetBuildRepository {
 	return &FleetBuildRepository{
-		fleetBuildMap: make(map[string]*galaxy.FleetBuild),
+		fleetBuildMap: make(map[string]*galaxy.FleetBuild, 0),
 	}
 }
 

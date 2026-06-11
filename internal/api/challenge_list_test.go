@@ -22,9 +22,9 @@ type getChallengesTestCase struct {
 
 func getChallengesTestCases() []getChallengesTestCase {
 	now := time.Now()
-	challengeA := &galaxy.Challenge{ID: "c-1", ChallengerRaceId: "race-1", ChallengeeRaceId: "race-2", AcceptedAAt: &now}
-	challengeB := &galaxy.Challenge{ID: "c-2", ChallengerRaceId: "race-1", ChallengeeRaceId: "race-3", AcceptedBAt: &now}
-	challengeC := &galaxy.Challenge{ID: "c-3", ChallengerRaceId: "race-3", ChallengeeRaceId: "race-2", AcceptedAAt: &now, AcceptedBAt: &now}
+	challengeA := &galaxy.Challenge{ID: "c-1", ChallengerRaceId: "race-1", ChallengeeRaceId: "race-2", ReadyA: true}
+	challengeB := &galaxy.Challenge{ID: "c-2", ChallengerRaceId: "race-1", ChallengeeRaceId: "race-3", ReadyB: true}
+	challengeC := &galaxy.Challenge{ID: "c-3", ChallengerRaceId: "race-3", ChallengeeRaceId: "race-2", ReadyA: true, ReadyB: true, AcceptedAAt: &now, AcceptedBAt: &now}
 
 	races := []*galaxy.Race{
 		{ID: "race-1", Token: "token-1", Role: galaxy.RolePlayer},
@@ -63,8 +63,8 @@ func getChallengesTestCases() []getChallengesTestCase {
 			expectedCount:   3,
 		},
 		{
-			name:            "filter by accepted_a",
-			queryParams:     "challenger_id=race-1&accepted_a=1",
+			name:            "filter by ready_a",
+			queryParams:     "challenger_id=race-1&ready_a=1",
 			authHeader:      "Bearer token-1",
 			setupRaces:      races,
 			setupChallenges: allChallenges,
@@ -72,8 +72,8 @@ func getChallengesTestCases() []getChallengesTestCase {
 			expectedCount:   1,
 		},
 		{
-			name:            "filter by accepted_b",
-			queryParams:     "challengee_id=race-2&accepted_b=1",
+			name:            "filter by ready_b",
+			queryParams:     "challengee_id=race-2&ready_b=1",
 			authHeader:      "Bearer token-2",
 			setupRaces:      races,
 			setupChallenges: allChallenges,

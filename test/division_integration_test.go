@@ -21,7 +21,7 @@ func setupTestServer() *httptest.Server {
 
 	apiRoute := router.Group("/api")
 	di.CreateSingletons("test")
-	di.RaceRepositoryInstance.Upsert(&galaxy.Race{ID: "rex", Name: "Commander Rex", Role: galaxy.RolePlayer, Token: testToken})
+	di.RaceRepositoryInstance.Upsert(&galaxy.Race{ID: "rex", Name: "Commander Rex", Role: galaxy.RoleAdmin, Token: testToken})
 	di.RegisterApiRoutes(apiRoute)
 
 	return httptest.NewServer(router)
