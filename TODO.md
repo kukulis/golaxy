@@ -32,5 +32,13 @@ Remaining work:
 2) CRUD for ShipModel
 3) CRUD for FleetBuild
 4) CRUD for divisions ( only for admin role )
-5) Build a fleet from a FleetBuild for a review.
-6) Run a battle between two races selected fleet builds. 
+? 5) Build a fleet from a FleetBuild for a review.
+Challenge 6) Run a battle between two races selected fleet builds. 
+
+---
+
+Remaining work 2026-06-12:
+
+Execute ready challenges. 
+
+Implement chat features.
