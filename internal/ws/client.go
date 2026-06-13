@@ -66,7 +66,7 @@ func (c *client) readPump() {
 		checkSendEvent := NewWsCheckSendEvent(EventMessageArrived, c.token, message)
 		c.hub.dispatcher.Dispatch(checkSendEvent)
 
-		if !checkSendEvent.Send {
+		if checkSendEvent.Send {
 			c.hub.broadcast <- message
 			c.hub.dispatcher.Dispatch(NewWsEvent(EventMessageSentToHub, c.token, message))
 		}

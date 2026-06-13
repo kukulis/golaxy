@@ -45,9 +45,13 @@ func (h *Hub) Run() {
 				close(c.send)
 			}
 		case message := <-h.broadcast:
-			// TODO select receiver from the message body if needed
-			// TODO check if the message should be sent at all ?
+
+			checkReceiverEvent := NewWsCheckSendEvent(EventCheckReceiver, "", message)
+			h.dispatcher.Dispatch(checkReceiverEvent)
 			for c := range h.clients {
+				if checkReceiverEvent.ReceiverToken != "" && checkReceiverEvent.ReceiverToken != c.token {
+					continue
+				}
 				select {
 				case c.send <- message:
 				default:

@@ -10,6 +10,7 @@ const (
 	EventMessageSendError       = "ws.message-send-error"
 	EventMessageSendSuccess     = "ws.message-send-success"
 	EventSendMessageChannelFail = "ws.send-message-channel-fail"
+	EventCheckReceiver          = "ws.check-receiver"
 )
 
 type WsEvent struct {
@@ -25,14 +26,15 @@ func NewWsEvent(name string, token string, payload []byte) *WsEvent {
 func (e *WsEvent) GetName() string { return e.Name }
 
 type WsCheckSendEvent struct {
-	Name    string
-	Token   string
-	Payload []byte
-	Send    bool
+	Name          string
+	Token         string
+	Payload       []byte
+	Send          bool
+	ReceiverToken string
 }
 
 func NewWsCheckSendEvent(name string, token string, payload []byte) *WsCheckSendEvent {
-	return &WsCheckSendEvent{Name: name, Token: token, Payload: payload, Send: true}
+	return &WsCheckSendEvent{Name: name, Token: token, Payload: payload, Send: true, ReceiverToken: ""}
 }
 
 func (e *WsCheckSendEvent) GetName() string { return e.Name }
