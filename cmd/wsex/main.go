@@ -31,6 +31,7 @@ func main() {
 	flag.Parse()
 	hub := ws.NewHub()
 	go hub.Run()
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	http.HandleFunc("/", serveHome)
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ws.ServeWs(hub, w, r)

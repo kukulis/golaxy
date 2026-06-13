@@ -1,37 +1,6 @@
 <html lang="en">
 <head>
-    <style>
-        .task-details-drag-handle {
-            background-color: #ff8c00;
-            color: white;
-            padding: 5px 10px;
-            cursor: move;
-            user-select: none;
-            font-weight: bold;
-            margin: -3px -3px 5px -3px;
-        }
-
-        .task-details-drag-handle:hover {
-            background-color: #ff7700;
-        }
-
-        .task-details {
-            display: block;
-            position: absolute;
-            top: 25%;
-            left: 25%;
-            width: 50%;
-            height: 50%;
-            padding: 3px;
-            border: 3px solid orange;
-            background-color: white;
-            z-index: 1002;
-            overflow: auto;
-            resize: both;
-            min-width: 200px;
-            min-height: 150px;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/task_details.css">
     <title>Home</title>
 </head>
 <body>
@@ -45,85 +14,11 @@
             <input type="text" id="msg" size="64" autofocus />
         </form>
     </div>
-</body>
-<script>
-    var conn;
-    var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
+<script type="module">
+    import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
 
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
-        }
-    }
-
-    document.getElementById("form").onsubmit = function () {
-        if (!conn) {
-            return false;
-        }
-        if (!msg.value) {
-            return false;
-        }
-        conn.send(msg.value);
-        msg.value = "";
-        return false;
-    };
-
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
-        conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
-        };
-        conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
-            }
-        };
-    } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
-    }
-
-    const wrapper = document.getElementById("wrapper");
-    function makeDraggable(outerDiv) {
-        let dragHandle = outerDiv.querySelector('.task-details-drag-handle');
-        if (!dragHandle) return;
-
-        let isDragging = false;
-        let currentX, currentY, initialX, initialY;
-
-        dragHandle.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            initialX = e.clientX - outerDiv.offsetLeft;
-            initialY = e.clientY - outerDiv.offsetTop;
-            dragHandle.style.cursor = 'grabbing';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-
-            outerDiv.style.left = currentX + 'px';
-            outerDiv.style.top = currentY + 'px';
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            dragHandle.style.cursor = 'move';
-        });
-    }
-
-    makeDraggable(wrapper);
+    const handler = new WSMessagesHandler();
+    handler.init();
 </script>
+</body>
 </html>
