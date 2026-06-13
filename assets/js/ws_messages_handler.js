@@ -119,7 +119,6 @@ export class WSMessagesHandler {
             this.dragHandle.style.cursor = 'grabbing';
         });
 
-        // TODO research if the events listeners must be declared globally
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             e.preventDefault();
