@@ -6,21 +6,25 @@ export class WSMessagesHandler {
     /** @type {HTMLElement|null} */
     log = null;
     /** @type {HTMLElement|null} */
+    container = null;
+    /** @type {HTMLElement|null} */
     wrapper = null;
     /** @type {HTMLFormElement|null} */
     form = null;
     /** @type {HTMLElement|null} */
     dragHandle = null;
+    /** @type {HTMLButtonElement|null} */
+    showChatBtn = null;
 
-    /**
-     * @param {HTMLElement} wrapper
-     */
-    constructor(wrapper) {
-        this.wrapper = wrapper;
+    constructor() {
     }
 
-    /** @returns {void} */
-    init() {
+    /**
+     * @param {HTMLElement} container
+     * @returns {void}
+     */
+    init(container) {
+        this.container = container;
         this._buildHtml();
         this._initDraggable();
         this._initForm();
@@ -29,14 +33,26 @@ export class WSMessagesHandler {
 
     /** @returns {void} */
     _buildHtml() {
+        this.wrapper = document.createElement("div");
+        this.wrapper.className = "chat";
+
+        this.showChatBtn = document.createElement("button");
+        this.showChatBtn.className = "chat-show-btn";
+        this.showChatBtn.textContent = "Chat";
+
+        const hideBtn = document.createElement("button");
+        hideBtn.textContent = "_";
+        hideBtn.addEventListener("click", () => { this.wrapper.style.display = "none"; });
+
         this.dragHandle = document.createElement("div");
         this.dragHandle.className = "chat-drag-handle";
-        this.dragHandle.textContent = "Drag me";
+        this.dragHandle.textContent = "Global chat";
+        this.dragHandle.appendChild(hideBtn);
 
         this.log = document.createElement("div");
+        this.log.className = "chat-log";
 
         this.form = document.createElement("form");
-        const form = this.form;
         const submit = document.createElement("input");
         submit.type = "submit";
         submit.value = "Send";
@@ -46,12 +62,21 @@ export class WSMessagesHandler {
         this.msg.size = 64;
         this.msg.autofocus = true;
 
-        form.appendChild(submit);
-        form.appendChild(this.msg);
+        this.form.appendChild(submit);
+        this.form.appendChild(this.msg);
+
+        const formWrapper = document.createElement("div");
+        formWrapper.className = "chat-form";
+        formWrapper.appendChild(this.form);
 
         this.wrapper.appendChild(this.dragHandle);
         this.wrapper.appendChild(this.log);
-        this.wrapper.appendChild(form);
+        this.wrapper.appendChild(formWrapper);
+
+        this.showChatBtn.addEventListener("click", () => { this.wrapper.style.display = "flex"; });
+
+        this.container.appendChild(this.wrapper);
+        this.container.appendChild(this.showChatBtn);
     }
 
     /**

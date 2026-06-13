@@ -6,12 +6,12 @@
 <body>
     <h1>Home</h1>
 
-    <div id="wrapper" class="chat"></div>
+    <div id="wrapper"></div>
 <script type="module">
     import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
 
-    const handler = new WSMessagesHandler(document.getElementById("wrapper"));
-    handler.init();
+    const handler = new WSMessagesHandler();
+    handler.init(document.getElementById("wrapper"));
 </script>
 </body>
 </html>

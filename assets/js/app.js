@@ -11,6 +11,7 @@ import UserBarView from "./user_bar_view.js";
 import UserMenuView from "./user_menu_view.js";
 import {ApiClient} from "./api.js";
 import {ShipModelComponent} from "./ship_model_component.js";
+import {WSMessagesHandler} from "./ws_messages_handler.js";
 
 export class App {
     /**
@@ -70,6 +71,11 @@ export class App {
      * @type {ApiClient}
      */
     apiClient = null;
+
+    /**
+     * @type {WSMessagesHandler|null}
+     */
+    wsMessagesHandler = null;
 
     /**
      * @returns {Dispatcher}
@@ -152,7 +158,7 @@ export class App {
 
     /**
      * @returns {FleetBuildsView}
-     */
+     */chatContainer
     getFleetBuildsView() {
         if (this.fleetBuildsView == null) {
             this.fleetBuildsView = new FleetBuildsView(this.getApiClient(), this.getDispatcher())
@@ -242,6 +248,27 @@ export class App {
         }
 
         return this.shipModelComponent
+    }
+
+    /**
+     * @returns {WSMessagesHandler}
+     */
+    getWSMessagesHandler() {
+        if (this.wsMessagesHandler == null) {
+            this.wsMessagesHandler = new WSMessagesHandler()
+        }
+
+        return this.wsMessagesHandler
+    }
+
+    tryToInitializeChatHandler() {
+        const chatContainer =  document.getElementById("chat-container");
+
+        if (chatContainer == null) {
+            return
+        }
+
+        this.getWSMessagesHandler().init(chatContainer);
     }
 
     /**

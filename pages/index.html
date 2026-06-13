@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <div id="wrapper" class="chat"></div>
+    <div id="chat-container"></div>
 
 </div>
 <script type="module">
@@ -74,8 +74,8 @@
 
     import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
 
-    const handler = new WSMessagesHandler(document.getElementById("wrapper"));
-    handler.init();
+    const handler = new WSMessagesHandler();
+    handler.init(document.getElementById("chat-container"));
 </script>
 
 </body>
