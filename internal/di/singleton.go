@@ -5,68 +5,79 @@ import (
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/internal/web"
 	"glaktika.eu/galaktika/internal/ws"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
-var AuthenticationManagerInstance api.AuthenticationManager
-var BattleRepositoryInstance *dao.BattleRepository
-var ChallengeRepositoryInstance *dao.ChallengeRepository
-var ChallengeControllerInstance *api.ChallengeController
-var BattleControllerInstance *api.BattleController
-var DivisionRepositoryInstance *dao.DivisionRepository
-var DivisionControllerInstance *api.DivisionController
-var FleetBuildRepositoryInstance *dao.FleetBuildRepository
-var FleetBuildControllerInstance *api.FleetBuildController
-var RaceControllerInstance *api.RaceController
-var FleetRepositoryInstance *dao.FleetRepository
-var RaceRepositoryInstance *dao.RaceRepository
-var ShipModelRepositoryInstance *dao.ShipModelRepository
-var ShipModelControllerInstance *api.ShipModelController
-var WebControllerInstance *web.WebController
-var WsControllerInstance *api.WsController
-var HubInstance *ws.Hub
+var authenticationManagerInstance api.AuthenticationManager
+var battleRepositoryInstance *dao.BattleRepository
+var challengeRepositoryInstance *dao.ChallengeRepository
+var challengeControllerInstance *api.ChallengeController
+var battleControllerInstance *api.BattleController
+var divisionRepositoryInstance *dao.DivisionRepository
+var divisionControllerInstance *api.DivisionController
+var fleetBuildRepositoryInstance *dao.FleetBuildRepository
+var fleetBuildControllerInstance *api.FleetBuildController
+var raceControllerInstance *api.RaceController
+var fleetRepositoryInstance *dao.FleetRepository
+var raceRepositoryInstance *dao.RaceRepository
+var shipModelRepositoryInstance *dao.ShipModelRepository
+var shipModelControllerInstance *api.ShipModelController
+var webControllerInstance *web.WebController
+var wsControllerInstance *api.WsController
+var hubInstance *ws.Hub
+var wsDispatcherInstance *util.Dispatcher
+
+func GetHubInstance() *ws.Hub {
+	return hubInstance
+}
+
+func GetRaceRepositoryInstance() *dao.RaceRepository {
+	return raceRepositoryInstance
+}
 
 func CreateSingletons(env string) {
 	// Based on env, choose repository implementation
 	// Currently only in-memory repos are implemented
 	switch env {
 	case "test":
-		RaceRepositoryInstance = dao.NewRaceRepository()
-		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
-		BattleRepositoryInstance = dao.NewBattleRepository()
-		ChallengeRepositoryInstance = dao.NewChallengeRepository()
-		DivisionRepositoryInstance = dao.NewDivisionRepository()
-		FleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
-		FleetRepositoryInstance = dao.NewFleetRepository()
-		ShipModelRepositoryInstance = dao.NewShipModelRepository()
+		raceRepositoryInstance = dao.NewRaceRepository()
+		authenticationManagerInstance = NewAuthenticationManager(raceRepositoryInstance)
+		battleRepositoryInstance = dao.NewBattleRepository()
+		challengeRepositoryInstance = dao.NewChallengeRepository()
+		divisionRepositoryInstance = dao.NewDivisionRepository()
+		fleetBuildRepositoryInstance = dao.NewFleetBuildRepository()
+		fleetRepositoryInstance = dao.NewFleetRepository()
+		shipModelRepositoryInstance = dao.NewShipModelRepository()
 
 	case "dev":
-		RaceRepositoryInstance = NewRaceRepository()
-		AuthenticationManagerInstance = NewAuthenticationManager(RaceRepositoryInstance)
-		BattleRepositoryInstance = dao.NewBattleRepository()
-		ChallengeRepositoryInstance = NewChallengeRepository()
-		DivisionRepositoryInstance = NewDivisionRepository()
-		FleetBuildRepositoryInstance = NewFleetBuildRepository()
-		FleetRepositoryInstance = dao.NewFleetRepository()
-		ShipModelRepositoryInstance = NewShipModelRepository()
+		raceRepositoryInstance = NewRaceRepository()
+		authenticationManagerInstance = NewAuthenticationManager(raceRepositoryInstance)
+		battleRepositoryInstance = dao.NewBattleRepository()
+		challengeRepositoryInstance = NewChallengeRepository()
+		divisionRepositoryInstance = NewDivisionRepository()
+		fleetBuildRepositoryInstance = NewFleetBuildRepository()
+		fleetRepositoryInstance = dao.NewFleetRepository()
+		shipModelRepositoryInstance = NewShipModelRepository()
 
 	case "prod":
 		// Future: DB-backed repositories
-		// Example: DivisionRepositoryInstance = dao.NewDBDivisionRepository(dbConn)
+		// Example: divisionRepositoryInstance = dao.NewDBDivisionRepository(dbConn)
 		panic("prod environment not yet implemented")
 	default:
 		panic("unknown environment: " + env)
 	}
 
 	// Controllers are environment-agnostic
-	HubInstance = ws.NewHub()
-	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
-	WsControllerInstance = api.NewWsController(AuthenticationManagerInstance, HubInstance)
-	ChallengeControllerInstance = api.NewChallengeController(AuthenticationManagerInstance, ChallengeRepositoryInstance, DivisionRepositoryInstance, RaceRepositoryInstance, FleetBuildRepositoryInstance)
-	RaceControllerInstance = api.NewRaceController(AuthenticationManagerInstance, RaceRepositoryInstance)
-	BattleControllerInstance = api.NewBattleController(AuthenticationManagerInstance, BattleRepositoryInstance)
-	DivisionControllerInstance = api.NewDivisionController(AuthenticationManagerInstance, DivisionRepositoryInstance)
-	FleetBuildControllerInstance = api.NewFleetBuildController(AuthenticationManagerInstance, FleetBuildRepositoryInstance, FleetRepositoryInstance, ShipModelRepositoryInstance, DivisionRepositoryInstance)
-	ShipModelControllerInstance = api.NewShipModelController(AuthenticationManagerInstance, ShipModelRepositoryInstance)
+	wsDispatcherInstance = util.NewDispatcher()
+	hubInstance = ws.NewHub(wsDispatcherInstance)
+	webControllerInstance = web.NewWebController(fleetBuildRepositoryInstance)
+	wsControllerInstance = api.NewWsController(authenticationManagerInstance, hubInstance)
+	challengeControllerInstance = api.NewChallengeController(authenticationManagerInstance, challengeRepositoryInstance, divisionRepositoryInstance, raceRepositoryInstance, fleetBuildRepositoryInstance)
+	raceControllerInstance = api.NewRaceController(authenticationManagerInstance, raceRepositoryInstance)
+	battleControllerInstance = api.NewBattleController(authenticationManagerInstance, battleRepositoryInstance)
+	divisionControllerInstance = api.NewDivisionController(authenticationManagerInstance, divisionRepositoryInstance)
+	fleetBuildControllerInstance = api.NewFleetBuildController(authenticationManagerInstance, fleetBuildRepositoryInstance, fleetRepositoryInstance, shipModelRepositoryInstance, divisionRepositoryInstance)
+	shipModelControllerInstance = api.NewShipModelController(authenticationManagerInstance, shipModelRepositoryInstance)
 }
 
 // ResetTestData clears all data in repositories for testing.
@@ -74,19 +85,19 @@ func CreateSingletons(env string) {
 // is shared across multiple test cases and repositories need to be reset
 // between tests to ensure data isolation.
 func ResetTestData() {
-	if ChallengeRepositoryInstance != nil {
-		ChallengeRepositoryInstance.ResetData()
+	if challengeRepositoryInstance != nil {
+		challengeRepositoryInstance.ResetData()
 	}
-	if DivisionRepositoryInstance != nil {
-		DivisionRepositoryInstance.ResetData()
+	if divisionRepositoryInstance != nil {
+		divisionRepositoryInstance.ResetData()
 	}
-	if FleetBuildRepositoryInstance != nil {
-		FleetBuildRepositoryInstance.ResetData()
+	if fleetBuildRepositoryInstance != nil {
+		fleetBuildRepositoryInstance.ResetData()
 	}
-	if RaceRepositoryInstance != nil {
-		RaceRepositoryInstance.ResetData()
+	if raceRepositoryInstance != nil {
+		raceRepositoryInstance.ResetData()
 	}
-	if ShipModelRepositoryInstance != nil {
-		ShipModelRepositoryInstance.ResetData()
+	if shipModelRepositoryInstance != nil {
+		shipModelRepositoryInstance.ResetData()
 	}
 }

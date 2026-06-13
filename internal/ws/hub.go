@@ -4,6 +4,8 @@
 
 package ws
 
+import "glaktika.eu/galaktika/pkg/util"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
@@ -18,14 +20,17 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *client
+
+	dispatcher *util.Dispatcher
 }
 
-func NewHub() *Hub {
+func NewHub(dispatcher *util.Dispatcher) *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan *client),
 		unregister: make(chan *client),
 		clients:    make(map[*client]bool),
+		dispatcher: dispatcher,
 	}
 }
 

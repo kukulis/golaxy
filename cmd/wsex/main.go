@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"glaktika.eu/galaktika/internal/ws"
+	"glaktika.eu/galaktika/pkg/util"
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
@@ -29,7 +30,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-	hub := ws.NewHub()
+	hub := ws.NewHub(util.NewDispatcher())
 	go hub.Run()
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 	http.HandleFunc("/", serveHome)

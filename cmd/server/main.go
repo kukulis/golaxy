@@ -27,7 +27,7 @@ func main() {
 	di.CreateSingletons("dev")
 	di.RegisterApiRoutes(apiRoute)
 
-	go di.HubInstance.Run()
+	go di.GetHubInstance().Run()
 	di.RegisterWsRoutes(router)
 
 	_ = router.Run(":8080")
