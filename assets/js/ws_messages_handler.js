@@ -1,17 +1,63 @@
 export class WSMessagesHandler {
-    constructor() {
-        this.conn = null;
-        this.msg = document.getElementById("msg");
-        this.log = document.getElementById("log");
-        this.wrapper = document.getElementById("wrapper");
+    /** @type {WebSocket|null} */
+    conn = null;
+    /** @type {HTMLInputElement|null} */
+    msg = null;
+    /** @type {HTMLElement|null} */
+    log = null;
+    /** @type {HTMLElement|null} */
+    wrapper = null;
+    /** @type {HTMLFormElement|null} */
+    form = null;
+    /** @type {HTMLElement|null} */
+    dragHandle = null;
+
+    /**
+     * @param {HTMLElement} wrapper
+     */
+    constructor(wrapper) {
+        this.wrapper = wrapper;
     }
 
+    /** @returns {void} */
     init() {
+        this._buildHtml();
         this._initDraggable();
         this._initForm();
         this._connectWs();
     }
 
+    /** @returns {void} */
+    _buildHtml() {
+        this.dragHandle = document.createElement("div");
+        this.dragHandle.className = "task-details-drag-handle";
+        this.dragHandle.textContent = "Drag me";
+
+        this.log = document.createElement("div");
+
+        this.form = document.createElement("form");
+        const form = this.form;
+        const submit = document.createElement("input");
+        submit.type = "submit";
+        submit.value = "Send";
+
+        this.msg = document.createElement("input");
+        this.msg.type = "text";
+        this.msg.size = 64;
+        this.msg.autofocus = true;
+
+        form.appendChild(submit);
+        form.appendChild(this.msg);
+
+        this.wrapper.appendChild(this.dragHandle);
+        this.wrapper.appendChild(this.log);
+        this.wrapper.appendChild(form);
+    }
+
+    /**
+     * @param {HTMLElement} item
+     * @returns {void}
+     */
     _appendLog(item) {
         var doScroll = this.log.scrollTop > this.log.scrollHeight - this.log.clientHeight - 1;
         this.log.appendChild(item);
@@ -20,8 +66,9 @@ export class WSMessagesHandler {
         }
     }
 
+    /** @returns {void} */
     _initForm() {
-        document.getElementById("form").onsubmit = () => {
+        this.form.onsubmit = () => {
             if (!this.conn) {
                 return false;
             }
@@ -34,6 +81,7 @@ export class WSMessagesHandler {
         };
     }
 
+    /** @returns {void} */
     _connectWs() {
         if (!window["WebSocket"]) {
             var item = document.createElement("div");
@@ -57,20 +105,21 @@ export class WSMessagesHandler {
         };
     }
 
+    /** @returns {void} */
     _initDraggable() {
-        let dragHandle = this.wrapper.querySelector('.task-details-drag-handle');
-        if (!dragHandle) return;
+        if (!this.dragHandle) return;
 
         let isDragging = false;
         let initialX, initialY;
 
-        dragHandle.addEventListener('mousedown', (e) => {
+        this.dragHandle.addEventListener('mousedown', (e) => {
             isDragging = true;
             initialX = e.clientX - this.wrapper.offsetLeft;
             initialY = e.clientY - this.wrapper.offsetTop;
-            dragHandle.style.cursor = 'grabbing';
+            this.dragHandle.style.cursor = 'grabbing';
         });
 
+        // TODO research if the events listeners must be declared globally
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             e.preventDefault();
@@ -80,7 +129,7 @@ export class WSMessagesHandler {
 
         document.addEventListener('mouseup', () => {
             isDragging = false;
-            dragHandle.style.cursor = 'move';
+            this.dragHandle.style.cursor = 'move';
         });
     }
 }
