@@ -45,6 +45,8 @@ func (h *Hub) Run() {
 				close(c.send)
 			}
 		case message := <-h.broadcast:
+			// TODO select receiver from the message body if needed
+			// TODO check if the message should be sent at all ?
 			for c := range h.clients {
 				select {
 				case c.send <- message:

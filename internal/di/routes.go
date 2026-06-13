@@ -83,5 +83,5 @@ func RegisterApiRoutes(apiRoute *gin.RouterGroup) {
 }
 
 func RegisterWsRoutes(router *gin.Engine) {
-	router.GET("/ws", func(c *gin.Context) { wsControllerInstance.ServeWs(c) })
+	router.GET("/ws", func(c *gin.Context) { wsControllerInstance.ServeWebSocketConnection(c) })
 }
