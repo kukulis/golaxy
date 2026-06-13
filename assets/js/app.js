@@ -11,7 +11,8 @@ import UserBarView from "./user_bar_view.js";
 import UserMenuView from "./user_menu_view.js";
 import {ApiClient} from "./api.js";
 import {ShipModelComponent} from "./ship_model_component.js";
-import {WSMessagesHandler} from "./ws_messages_handler.js";
+import {WebSocketHandler} from "./web_socket_handler.js";
+import {ChatBox} from "./chat_box.js";
 
 export class App {
     /**
@@ -73,9 +74,14 @@ export class App {
     apiClient = null;
 
     /**
-     * @type {WSMessagesHandler|null}
+     * @type {WebSocketHandler|null}
      */
-    wsMessagesHandler = null;
+    webSocketHandler = null;
+
+    /**
+     * @type {ChatBox|null}
+     */
+    chatBox = null;
 
     /**
      * @returns {Dispatcher}
@@ -158,7 +164,7 @@ export class App {
 
     /**
      * @returns {FleetBuildsView}
-     */chatContainer
+     */
     getFleetBuildsView() {
         if (this.fleetBuildsView == null) {
             this.fleetBuildsView = new FleetBuildsView(this.getApiClient(), this.getDispatcher())
@@ -251,24 +257,49 @@ export class App {
     }
 
     /**
-     * @returns {WSMessagesHandler}
+     * @returns {WebSocketHandler}
      */
-    getWSMessagesHandler() {
-        if (this.wsMessagesHandler == null) {
-            this.wsMessagesHandler = new WSMessagesHandler()
+    getWebSocketHandler() {
+        if (this.webSocketHandler == null) {
+            this.webSocketHandler = new WebSocketHandler(this.getDispatcher())
+            const dispatcher = this.getDispatcher()
+            dispatcher.addListener("ws:message", (msg) => console.log("ws:message", msg))
+            dispatcher.addListener("ws:close", () => console.log("ws:close"))
+            dispatcher.addListener("ws:unsupported", () => console.log("ws:unsupported"))
+            this.webSocketHandler.connect()
         }
 
-        return this.wsMessagesHandler
+        return this.webSocketHandler
+    }
+
+    /**
+     * @returns {ChatBox}
+     */
+    getChatBox() {
+        if (this.chatBox == null) {
+            this.chatBox = new ChatBox(this.getDispatcher())
+        }
+
+        return this.chatBox
     }
 
     tryToInitializeChatHandler() {
-        const chatContainer =  document.getElementById("chat-container");
+        const wsHandler = this.getWebSocketHandler()
 
+        const chatContainer = document.getElementById("chat-container");
         if (chatContainer == null) {
             return
         }
 
-        this.getWSMessagesHandler().init(chatContainer);
+        const chatBox = this.getChatBox()
+        const dispatcher = this.getDispatcher()
+
+        chatBox.init(chatContainer);
+
+        dispatcher.addListener("ws:message", (msg) => chatBox.displayMessage(msg))
+        dispatcher.addListener("ws:close", () => chatBox.displayClose())
+        dispatcher.addListener("ws:unsupported", () => chatBox.displayUnsupported())
+        dispatcher.addListener("ws:send", (msg) => wsHandler.send(msg))
     }
 
     /**

@@ -1,17 +1,16 @@
-/**
- * @deprecated Use ChatBox + WebSocketHandler instead. Kept for ws_messages_example.html only.
- */
-export class WSMessagesHandler {
-    /** @type {WebSocket|null} */
-    conn = null;
-    /** @type {HTMLInputElement|null} */
-    msg = null;
-    /** @type {HTMLElement|null} */
-    log = null;
+import {Dispatcher} from "./dispatcher.js";
+
+export class ChatBox {
+    /** @type {Dispatcher|null} */
+    dispatcher = null;
     /** @type {HTMLElement|null} */
     container = null;
     /** @type {HTMLElement|null} */
     wrapper = null;
+    /** @type {HTMLElement|null} */
+    log = null;
+    /** @type {HTMLInputElement|null} */
+    msg = null;
     /** @type {HTMLFormElement|null} */
     form = null;
     /** @type {HTMLElement|null} */
@@ -19,7 +18,11 @@ export class WSMessagesHandler {
     /** @type {HTMLButtonElement|null} */
     showChatBtn = null;
 
-    constructor() {
+    /**
+     * @param {Dispatcher} dispatcher
+     */
+    constructor(dispatcher) {
+        this.dispatcher = dispatcher;
     }
 
     /**
@@ -31,7 +34,6 @@ export class WSMessagesHandler {
         this._buildHtml();
         this._initDraggable();
         this._initForm();
-        this._connectWs();
     }
 
     /** @returns {void} */
@@ -42,6 +44,7 @@ export class WSMessagesHandler {
         this.showChatBtn = document.createElement("button");
         this.showChatBtn.className = "chat-show-btn";
         this.showChatBtn.textContent = "Chat";
+        this.showChatBtn.addEventListener("click", () => { this.wrapper.style.display = "flex"; });
 
         const hideBtn = document.createElement("button");
         hideBtn.textContent = "_";
@@ -76,8 +79,6 @@ export class WSMessagesHandler {
         this.wrapper.appendChild(this.log);
         this.wrapper.appendChild(formWrapper);
 
-        this.showChatBtn.addEventListener("click", () => { this.wrapper.style.display = "flex"; });
-
         this.container.appendChild(this.wrapper);
         this.container.appendChild(this.showChatBtn);
     }
@@ -97,40 +98,37 @@ export class WSMessagesHandler {
     /** @returns {void} */
     _initForm() {
         this.form.onsubmit = () => {
-            if (!this.conn) {
-                return false;
-            }
             if (!this.msg.value) {
                 return false;
             }
-            this.conn.send(this.msg.value);
+            this.dispatcher.dispatch("ws:send", this.msg.value);
             this.msg.value = "";
             return false;
         };
     }
 
+    /**
+     * @param {string} msg
+     * @returns {void}
+     */
+    displayMessage(msg) {
+        var item = document.createElement("div");
+        item.innerText = msg;
+        this._appendLog(item);
+    }
+
     /** @returns {void} */
-    _connectWs() {
-        if (!window["WebSocket"]) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-            this._appendLog(item);
-            return;
-        }
-        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
-        this.conn.onclose = (evt) => {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            this._appendLog(item);
-        };
-        this.conn.onmessage = (evt) => {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                this._appendLog(item);
-            }
-        };
+    displayClose() {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Connection closed.</b>";
+        this._appendLog(item);
+    }
+
+    /** @returns {void} */
+    displayUnsupported() {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        this._appendLog(item);
     }
 
     /** @returns {void} */
