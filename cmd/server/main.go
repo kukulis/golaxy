@@ -1,14 +1,11 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/gin-gonic/gin"
 	_ "glaktika.eu/galaktika/docs"
 	"glaktika.eu/galaktika/internal/di"
-	"glaktika.eu/galaktika/internal/ws"
 )
 
 // @title Galaktika API
@@ -30,13 +27,8 @@ func main() {
 	di.CreateSingletons("dev")
 	di.RegisterApiRoutes(apiRoute)
 
-	// ws messages hub
-	hub := ws.NewHub()
-	go hub.Run()
-
-	router.GET("/ws", gin.WrapF(func(w http.ResponseWriter, r *http.Request) {
-		ws.ServeWs(hub, w, r)
-	}))
+	go di.HubInstance.Run()
+	di.RegisterWsRoutes(router)
 
 	_ = router.Run(":8080")
 }

@@ -81,3 +81,7 @@ func RegisterApiRoutes(apiRoute *gin.RouterGroup) {
 	apiRoute.POST("/ship-models/:id/calculate-ship-tech", func(c *gin.Context) { ShipModelControllerInstance.CalculateShipTech(c) })
 	apiRoute.DELETE("/ship-models/:id", func(c *gin.Context) { ShipModelControllerInstance.DeleteShipModel(c) })
 }
+
+func RegisterWsRoutes(router *gin.Engine) {
+	router.GET("/ws", func(c *gin.Context) { WsControllerInstance.ServeWs(c) })
+}

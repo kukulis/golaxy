@@ -19,7 +19,12 @@ export class WebSocketHandler {
             this.dispatcher.dispatch("ws:unsupported");
             return;
         }
-        this.conn = new WebSocket("ws://" + document.location.host + "/ws");
+        const token = this.dispatcher.dispatch("getToken");
+        if (!token) {
+            console.log("ws: no token, skipping connection");
+            return;
+        }
+        this.conn = new WebSocket("ws://" + document.location.host + "/ws?token=" + token);
         this.conn.onclose = (evt) => {
             this.dispatcher.dispatch("ws:close", evt);
         };

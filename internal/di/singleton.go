@@ -4,6 +4,7 @@ import (
 	"glaktika.eu/galaktika/internal/api"
 	"glaktika.eu/galaktika/internal/dao"
 	"glaktika.eu/galaktika/internal/web"
+	"glaktika.eu/galaktika/internal/ws"
 )
 
 var AuthenticationManagerInstance api.AuthenticationManager
@@ -21,6 +22,8 @@ var RaceRepositoryInstance *dao.RaceRepository
 var ShipModelRepositoryInstance *dao.ShipModelRepository
 var ShipModelControllerInstance *api.ShipModelController
 var WebControllerInstance *web.WebController
+var WsControllerInstance *api.WsController
+var HubInstance *ws.Hub
 
 func CreateSingletons(env string) {
 	// Based on env, choose repository implementation
@@ -55,7 +58,9 @@ func CreateSingletons(env string) {
 	}
 
 	// Controllers are environment-agnostic
+	HubInstance = ws.NewHub()
 	WebControllerInstance = web.NewWebController(FleetBuildRepositoryInstance)
+	WsControllerInstance = api.NewWsController(AuthenticationManagerInstance, HubInstance)
 	ChallengeControllerInstance = api.NewChallengeController(AuthenticationManagerInstance, ChallengeRepositoryInstance, DivisionRepositoryInstance, RaceRepositoryInstance, FleetBuildRepositoryInstance)
 	RaceControllerInstance = api.NewRaceController(AuthenticationManagerInstance, RaceRepositoryInstance)
 	BattleControllerInstance = api.NewBattleController(AuthenticationManagerInstance, BattleRepositoryInstance)
