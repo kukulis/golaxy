@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galaktika - Fleet Game</title>
     <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/chat.css">
     <link rel="icon" type="image/x-icon" href="/assets/img/Goodstuff-No-Nonsense-Free-Space-Galaxy.ico">
 </head>
 <body>
@@ -36,6 +37,9 @@
             <button id="close-battle">Close Battle</button>
         </div>
     </div>
+
+    <div id="wrapper" class="chat"></div>
+
 </div>
 <script type="module">
     import '/assets/js/user-bar.js';
@@ -67,6 +71,11 @@
             mainMenu.style.display = 'block';
         });
     });
+
+    import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
+
+    const handler = new WSMessagesHandler(document.getElementById("wrapper"));
+    handler.init();
 </script>
 
 </body>

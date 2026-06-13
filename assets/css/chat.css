@@ -1,4 +1,4 @@
-.task-details-drag-handle {
+.chat-drag-handle {
     background-color: #ff8c00;
     color: white;
     padding: 5px 10px;
@@ -8,11 +8,15 @@
     margin: -3px -3px 5px -3px;
 }
 
-.task-details-drag-handle:hover {
+.chat-drag-handle:hover {
     background-color: #ff7700;
 }
 
-.task-details {
+.chat > div {
+    color: gray;
+}
+
+.chat {
     display: block;
     position: absolute;
     top: 25%;

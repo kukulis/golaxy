@@ -30,7 +30,7 @@ export class WSMessagesHandler {
     /** @returns {void} */
     _buildHtml() {
         this.dragHandle = document.createElement("div");
-        this.dragHandle.className = "task-details-drag-handle";
+        this.dragHandle.className = "chat-drag-handle";
         this.dragHandle.textContent = "Drag me";
 
         this.log = document.createElement("div");
