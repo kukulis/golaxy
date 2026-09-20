@@ -4,7 +4,18 @@
 
 package ws
 
-import "glaktika.eu/galaktika/pkg/util"
+import (
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+	"glaktika.eu/galaktika/pkg/util"
+)
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -34,6 +45,7 @@ func NewHub(dispatcher *util.Dispatcher) *Hub {
 	}
 }
 
+// Run this makes registering, unregistering and message sending actions never happen in parallel
 func (h *Hub) Run() {
 	for {
 		select {
@@ -61,4 +73,18 @@ func (h *Hub) Run() {
 			}
 		}
 	}
+}
+
+// RegisterWebSocketClient handles websocket requests from the peer.
+func RegisterWebSocketClient(hub *Hub, w http.ResponseWriter, r *http.Request, token string) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	c := &client{hub: hub, conn: conn, send: make(chan []byte, 256), token: token}
+	c.hub.register <- c
+
+	go c.writePump()
+	go c.readPump()
 }

@@ -7,7 +7,6 @@ package ws
 import (
 	"bytes"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -24,11 +23,6 @@ var (
 	newline = []byte{'\n'}
 	space   = []byte{' '}
 )
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 // client is a middleman between the websocket connection and the hub.
 type client struct {
@@ -109,18 +103,4 @@ func (c *client) writePump() {
 			}
 		}
 	}
-}
-
-// RegisterWebSocketClient handles websocket requests from the peer.
-func RegisterWebSocketClient(hub *Hub, w http.ResponseWriter, r *http.Request, token string) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	c := &client{hub: hub, conn: conn, send: make(chan []byte, 256), token: token}
-	c.hub.register <- c
-
-	go c.writePump()
-	go c.readPump()
 }
