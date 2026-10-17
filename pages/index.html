@@ -72,10 +72,15 @@
         });
     });
 
-    import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
+    // import {WSMessagesHandler} from '/assets/js/ws_messages_handler.js';
+    //
+    // const handler = new WSMessagesHandler();
+    // handler.init(document.getElementById("chat-container"));
 
-    const handler = new WSMessagesHandler();
-    handler.init(document.getElementById("chat-container"));
+    import {App} from "../assets/js/app.js";
+    const app = new App()
+
+    app.tryToInitializeChatHandler()
 </script>
 
 </body>

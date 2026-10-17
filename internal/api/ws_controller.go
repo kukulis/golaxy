@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ func NewWsController(authenticationManager AuthenticationManager, hub *ws.Hub) *
 
 func (c *WsController) ServeWebSocketConnection(ctx *gin.Context) {
 	token := ctx.Query("token")
+	log.Println("ServeWebSocketConnection: token = ", token)
 	if !c.authenticationManager.TokenValid(token) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
